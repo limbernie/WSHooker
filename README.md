@@ -96,4 +96,4 @@ GootUnloader has been tested on Windows 10 and should work on other versions of 
 
 ## Feedback
 
-If you have ideas or suggestions how to make GootUnloader better, please DM me ([@limbernie](https://twitter/limbernie)) in Twitter, thank you!
+If you have ideas or suggestions how to make GootUnloader better, please DM me ([@limbernie](https://twitter/limbernie)) in Twitter. Thank you!
