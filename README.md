@@ -49,7 +49,7 @@ GootUnloader has several features over AMSI when it comes to unpacking malicious
 
 6. Registry write-protection
 
-7. Terminates dangerous COM objects — only `InternetExplorer.Application` is blocklisted
+7. Terminates dangerous COM objects — only `InternetExplorer.Application` is blocklisted for now
 
 8. Time skipping in `WScript.Sleep()`
 
