@@ -134,6 +134,13 @@ def cleanup():
     if len(files) > 0:
         for file in files:
             deleteFile(file)
+    
+    # clean up frida-helper stuff as much as possible
+    for helper in glob.glob(os.path.expandvars("%TEMP%\\frida-*")):
+        try:
+            shutil.rmtree(helper)
+        except PermissionError:
+            pass
 
 def deleteFile(path):
     shutil.copy(path, WORK_DIR)
