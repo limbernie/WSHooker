@@ -125,6 +125,14 @@ def search():
             for url in urls:
                 print("   [+] URL: %s" % url.replace('"','').replace("'",''))
 
+def cleanFrida():
+    # clean up frida-helper stuff as much as possible
+    for helper in glob.glob(os.path.expandvars("%TEMP%\\frida-*")):
+        try:
+            shutil.rmtree(helper)
+        except PermissionError:
+            pass
+
 def cleanup():
     search()
     print(" [*] Cleaning up...")
@@ -134,13 +142,7 @@ def cleanup():
     if len(files) > 0:
         for file in files:
             deleteFile(file)
-    
-    # clean up frida-helper stuff as much as possible
-    for helper in glob.glob(os.path.expandvars("%TEMP%\\frida-*")):
-        try:
-            shutil.rmtree(helper)
-        except PermissionError:
-            pass
+    cleanFrida()
 
 def deleteFile(path):
     shutil.copy(path, WORK_DIR)
@@ -305,6 +307,7 @@ class Instrumenter:
         print(" [*] output: pid={}, fd={}, data={}".format(pid, fd, repr(data)))
 
 if __name__ == '__main__':
+    cleanFrida()
     parser = argparse.ArgumentParser(description='GootUnloader - Unpack GootLoader with Frida')
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
