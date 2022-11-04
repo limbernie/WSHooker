@@ -4,7 +4,7 @@ Have you ever wondered what goes under the hood of unpacking a malicious JavaScr
 
 I present to you GootUnloader, a tool I wrote (inspired by OALabs' [frida-wshook](https://github.com/OALabs/frida-wshook) and this blog [post](https://darungrim.com/research/2020-06-17-using-frida-for-windows-reverse-engineering.html)) that aims to do better than AMSI. GootUnloader is written in Python, relying heavily on [Frida](https://frida.re), a dynamic binary instrumentation framework that enables developers, malware analysts or security researchers to have full control over a piece of software or malware or code through function or API hooking. GootUnloader uses Frida to trace and intercept Windows Scripting Host (WSH) as it executes the malicious script. As such, it supports the analysis of script types such as `.js` (JScript) and `.vbs` (VBScript).
 
-In theory, you should be able to use GootUnloader to analyze and unpack other malicious scripts besides GootLoader. I've tested GootUnloader against malicious scripts associated to the following malware families:
+In theory, you should be able to use GootUnloader to analyze and unpack other malicious scripts besides GootLoader. I've tested GootUnloader against malicious scripts associated with the following malware families:
 
 - Adwind
 - AgentTesla
