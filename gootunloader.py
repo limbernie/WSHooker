@@ -58,7 +58,6 @@ def parseHKEY(path):
         hkey = winreg.HKEY_LOCAL_MACHINE
     if hkey == "HKEY_USERS":
         hkey = winreg.HKEY_USERS
-    
     return hkey
 
 def search():
@@ -395,11 +394,6 @@ if __name__ == '__main__':
 
     instrumenter = Instrumenter(hook)
     
-    # for your protection!
-    if args.disable_dns and args.disable_net:
-        print(" [!] Error: You can't disable DNS sinkhole AND socket termination")
-        exit(1)
-    
     # reserved for future release
     if args.pid is not None:
         parser.print_help()
@@ -409,6 +403,11 @@ if __name__ == '__main__':
         if os.path.exists(args.script):
             # create working directory from filename of script
             WORK_DIR  = os.path.basename(args.script).rsplit('.', 1)[0]
+            try:
+                os.mkdir(WORK_DIR)
+                status = ' [*] Working directory: %s' % WORK_DIR
+            except FileExistsError:
+                status = ' [*] Working directory already exists: %s' % WORK_DIR
             valid_extensions = ['js', 'vbs']
             try:
                 EXTENSION = os.path.basename(args.script).rsplit('.', 1)[1]
@@ -417,12 +416,7 @@ if __name__ == '__main__':
             if EXTENSION.lower() not in valid_extensions:
                 print(" [!] Error: Invalid extension or no extension")
                 exit(1)
-            try:
-                os.mkdir(WORK_DIR)
-                status = ' [*] Working directory: %s' % WORK_DIR
-            except FileExistsError:
-                status = ' [*] Working directory already exists: %s' % WORK_DIR
-            
+
             # truncate file if it exists
             if args.file:
                 f = open('.\\' + WORK_DIR + '\\' + args.file, 'w')
@@ -430,6 +424,11 @@ if __name__ == '__main__':
                 f.truncate()
                 f.close()
             
+            # for your protection!
+            if args.disable_dns and args.disable_net:
+                print(" [!] Error: You can't disable DNS sinkhole AND socket termination")
+                exit(1)
+
             # start
             print(status)
             
@@ -456,6 +455,7 @@ if __name__ == '__main__':
                                     args.disable_sleep
                                    )
         else:
+            args.file = False
             print(" [!] Error: No such file")
             exit(1)
     else:
