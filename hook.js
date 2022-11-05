@@ -61,6 +61,7 @@ recv('config', function onMessage(setting) {
 	Module.load('scrrun.dll');		// Scripting Runtime
 	Module.load('wshom.ocx');		// Windows Script Host Runtime
 	Module.load('wbemdisp.dll'); 	// WQL
+	Module.load('msxml3.dll');		// MSXML
 	
 	// hook these
 	hookCOleScriptCompile();
@@ -71,6 +72,7 @@ recv('config', function onMessage(setting) {
 	hookShellExecuteExW();
 	hookCWshShellRegWrite();
 	hookCSWbemServicesExecQuery();
+	hookXMLHttpOpen();
 	
 	// done configuring; tell frida to resume process
 	resume();
@@ -508,3 +510,32 @@ function hookCSWbemServicesExecQuery() {
 		}
 	});
 }
+
+function hookXMLHttpOpen() {
+	hookFunction('msxml3.dll', 'XMLHttp::open', {
+		onEnter: function(args) {
+			log(" Call: msxml3.dll!XMLHttp::open()");
+			log("   |");
+			var verb = args[1].readUtf16String();
+			var url  = args[2].readUtf16String();
+			log("   |-- Verb: " + verb);
+			log("   |-- URL : " + url);
+			log("   |");
+			
+			if (verb.toUpperCase() === "POST")
+				hookXMLHttpSend();
+		}
+	});
+}
+
+function hookXMLHttpSend() {
+	hookFunction('msxml3.dll', 'XMLHttp::send', {
+		onEnter: function(args) {
+			log(" Call: msxml3.dll!XMLHttp::send()");
+			log("   |");
+			log("   |-- Data: " + args[3].readUtf16String());
+			log("   |");
+		}
+	});
+}
+
