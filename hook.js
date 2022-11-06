@@ -14,14 +14,17 @@ var eval_count    = 0;
 var shell_count   = 0;
 var sock_count    = 0;
 
-// functions to filter out
+// functions to filter out from dynamic hooking
 var hooked = {
 	"CWshShell::RegWrite" : 1,
 	"CHostObj::Sleep" : 1,
 	"CSWbemServices::ExecQuery" : 1,
 	"CHostObj::CreateObject" : 1,
 	"CWshShell::Run" : 1,
-	"CShellDispatch::ShellExecuteW" : 1
+	"CShellDispatch::ShellExecuteW" : 1,
+	"XMLHttp::open" : 1,
+	"XMLHttp::send" : 1,
+	"CFileSystem::GetSpecialFolder" : 1
 };
 
 recv('config', function onMessage(setting) {
@@ -73,6 +76,7 @@ recv('config', function onMessage(setting) {
 	hookCWshShellRegWrite();
 	hookCSWbemServicesExecQuery();
 	hookXMLHttpOpen();
+	hookCFileSystemGetSpecialFolder();
 
 	// done configuring; tell frida to resume process
 	resume();
@@ -539,3 +543,19 @@ function hookXMLHttpSend() {
 	});
 }
 
+var FOLDERSPEC = {
+	0x0 : "WindowsFolder",
+	0x1 : "SystemFolder",
+	0x2 : "TemporaryFolder"
+};
+
+function hookCFileSystemGetSpecialFolder() {
+	hookFunction("scrrun.dll", "CFileSystem::GetSpecialFolder", {
+		onEnter: function(args) {
+			log(" Call: scrrun.dll!CFileSystem::GetSpecialFolder()");
+			log("   |");
+			log("   |-- folderspec: " + args[1] + " (" + FOLDERSPEC[args[1].toInt32()] + ")");
+			log("   |");
+		}
+	});
+}
