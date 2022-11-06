@@ -43,10 +43,10 @@ recv('config', function onMessage(setting) {
 	debug(" [*] DISABLE_SHELL: " + DISABLE_SHELL);
 	DISABLE_SLEEP = setting['disable_sleep'];
 	debug(" [*] DISABLE_SLEEP: " + DISABLE_SLEEP);
-	
+
 	WORK_DIR  = setting['work_dir'];
 	EXTENSION = setting['extension'];
-	
+
 	if (EXTENSION === 'js') {
 		debug(" [*] ENGINE: JScript");
 		engine = 'jscript.dll';
@@ -54,15 +54,15 @@ recv('config', function onMessage(setting) {
 		debug(" [*] EGNINE: VBScript");
 		engine = 'vbscript.dll';
 	}
-	
+
 	Module.load(engine);
-	
+
 	// manually load these
-	Module.load('scrrun.dll');		// Scripting Runtime
-	Module.load('wshom.ocx');		// Windows Script Host Runtime
-	Module.load('wbemdisp.dll'); 	// WQL
-	Module.load('msxml3.dll');		// MSXML
-	
+	Module.load('scrrun.dll');      // Scripting Runtime
+	Module.load('wshom.ocx');       // Windows Script Host Runtime
+	Module.load('wbemdisp.dll');    // WQL
+	Module.load('msxml3.dll');      // MSXML
+
 	// hook these
 	hookCOleScriptCompile();
 	hookCHostObjSleep();
@@ -73,7 +73,7 @@ recv('config', function onMessage(setting) {
 	hookCWshShellRegWrite();
 	hookCSWbemServicesExecQuery();
 	hookXMLHttpOpen();
-	
+
 	// done configuring; tell frida to resume process
 	resume();
 });
@@ -115,7 +115,7 @@ function deleteValue(path) {
 		type: "value",
 		path : path
 	});
-}		
+}
 
 function getInprocServer32(clsid) {
 	send({
@@ -178,7 +178,7 @@ function resolveName(dllName, name) {
 	var addr = Module.findExportByName(dllName, name);
 
 	if (!addr || addr.isNull()) {
-		
+
 		debug("   [+] DebugSymbol.load " + dllName);
 
 		try {
@@ -187,9 +187,9 @@ function resolveName(dllName, name) {
 			debug("   [-] DebugSymbol.load: " + err);
 			return;
 		}
-		
+
 		debug("   [+] DebugSymbol.load finished");
-	
+
 		if (functionName.indexOf('*') === -1) {
 			try {
 				debug("   [+] DebugSymbol.getFunctionByName: " + functionName);
@@ -235,7 +235,7 @@ function hookCOleScriptCompile() {
 				var file_name =  'eval_' + eval_count + ".txt";
 				var file = new File(file_path + file_name, 'w');
 				file.write(ptr(args[1]).readUtf16String());
-				
+
 				log("   |-- eval(): " + "Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
 				file.close();
 			}
@@ -276,21 +276,21 @@ function hookWSASend() {
 			log("   |-- Buffers: " + args[2].toInt32());
 			var size = ptr(args[1]).readInt();
 			log("   |-- Size   : " + size);
-			
+
 			if (!DISABLE_NET) {
 				sock_count++;
 				var lpwbuf = args[1].toInt32() + 4;
 				var dptr = Memory.readInt(ptr(lpwbuf));
 				var data = hexdump(ptr(dptr), { length: size });
-			
+
 				var file_path = '.\\' + WORK_DIR + '\\';
 				var file_name =  'sock_' + sock_count + ".txt";
 				var file = new File(file_path + file_name, 'w');
 				file.write(data);
-			
+
 				log("   |-- Data   : " + "Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
 				file.close();
-			
+
 				var ptr_closesocket = Module.findExportByName("ws2_32.dll", "closesocket");
 				var closesocket = new NativeFunction(ptr_closesocket, 'int', ['pointer']);
 				closesocket(args[0]);
@@ -311,7 +311,7 @@ function hookShellExecuteExW() {
 			var ptr_params = Memory.readPointer(shellinfo_ptr.add(20));
 			var lpfile = Memory.readUtf16String(ptr(ptr_file));
 			var lpparams = Memory.readUtf16String(ptr(ptr_params));
-			
+
 			if (!DISABLE_SHELL) {
 				shell_count++
 				var file_path = '.\\' + WORK_DIR + '\\';
@@ -334,7 +334,7 @@ function hookCWshShellRegWrite() {
 			log(" Call: wshom.ocx!CWshShell::RegWrite()");
 			log("   |");
 			var path = args[1].readUtf16String();
-			
+
 			if (path.slice(-1) == '\\') {
 				log("   |-- Key: " + path);
 				if (!DISABLE_REG) deleteKey(path);
@@ -366,17 +366,17 @@ function hookWriteFile() {
 			log("   |-- Handle: " + handle);
 			var size = args[2].toInt32();
 			log("   |-- Size  : " + size);
-			
+
 			var ptrGetFinalPathNameByHandleW = Module.findExportByName('kernel32.dll', 'GetFinalPathNameByHandleW');
 			var GetFinalPathNameByHandleW = new NativeFunction(
 												ptrGetFinalPathNameByHandleW,
 												'int', ['pointer', 'pointer', 'int', 'int']);
-			
+
 			var lpszFilePath = Memory.alloc(256);
 			GetFinalPathNameByHandleW(handle, ptr(lpszFilePath), 256, 0x8);
 			var path = lpszFilePath.readUtf16String();
 			log("   |-- Path  : " + path);
-			
+
 			if (!DISABLE_FILE) deleteFile(path);
 			log("   |");
 		}
@@ -409,13 +409,13 @@ function hookCLSIDFromProgID() {
 		log("   |-- ProgID: " + progid);
 		log("   |-- CLSID : " + clsid);
 		getInprocServer32(clsid);
-		
+
 		if (progid.toLowerCase() in badCOM) {
 			if (!DISABLE_COM) {
 				log("   |-- (Dangerous COM object terminated!)");
 				retval = CO_E_CLASSSTRING;
 			}
-		} 
+		}
 		log("   |");
 		return retval;
 	}, 'uint', ['pointer', 'pointer'], 'stdcall'));
@@ -439,14 +439,14 @@ function hookDispCallFunc() {
 				var functionName = DebugSymbol.fromAddress(functionAddress)
 				log("   |-- Function: " + functionName);
 				log("   |");
-				
+
 				// hook new functions here if they aren't already hooked
 				if (!(functionName.name in hooked)) {
 					hooked[functionName.name] = 1;
 					Interceptor.attach(functionAddress, {
 						onEnter: function(args) {
 							log(" Call: " + functionName.moduleName + '!' + functionName.name + '()');
-							log("   |");					
+							log("   |");
 							var i;
 							for (i = 1; i < 3; i++) {
 								var out;
@@ -521,7 +521,7 @@ function hookXMLHttpOpen() {
 			log("   |-- Verb: " + verb);
 			log("   |-- URL : " + url);
 			log("   |");
-			
+
 			if (verb.toUpperCase() === "POST")
 				hookXMLHttpSend();
 		}
