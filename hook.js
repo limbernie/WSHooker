@@ -23,8 +23,12 @@ var hooked = {
 	"CWshShell::Run" : 1,
 	"CShellDispatch::ShellExecuteW" : 1,
 	"XMLHttp::open" : 1,
+	"XMLHttp::setRequestHeader" : 1,
 	"XMLHttp::send" : 1,
-	"CFileSystem::GetSpecialFolder" : 1
+	"CFileSystem::GetSpecialFolder" : 1,
+	"CHttpRequest::Open" : 1,
+	"CHttpRequest::SetRequestHeader" : 1,
+	"CHttpRequest::Send" : 1
 };
 
 recv('config', function onMessage(setting) {
@@ -65,6 +69,7 @@ recv('config', function onMessage(setting) {
 	Module.load('wshom.ocx');       // Windows Script Host Runtime
 	Module.load('wbemdisp.dll');    // WQL
 	Module.load('msxml3.dll');      // MSXML
+	Module.load('winhttpcom.dll');  // WinHttpRequest
 
 	// hook these
 	hookCOleScriptCompile();
@@ -76,7 +81,12 @@ recv('config', function onMessage(setting) {
 	hookCWshShellRegWrite();
 	hookCSWbemServicesExecQuery();
 	hookXMLHttpOpen();
+	hookXMLHttpsetRequestHeader();
+	hookXMLHttpSend();
 	hookCFileSystemGetSpecialFolder();
+	hookCHttpRequestOpen();
+	hookCHttpRequestSetRequestHeader();
+	hookCHttpRequestSend();
 
 	// done configuring; tell frida to resume process
 	resume();
@@ -525,9 +535,20 @@ function hookXMLHttpOpen() {
 			log("   |-- Verb: " + verb);
 			log("   |-- URL : " + url);
 			log("   |");
+		}
+	});
+}
 
-			if (verb.toUpperCase() === "POST")
-				hookXMLHttpSend();
+function hookXMLHttpsetRequestHeader() {
+	hookFunction('msxml3.dll', 'XMLHttp::setRequestHeader', {
+		onEnter: function(args) {
+			log(" Call: msxml3.dll!XMLHttp::setRequestHeader()");
+			log("   |");
+			var header = args[1].readUtf16String();
+			var value  = args[2].readUtf16String();
+			log("   |-- Header: " + header);
+			log("   |-- Value : " + value);
+			log("   |");
 		}
 	});
 }
@@ -537,7 +558,9 @@ function hookXMLHttpSend() {
 		onEnter: function(args) {
 			log(" Call: msxml3.dll!XMLHttp::send()");
 			log("   |");
-			log("   |-- Data: " + args[3].readUtf16String());
+			var data = args[3].readUtf16String();
+			if (data)
+				log("   |-- Data: " + data);
 			log("   |");
 		}
 	});
@@ -555,6 +578,47 @@ function hookCFileSystemGetSpecialFolder() {
 			log(" Call: scrrun.dll!CFileSystem::GetSpecialFolder()");
 			log("   |");
 			log("   |-- folderspec: " + args[1] + " (" + FOLDERSPEC[args[1].toInt32()] + ")");
+			log("   |");
+		}
+	});
+}
+
+function hookCHttpRequestOpen() {
+	hookFunction('winhttpcom.dll', 'CHttpRequest::Open', {
+		onEnter: function(args) {
+			log(" Call: winhttpcom.dll!CHttpRequest::Open()");
+			log("   |");
+			var verb = args[1].readUtf16String();
+			var url  = args[2].readUtf16String();
+			log("   |-- Verb: " + verb);
+			log("   |-- URL : " + url);
+			log("   |");
+		}
+	});
+}
+
+function hookCHttpRequestSetRequestHeader() {
+	hookFunction('winhttpcom.dll', 'CHttpRequest::SetRequestHeader', {
+		onEnter: function(args) {
+			log(" Call: winhttpcom.dll!CHttpRequest::SetRequestHeader()");
+			log("   |");
+			var header = args[1].readUtf16String();
+			var value  = args[2].readUtf16String();
+			log("   |-- Header: " + header);
+			log("   |-- Value : " + value);
+			log("   |");
+		}
+	});
+}
+
+function hookCHttpRequestSend() {
+	hookFunction('winhttpcom.dll', 'CHttpRequest::Send', {
+		onEnter: function(args) {
+			log(" Call: winhttpcom.dll!CHttpRequest::Send()");
+			log("   |");
+			var data = args[3].readUtf16String();
+			if (data)
+				log("   |-- Data: " + data);
 			log("   |");
 		}
 	});
