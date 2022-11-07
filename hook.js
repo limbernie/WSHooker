@@ -558,9 +558,11 @@ function hookXMLHttpSend() {
 		onEnter: function(args) {
 			log(" Call: msxml3.dll!XMLHttp::send()");
 			log("   |");
-			var data = args[3].readUtf16String();
-			if (data)
-				log("   |-- Data: " + data);
+			try {
+				var data = args[3].readUtf16String();
+				if (data)
+					log("   |-- Data: " + data);
+			} catch(e) {}
 			log("   |");
 		}
 	});
@@ -616,9 +618,11 @@ function hookCHttpRequestSend() {
 		onEnter: function(args) {
 			log(" Call: winhttpcom.dll!CHttpRequest::Send()");
 			log("   |");
-			var data = args[3].readUtf16String();
-			if (data)
-				log("   |-- Data: " + data);
+			try {
+				var data = args[3].readUtf16String();
+				if (data)
+					log("   |-- Data: " + data);
+			} catch(e) {}
 			log("   |");
 		}
 	});
