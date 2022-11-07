@@ -67,8 +67,8 @@ recv('config', function onMessage(setting) {
 	// manually load these
 	Module.load('scrrun.dll');      // Scripting Runtime
 	Module.load('wshom.ocx');       // Windows Script Host Runtime
-	Module.load('wbemdisp.dll');    // WQL
-	Module.load('msxml3.dll');      // MSXML
+	Module.load('wbemdisp.dll');    // WMI Query Language
+	Module.load('msxml3.dll');      // MSXML 3.0
 	Module.load('winhttpcom.dll');  // WinHttpRequest
 
 	// hook these
@@ -467,11 +467,13 @@ function hookDispCallFunc() {
 								try {
 									out = args[i].readUtf16String();
 									if (out === '')
-										out = "0x0";
+										out = "NULL";
+									else if (out.length === 1)
+										out = null;
 								} catch(e) {
-									out = args[i];
+									out = null;
 								}
-								log("   |-- Arg: " + out);
+								if (out) log("   |-- Arg: " + out);
 							}
 							log("   |");
 						}
@@ -579,7 +581,7 @@ function hookCFileSystemGetSpecialFolder() {
 		onEnter: function(args) {
 			log(" Call: scrrun.dll!CFileSystem::GetSpecialFolder()");
 			log("   |");
-			log("   |-- folderspec: " + args[1] + " (" + FOLDERSPEC[args[1].toInt32()] + ")");
+			log("   |-- Folder: " + args[1] + " (" + FOLDERSPEC[args[1].toInt32()] + ")");
 			log("   |");
 		}
 	});
