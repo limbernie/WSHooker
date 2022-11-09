@@ -49,14 +49,14 @@ def InprocServer32FromCLSID(clsid):
     return module.split('\\')[-1]
 
 def parseHKEY(path):
-    hkey = path.split('\\')[0]
-    if hkey == "HKEY_CLASSES_ROOT":
+    hkey = path.split('\\')[0].lower()
+    if hkey == "HKEY_CLASSES_ROOT".lower() or hkey == "HKCR".lower():
         hkey = winreg.HKEY_CLASSES_ROOT
-    if hkey == "HKEY_CURRENT_USER":
+    if hkey == "HKEY_CURRENT_USER".lower() or hkey == "HKCU".lower():
         hkey = winreg.HKEY_CURRENT_USER
-    if hkey == "HKEY_LOCAL_MACHINE":
+    if hkey == "HKEY_LOCAL_MACHINE".lower() or hkey == "HKLM".lower():
         hkey = winreg.HKEY_LOCAL_MACHINE
-    if hkey == "HKEY_USERS":
+    if hkey == "HKEY_USERS".lower() or hkey == "HKU".lower():
         hkey = winreg.HKEY_USERS
     return hkey
 
