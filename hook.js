@@ -70,6 +70,7 @@ recv('config', function onMessage(setting) {
 	Module.load('wbemdisp.dll');    // WMI Query Language
 	Module.load('msxml3.dll');      // MSXML 3.0
 	Module.load('winhttpcom.dll');  // WinHttpRequest
+	Module.load('taskschd.dll');    // Schedule.Service
 
 	// hook these
 	hookCOleScriptCompile();
@@ -409,6 +410,7 @@ var REGDB_E_WRITEREGDB = 0x80040151;
 var S_OK = 0;
 var badCOM = {
 	"internetexplorer.application" : 1,
+	"schedule.service" : 1
 };
 
 function hookCLSIDFromProgID() {
