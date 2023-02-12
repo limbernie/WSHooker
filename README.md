@@ -67,6 +67,16 @@ To use GootUnloader, you need Python 3 and Frida:
 pip install frida-tools
 ```
 
+### Setting Symbol Path
+
+To use `c:\symbols` as the local symbol cache as GootUnloader downloads debug symbols from the Microsoft symbol server, use the following:
+
+```
+setx _NT_SYMBOL_PATH SRV*c:\symbols*https://msdl.microsoft.com/downloads/symbols
+```
+
+### Options
+
 GootUnloader supports a number of options to disable certain protection mechanisms during analysis in order to reveal other behaviors of the malicious script that were blocked.
 
 ```
@@ -96,7 +106,7 @@ options:
 
 ### Supported OS
 
-GootUnloader has been tested on Windows 10 and should work on other versions of Windows from Windows 7 onwards. 
+GootUnloader has been tested on Windows 10. 
 
 ## Feedback
 
