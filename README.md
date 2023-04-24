@@ -2,36 +2,37 @@
 
 Have you ever wondered what goes under the hood of unpacking a malicious JavaScript like [GootLoader](https://malpedia.caad.fkie.fraunhofer.de/details/js.gootloader)? Well, I certainly did when I saw Joe Sandbox [unpack](https://www.joesecurity.org/blog/4297261482537891261#) GootLoader with Microsoft's Antimalware Scan Interface (AMSI).
 
-I present to you GootUnloader, a tool I wrote (inspired by OALabs' [frida-wshook](https://github.com/OALabs/frida-wshook) and this blog [post](https://darungrim.com/research/2020-06-17-using-frida-for-windows-reverse-engineering.html)) that aims to do better than AMSI. GootUnloader is written in Python, relying heavily on [Frida](https://frida.re), a dynamic binary instrumentation framework that enables developers, malware analysts or security researchers to have full control over a piece of software or malware or code through function or API hooking. GootUnloader uses Frida to trace and intercept Windows Scripting Host (WSH) as it executes the malicious script. As such, it supports the analysis of script types such as `.js` (JScript) and `.vbs` (VBScript).
+I present to you GootUnloader, a tool I wrote (inspired by OALabs' [frida-wshook](https://github.com/OALabs/frida-wshook) and this blog [post](https://darungrim.com/research/2020-06-17-using-frida-for-windows-reverse-engineering.html)) that aims to do better than AMSI. GootUnloader is written in Python, relying heavily on [Frida](https://frida.re), a dynamic binary instrumentation framework that enables developers, malware analysts or security researchers to have full control over a piece of software or malware or code through function or API hooking. GootUnloader uses Frida to trace and intercept Windows Scripting Host (WSH) as it executes the malicious script. As such, it supports the analysis of script types such as `.js` (JScript), `.vbs` (VBScript), and even script container like `.wsf` (Windows Script File). 
 
 In theory, you should be able to use GootUnloader to analyze and unpack other malicious scripts besides GootLoader. I've tested GootUnloader against malicious scripts associated with the following malware families:
 
-- Adwind
+- AdWind
 - AgentTesla
 - AsyncRAT
 - AveMariaRAT
-- AZORult
+- Azorult
 - BabylonRAT
-- FormBook
+- Emotet
+- Formbook
 - GuLoader
 - IcedID
-- jsoutprox
+- JSOutProx
 - Loki
 - Magniber
 - NanoCore
 - NetSupport
 - NetWire
 - NjRAT
-- purecrypter
+- PureCrypter
 - QNodeService
-- Quakbot
+- Qbot/Qakbot/Quakbot
 - RedLineStealer
 - RemcosRAT
-- socgholish
+- SocGholish
 - STRRAT
-- vjw0rm
-- wshrat
-- younglotus
+- Vjw0rm
+- WSHRAT
+- YoungLotus
 
 ## Features
 
@@ -74,6 +75,8 @@ To use `c:\symbols` as the local symbol cache as GootUnloader downloads debug sy
 ```
 setx _NT_SYMBOL_PATH SRV*c:\symbols*https://msdl.microsoft.com/downloads/symbols
 ```
+
+Note that GootUnloader will take some time to download the required debug symbols at the first run.
 
 ### Options
 

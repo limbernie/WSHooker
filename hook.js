@@ -58,13 +58,15 @@ recv('config', function onMessage(setting) {
 		debug(" [*] ENGINE: JScript");
 		engine = 'jscript.dll';
 	} else if (EXTENSION === 'vbs') {
-		debug(" [*] EGNINE: VBScript");
+		debug(" [*] ENGINE: VBScript");
 		engine = 'vbscript.dll';
+	} else if (EXTENSION === 'wsf') {
+		debug(" [*] ENGINE: Windows Script File");
 	}
-
-	Module.load(engine);
-
+	
 	// manually load these
+	Module.load('jscript.dll');		// JScript Engine
+	Module.load('vbscript.dll');	// VBScript Engine	
 	Module.load('scrrun.dll');      // Scripting Runtime
 	Module.load('wshom.ocx');       // Windows Script Host Runtime
 	Module.load('wbemdisp.dll');    // WMI Query Language
@@ -73,7 +75,7 @@ recv('config', function onMessage(setting) {
 	Module.load('taskschd.dll');    // Schedule.Service
 
 	// hook these
-	hookCOleScriptCompile();
+	hookCOleScriptCompile(engine);
 	hookCHostObjSleep();
 	hookWriteFile();
 	hookGetAddrInfoExW();
@@ -239,10 +241,57 @@ function hookFunction(dllName, funcName, callback) {
   Interceptor.attach(addr, callback);
 }
 
-function hookCOleScriptCompile() {
-	hookFunction(engine, "COleScript::Compile", {
+function hookCOleScriptCompile(engine) {
+	if (engine) {
+		hookFunction(engine, "COleScript::Compile", {
+			onEnter: function(args) {
+				log(" Call: " + engine + "!COleScript::Compile()");
+				log("   |");
+				if (!DISABLE_EVAL) {
+					eval_count++;
+					var file_path = '.\\' + WORK_DIR + '\\';
+					var file_name =  'eval_' + eval_count + ".txt";
+					var file = new File(file_path + file_name, 'w');
+					file.write(ptr(args[1]).readUtf16String());
+
+					log("   |-- eval(): " + "Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
+					file.close();
+				}
+				log("   |");
+				hookDispCallFunc();
+				hookCLSIDFromProgID();
+			}
+		});
+	} else { 
+		// we need to hook COleScript::Compile for both js and vbs
+		hookCOleScriptCompileAll();
+	}
+}
+
+function hookCOleScriptCompileAll() {
+	hookFunction("jscript.dll", "COleScript::Compile", {
 		onEnter: function(args) {
-			log(" Call: " + engine + "!COleScript::Compile()");
+			log(" Call: " + "jscript.dll" + "!COleScript::Compile()");
+			log("   |");
+			if (!DISABLE_EVAL) {
+				eval_count++;
+				var file_path = '.\\' + WORK_DIR + '\\';
+				var file_name =  'eval_' + eval_count + ".txt";
+				var file = new File(file_path + file_name, 'w');
+				file.write(ptr(args[1]).readUtf16String());
+
+				log("   |-- eval(): " + "Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
+				file.close();
+			}
+			log("   |");
+			hookDispCallFunc();
+			hookCLSIDFromProgID();
+		}
+	});
+		
+	hookFunction("vbscript.dll", "COleScript::Compile", {
+		onEnter: function(args) {
+			log(" Call: " + "vbscript.dll" + "!COleScript::Compile()");
 			log("   |");
 			if (!DISABLE_EVAL) {
 				eval_count++;

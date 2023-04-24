@@ -411,7 +411,7 @@ if __name__ == '__main__':
                 status = ' [*] Working directory: %s' % WORK_DIR
             except FileExistsError:
                 status = ' [*] Working directory already exists: %s' % WORK_DIR
-            valid_extensions = ['js', 'vbs']
+            valid_extensions = ['js', 'vbs', 'wsf']
             try:
                 EXTENSION = os.path.basename(args.script).rsplit('.', 1)[1]
             except:
