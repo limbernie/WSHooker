@@ -76,7 +76,7 @@ To use `c:\symbols` as the local symbol cache as GootUnloader downloads debug sy
 setx _NT_SYMBOL_PATH SRV*c:\symbols*https://msdl.microsoft.com/downloads/symbols
 ```
 
-Note that GootUnloader will take some time to download the required debug symbols at the first run.
+GootUnloader may appear unresponsive on the first run as it downloads the required debug symbols. This is normal behavior.
 
 ### Options
 
