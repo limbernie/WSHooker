@@ -83,9 +83,10 @@ GootUnloader may appear unresponsive on the first run as it downloads the requir
 GootUnloader supports a number of options to disable certain protection mechanisms during analysis in order to reveal other behaviors of the malicious script that were blocked.
 
 ```
-> python gootunloader.py --help
+python gootunloader.py --help
 usage: gootunloader.py [-h] [-p PID | -s SCRIPT] [-o FILE] [--debug] [--disable-com] [--disable-dns] [--disable-eval]
-                       [--disable-file] [--disable-net] [--disable-reg] [--disable-shell] [--disable-sleep] [--enable-timestamp]
+                       [--disable-file] [--disable-net] [--disable-proc] [--disable-reg] [--disable-shell] [--disable-sleep]
+                       [--enable-timestamp]
 
 GootUnloader - Unpack GootLoader with Frida
 
@@ -101,6 +102,7 @@ options:
   --disable-eval        disable eval() output
   --disable-file        disable file write-protect
   --disable-net         disable socket termination
+  --disable-proc        disable Win32_Process termination
   --disable-reg         disable registry write-protect
   --disable-shell       disable shell output
   --disable-sleep       disable sleep skipping
@@ -109,7 +111,7 @@ options:
 
 ### Supported OS
 
-GootUnloader has been tested on Windows 10. 
+GootUnloader has been tested on Windows 10.
 
 ## Feedback
 
