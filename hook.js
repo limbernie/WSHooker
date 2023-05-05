@@ -90,6 +90,7 @@ recv('config', function onMessage(setting) {
 	hookCHttpRequestOpen();
 	hookCHttpRequestSetRequestHeader();
 	hookCHttpRequestSend();
+	hookMkParseDisplayName();
 
 	// done configuring; tell frida to resume process
 	resume();
@@ -677,6 +678,30 @@ function hookCHttpRequestSend() {
 					log("   |-- Data: " + data);
 			} catch(e) {}
 			log("   |");
+		}
+	});
+}
+
+var MK_E_SYNTAX = 0x800401E4;
+
+function hookMkParseDisplayName() {
+	var moniker = null;
+	hookFunction('ole32.dll', "MkParseDisplayName", {
+		onEnter: function(args) {
+			moniker = args[1].readUtf16String();
+			log(" Call: ole32.dll!MkParseDisplayName()");
+			log("   |");
+			log("   |-- Object: " + moniker);
+		},
+		onLeave(retval) {
+			if (moniker.match(/win32_process/i)) {
+				log("   |-- Evasion: WMI (blocked!)");
+				log("   |");
+				retval.replace(MK_E_SYNTAX);
+			}
+			else {
+				log("   |");
+			}
 		}
 	});
 }
