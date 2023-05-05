@@ -56,9 +56,9 @@ GootUnloader has several features over AMSI when it comes to analyzing and unpac
 
 8. Timestamps in output — useful for measuring time between function calls
 
-9. Hooks functions dynamically as they are called
+9. Hooks functions dynamically as they are calle
 
-10. Tracks COM objects creation and WMI queries
+10. Tracks COM objects creation, Win32_Process creation and WMI queries.
 
 ## Usage
 

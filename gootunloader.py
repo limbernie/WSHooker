@@ -211,9 +211,10 @@ class Instrumenter:
                    disable_eval=False,
                    disable_file=False,
                    disable_net=False,
+                   disable_proc=False,
                    disable_reg=False,
                    disable_shell=False,
-                   disable_sleep=False
+                   disable_sleep=False,
                   ):
     
         session = frida.attach(pid)
@@ -233,6 +234,7 @@ class Instrumenter:
             "disable_eval"  : disable_eval,
             "disable_file"  : disable_file,
             "disable_net"   : disable_net,
+            "disable_proc"  : disable_proc,
             "disable_reg"   : disable_reg,
             "disable_shell" : disable_shell,
             "disable_sleep" : disable_sleep,
@@ -367,6 +369,12 @@ if __name__ == '__main__':
         help="disable socket termination"
     )
     parser.add_argument(
+        '--disable-proc',
+        dest="disable_proc",
+        action="store_true",
+        help="disable Win32_Process termination"
+    )
+    parser.add_argument(
         '--disable-reg', 
         dest="disable_reg", 
         action="store_true", 
@@ -453,6 +461,7 @@ if __name__ == '__main__':
                                     args.disable_eval,
                                     args.disable_file,
                                     args.disable_net,
+                                    args.disable_proc,
                                     args.disable_reg,
                                     args.disable_shell,
                                     args.disable_sleep

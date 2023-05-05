@@ -4,6 +4,7 @@ var DISABLE_DNS   = false;
 var DISABLE_EVAL  = false;
 var DISABLE_FILE  = false;
 var DISABLE_NET   = false;
+var DISABLE_PROC  = false;
 var DISABLE_REG   = false;
 var DISABLE_SHELL = false;
 var DISABLE_SLEEP = false;
@@ -44,6 +45,8 @@ recv('config', function onMessage(setting) {
 	debug(" [*] DISABLE_FILE: " + DISABLE_FILE);
 	DISABLE_NET = setting['disable_net'];
 	debug(" [*] DISABLE_NET: " + DISABLE_NET);
+	DISABLE_PROC = setting['disable_proc'];
+	debug(" [*] DISABLE_PROC: " + DISABLE_PROC);
 	DISABLE_REG = setting['disable_reg'];
 	debug(" [*] DISABLE_REG: " + DISABLE_REG);
 	DISABLE_SHELL = setting['disable_shell'];
@@ -694,14 +697,13 @@ function hookMkParseDisplayName() {
 			log("   |-- Object: " + moniker);
 		},
 		onLeave(retval) {
-			if (moniker.match(/win32_process/i)) {
-				log("   |-- Evasion: WMI (blocked!)");
-				log("   |");
-				retval.replace(MK_E_SYNTAX);
-			}
-			else {
-				log("   |");
-			}
+			if (!DISABLE_PROC)
+				if (moniker.match(/win32_process/i)) {
+					log("   |-- Evasion: Win32_Process (blocked!)");
+					log("   |");
+					retval.replace(MK_E_SYNTAX);
+				}
+			log("   |");
 		}
 	});
 }
