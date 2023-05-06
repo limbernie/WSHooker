@@ -29,7 +29,9 @@ var hooked = {
 	"CFileSystem::GetSpecialFolder" : 1,
 	"CHttpRequest::Open" : 1,
 	"CHttpRequest::SetRequestHeader" : 1,
-	"CHttpRequest::Send" : 1
+	"CHttpRequest::Send" : 1,
+	"CTextStream::Close" : 1, // serves no real purpose
+	"CTextStream::Write" : 1  // wall of text
 };
 
 recv('config', function onMessage(setting) {
