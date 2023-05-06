@@ -700,7 +700,6 @@ function hookMkParseDisplayName() {
 			if (!DISABLE_PROC)
 				if (moniker.match(/win32_process/i)) {
 					log("   |-- Evasion: Win32_Process (blocked!)");
-					log("   |");
 					retval.replace(MK_E_SYNTAX);
 				}
 			log("   |");
