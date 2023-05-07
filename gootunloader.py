@@ -328,6 +328,12 @@ if __name__ == '__main__':
         help="path to malicious script"
     )
     parser.add_argument(
+        '-a',
+        '--args',
+        dest='args',
+        help="arguments to malicious script, e.g. -a \"arg1 arg2 arg3 ...\""
+    )
+    parser.add_argument(
         '-o', 
         dest='file', 
         help="write output to file"
@@ -452,6 +458,12 @@ if __name__ == '__main__':
 
             # use '/b' to suppress alerts, errors or prompts
             cmd = [wshost, '/b', args.script]
+            
+            # arguments to malicious script, if any
+            if args.args:
+                for a in args.args.split(' '):
+                    cmd.append(a)
+            
             pid = frida.spawn(cmd)
         
             instrumenter.instrument(pid,
