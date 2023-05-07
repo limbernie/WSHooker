@@ -84,9 +84,9 @@ WSHooker supports a number of options to disable certain protection mechanisms d
 
 ```
 python wshooker.py --help
-usage: wshooker.py [-h] [-p PID | -s SCRIPT] [-o FILE] [--debug] [--disable-com] [--disable-dns] [--disable-eval]
-                       [--disable-file] [--disable-net] [--disable-proc] [--disable-reg] [--disable-shell] [--disable-sleep]
-                       [--enable-timestamp]
+usage: wshooker.py [-h] [-p PID | -s SCRIPT] [-a ARGS] [-o FILE] [--debug] [--disable-com] [--disable-dns]
+                       [--disable-eval] [--disable-file] [--disable-net] [--disable-proc] [--disable-reg]
+                       [--disable-shell] [--disable-sleep] [--enable-timestamp]
 
 WSHooker - Windows Script Hooking with Frida
 
