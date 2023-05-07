@@ -331,7 +331,7 @@ if __name__ == '__main__':
         '-a',
         '--args',
         dest='args',
-        help="arguments to malicious script, e.g. -a \"arg1 arg2 arg3 ...\""
+        help="arguments to malicious script, e.g., -a \"arg1 arg2 arg3 ...\""
     )
     parser.add_argument(
         '-o', 

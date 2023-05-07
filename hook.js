@@ -68,10 +68,10 @@ recv('config', function onMessage(setting) {
 	} else if (EXTENSION === 'wsf') {
 		debug(" [*] ENGINE: Windows Script File");
 	}
-	
+
 	// manually load these
-	Module.load('jscript.dll');		// JScript Engine
-	Module.load('vbscript.dll');	// VBScript Engine	
+	Module.load('jscript.dll');     // JScript Engine
+	Module.load('vbscript.dll');    // VBScript Engine
 	Module.load('scrrun.dll');      // Scripting Runtime
 	Module.load('wshom.ocx');       // Windows Script Host Runtime
 	Module.load('wbemdisp.dll');    // WMI Query Language
@@ -268,7 +268,7 @@ function hookCOleScriptCompile(engine) {
 				hookCLSIDFromProgID();
 			}
 		});
-	} else { 
+	} else {
 		// we need to hook COleScript::Compile for both js and vbs
 		hookCOleScriptCompileAll();
 	}
@@ -294,7 +294,7 @@ function hookCOleScriptCompileAll() {
 			hookCLSIDFromProgID();
 		}
 	});
-		
+
 	hookFunction("vbscript.dll", "COleScript::Compile", {
 		onEnter: function(args) {
 			log(" Call: " + "vbscript.dll" + "!COleScript::Compile()");
