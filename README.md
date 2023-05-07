@@ -14,6 +14,7 @@ In theory, you should be able to use WSHooker to analyze and unpack Windows-base
 - BabylonRAT
 - Emotet
 - Formbook
+- GootLoader
 - GuLoader
 - IcedID
 - JSOutProx
