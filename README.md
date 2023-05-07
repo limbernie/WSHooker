@@ -1,6 +1,6 @@
 # WSHooker
 
-Have you ever wondered what goes under the hood of unpacking a malicious JavaScript? Well, I certainly did when I saw Joe Sandbox [unpack](https://www.joesecurity.org/blog/4297261482537891261#) [GootLoader](https://malpedia.caad.fkie.fraunhofer.de/details/js.gootloader) with Microsoft's Antimalware Scan Interface (AMSI) during an incident response.
+Have you ever wondered what goes under the hood of unpacking a malicious JavaScript? Well, I certainly did when I saw Joe Sandbox [unpack](https://www.joesecurity.org/blog/4297261482537891261#) GootLoader with Microsoft's Antimalware Scan Interface (AMSI) during an incident response.
 
 I present to you WSHooker, a tool I wrote (inspired by OALabs' [frida-wshook](https://github.com/OALabs/frida-wshook) and this blog [post](https://darungrim.com/research/2020-06-17-using-frida-for-windows-reverse-engineering.html)) that aims to do just as good as AMSI, if not better. WSHooker is written in Python, relying heavily on [Frida](https://frida.re), a dynamic binary instrumentation framework that enables developers, malware analysts or security researchers to have full control over a piece of software or malware or code through function or API hooking. WSHooker uses Frida to trace and intercept Windows Scripting Host (WSH) as it executes the malicious script. As such, it supports the analysis of script types such as `.js` (JScript), `.vbs` (VBScript), and even script container like `.wsf` (Windows Script File). 
 
@@ -36,7 +36,7 @@ In theory, you should be able to use WSHooker to analyze and unpack Windows-base
 
 ## Features
 
-GootUnloader has several features over AMSI when it comes to analyzing and unpacking malicious scripts.
+WSHooker has several features over AMSI when it comes to analyzing and unpacking malicious scripts.
 
 1. Unpacks the malicious script on-the-fly and writes the unpacked code to a file for further analysis and/or to extract IOCs
 
@@ -76,11 +76,11 @@ To use `c:\symbols` as the local symbol cache as GootUnloader downloads debug sy
 setx _NT_SYMBOL_PATH SRV*c:\symbols*https://msdl.microsoft.com/downloads/symbols
 ```
 
-GootUnloader may appear unresponsive on the first run as it downloads the required debug symbols. This is normal.
+WSHooker may appear unresponsive on the first run as it downloads the required debug symbols. This is normal.
 
 ### Options
 
-GootUnloader supports a number of options to disable certain protection mechanisms during analysis in order to reveal other behaviors of the malicious script that were blocked.
+WSHooker supports a number of options to disable certain protection mechanisms during analysis in order to reveal other behaviors of the malicious script that were blocked.
 
 ```
 python wshooker.py --help
