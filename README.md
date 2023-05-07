@@ -62,7 +62,7 @@ WSHooker has several features over AMSI when it comes to analyzing and unpacking
 
 ## Usage
 
-To use GootUnloader, you need Python 3 and Frida:
+To use WSHooker, you need Python 3 and Frida:
 
 ```
 pip install frida-tools
@@ -70,7 +70,7 @@ pip install frida-tools
 
 ### Setting Symbol Path
 
-To use `c:\symbols` as the local symbol cache as GootUnloader downloads debug symbols from the Microsoft symbol server, use the following:
+To use `c:\symbols` as the local symbol cache as WSHooker downloads debug symbols from the Microsoft symbol server, use the following:
 
 ```
 setx _NT_SYMBOL_PATH SRV*c:\symbols*https://msdl.microsoft.com/downloads/symbols
