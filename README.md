@@ -117,4 +117,4 @@ WSHooker has been tested on Windows 10.
 
 ## Feedback
 
-If you have ideas or suggestions how to make WSHooker better, please DM me ([@limbernie](https://twitter/limbernie)) in Twitter. Thank you!
+If you have ideas or suggestions how to make WSHooker better, please DM me ([@limbernie](https://twitter.com/limbernie)) in Twitter. Thank you!
