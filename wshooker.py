@@ -79,6 +79,7 @@ def search():
         hostname_re = (
             r"[a-z" + ul + r"0-9](?:[a-z" + ul + r"0-9-]{0,61}[a-z" + ul + r"0-9])?"
         )
+
         # Max length for domain name labels is 63 characters per RFC 1034 sec. 3.1
         domain_re = r"(?:\.(?!-)[a-z" + ul + r"0-9-]{1,63}(?<!-))*"
         tld_re = (
@@ -118,7 +119,7 @@ def search():
         if (len(domains) > 0 or len(ips) > 0 or len(urls) > 0):
             print(" [*] Searching for IOCs in '%s'..." % file)
             for domain in domains:
-                print("   [+] Domain: %s" % domain.replace('"','').replace("'",''))
+                print("   [+] Keyword: %s" % domain.replace('"','').replace("'",''))
             for ip in ips:
                 print("   [+] IP: %s" % ip)
             for url in urls:
