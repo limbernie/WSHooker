@@ -336,26 +336,27 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '-o',
+		'--output',
         dest='file',
-        help="write output to file"
+        help="write output trace to file"
     )
     parser.add_argument(
         '--debug',
         dest="debug",
         action="store_true",
-        help="show debug output"
+        help="display debug message"
     )
     parser.add_argument(
         '--disable-com',
         dest="disable_com",
         action="store_true",
-        help="disable COM object termination"
+        help="disable COM object termination (dangerous!)"
     )
     parser.add_argument(
         '--disable-dns',
         dest="disable_dns",
         action="store_true",
-        help="disable DNS sinkhole"
+        help="disable DNS sinkhole (dangerous!)"
     )
     parser.add_argument(
         '--disable-eval',
@@ -367,25 +368,25 @@ if __name__ == '__main__':
         '--disable-file',
         dest="disable_file",
         action="store_true",
-        help="disable file write-protect"
+        help="disable file copy/write protect (dangerous!)"
     )
     parser.add_argument(
         '--disable-net',
         dest="disable_net",
         action="store_true",
-        help="disable socket termination"
+        help="disable socket termination (dangerous!)"
     )
     parser.add_argument(
         '--disable-proc',
         dest="disable_proc",
         action="store_true",
-        help="disable Win32_Process termination"
+        help="disable Win32_Process termination (dangerous!)"
     )
     parser.add_argument(
         '--disable-reg',
         dest="disable_reg",
         action="store_true",
-        help="disable registry write-protect"
+        help="disable registry write protect (dangerous!)"
     )
     parser.add_argument(
         '--disable-shell',
@@ -403,7 +404,7 @@ if __name__ == '__main__':
         '--enable-timestamp',
         dest="timestamp",
         action="store_true",
-        help="enable timestamp in output"
+        help="enable timestamp in output trace"
     )
     args = parser.parse_args()
 

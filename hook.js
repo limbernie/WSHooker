@@ -15,7 +15,7 @@ var eval_count    = 0;
 var shell_count   = 0;
 var sock_count    = 0;
 
-// functions to filter out from dynamic hooking
+// filter these functions from dynamic hooking
 var hooked = {
 	"CWshShell::RegWrite" : 1,
 	"CHostObj::Sleep" : 1,
@@ -30,8 +30,9 @@ var hooked = {
 	"CHttpRequest::Open" : 1,
 	"CHttpRequest::SetRequestHeader" : 1,
 	"CHttpRequest::Send" : 1,
-	"CTextStream::Close" : 1, // serves no real purpose
-	"CTextStream::Write" : 1  // wall of text
+	"CTextStream::Close" : 1,
+	"CTextStream::Write" : 1,
+	"CFileSystem::CopyFileA" : 1
 };
 
 recv('config', function onMessage(setting) {
@@ -83,6 +84,7 @@ recv('config', function onMessage(setting) {
 	hookCOleScriptCompile(engine);
 	hookCHostObjSleep();
 	hookWriteFile();
+	hookCopyFileA();
 	hookGetAddrInfoExW();
 	hookWSASend();
 	hookShellExecuteExW();
@@ -448,6 +450,21 @@ function hookWriteFile() {
 			log("   |-- Path  : " + path);
 
 			if (!DISABLE_FILE) deleteFile(path);
+			log("   |");
+		}
+	});
+}
+
+function hookCopyFileA() {
+	hookFunction('scrrun.dll', "CFileSystem::CopyFileA", {
+		onEnter: function(args) {
+			log(" Call: scrrun.dll!CFileSystem::CopyFileA()");
+			log("   |");
+			var src = args[1].readUtf16String();
+			var dst = args[2].readUtf16String();
+			log("   |-- Source: " + src);
+			log("   |-- Destination: " + dst);
+			if (!DISABLE_FILE) deleteFile(dst);
 			log("   |");
 		}
 	});

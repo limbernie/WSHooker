@@ -4,7 +4,7 @@ Have you ever wondered what goes under the hood of unpacking a malicious JavaScr
 
 I present to you WSHooker, a tool I wrote (inspired by OALabs' [frida-wshook](https://github.com/OALabs/frida-wshook) and this blog [post](https://darungrim.com/research/2020-06-17-using-frida-for-windows-reverse-engineering.html)) that aims to do just as good as AMSI, if not better. WSHooker is written in Python, relying heavily on [Frida](https://frida.re), a dynamic binary instrumentation framework that enables developers, malware analysts or security researchers to have full control over a piece of software or malware or code through function or API hooking. WSHooker uses Frida to trace and intercept Windows Scripting Host (WSH) as it executes the malicious script. As such, it supports the analysis of script types such as `.js` (JScript), `.vbs` (VBScript), and even script container like `.wsf` (Windows Script File). 
 
-In theory, you should be able to use WSHooker to analyze and unpack Windows-based malicious scripts. I've tested WSHooker against malicious scripts associated with the following malware families:
+In theory, you should be able to use WSHooker to analyze and unpack malicious scripts targeted at Windows. I've tested WSHooker against malicious scripts associated with the following malware families:
 
 - AdWind
 - AgentTesla
@@ -45,9 +45,9 @@ WSHooker has several features over AMSI when it comes to analyzing and unpacking
 
 3. Sinkholes DNS query or terminates network socket
 
-4. File write-protection
+4. Prevents file copy/write
 
-5. Registry write-protection
+5. Prevents Registry key/value write
 
 6. Terminates dangerous COM objects:
    - `InternetExplorer.Application`
@@ -55,11 +55,11 @@ WSHooker has several features over AMSI when it comes to analyzing and unpacking
 
 7. Time skipping in `WScript.Sleep()`
 
-8. Timestamps in output — useful for measuring time between function calls
+8. Timestamps in output trace — useful for measuring time between function calls
 
 9. Hooks functions dynamically as they are called
 
-10. Tracks COM objects creation, `Win32_Process` creation and WMI queries.
+10. Tracks COM objects creation, WMI queries, and stops `Win32_Process` creation 
 
 ## Usage
 
@@ -77,7 +77,7 @@ To use `c:\symbols` as the local symbol cache as WSHooker downloads debug symbol
 setx _NT_SYMBOL_PATH SRV*c:\symbols*https://msdl.microsoft.com/downloads/symbols
 ```
 
-WSHooker may appear unresponsive on the first run as it downloads the required debug symbols. This is normal.
+WSHooker may appear unresponsive in the first run as it downloads the required debug symbols. This is normal.
 
 ### Options
 
@@ -85,9 +85,9 @@ WSHooker supports a number of options to disable certain protection mechanisms d
 
 ```
 python wshooker.py --help
-usage: wshooker.py [-h] [-p PID | -s SCRIPT] [-a ARGS] [-o FILE] [--debug] [--disable-com] [--disable-dns]
-                       [--disable-eval] [--disable-file] [--disable-net] [--disable-proc] [--disable-reg]
-                       [--disable-shell] [--disable-sleep] [--enable-timestamp]
+usage: wshooker.py [-h] [-p PID | -s SCRIPT] [-a ARGS] [-o FILE] [--debug] [--disable-com] [--disable-dns] [--disable-eval]
+                   [--disable-file] [--disable-net] [--disable-proc] [--disable-reg] [--disable-shell] [--disable-sleep]
+                   [--enable-timestamp]
 
 WSHooker - Windows Script Hooking with Frida
 
@@ -97,18 +97,19 @@ options:
   -s SCRIPT, --script SCRIPT
                         path to malicious script
   -a ARGS, --args ARGS  arguments to malicious script, e.g., -a "arg1 arg2 arg3 ..."
-  -o FILE               write output to file
-  --debug               show debug output
-  --disable-com         disable COM object termination
-  --disable-dns         disable DNS sinkhole
+  -o FILE, --output FILE
+                        write output trace to file
+  --debug               display debug message
+  --disable-com         disable COM object termination (dangerous!)
+  --disable-dns         disable DNS sinkhole (dangerous!)
   --disable-eval        disable eval() output
-  --disable-file        disable file write-protect
-  --disable-net         disable socket termination
-  --disable-proc        disable Win32_Process termination
-  --disable-reg         disable registry write-protect
+  --disable-file        disable file copy/write protect (dangerous!)
+  --disable-net         disable socket termination (dangerous!)
+  --disable-proc        disable Win32_Process termination (dangerous!)
+  --disable-reg         disable registry write protect (dangerous!)
   --disable-shell       disable shell output
   --disable-sleep       disable sleep skipping
-  --enable-timestamp    enable timestamp in output
+  --enable-timestamp    enable timestamp in output trace
 ```
 
 ### Supported OS
