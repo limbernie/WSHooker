@@ -291,7 +291,7 @@ class Instrumenter:
                     frida.resume(pid)
                     print(' [*] Press Ctrl-C to kill the process...')
                     print(" +---------+")
-                    print(" |  Hooks  |")
+                    print(" |  Trace  |")
                     print(" +---------+")
             elif msg_data['target'] == 'system':
                 if msg_data['action'] == 'print':
