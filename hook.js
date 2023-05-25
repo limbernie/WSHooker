@@ -8,6 +8,7 @@ var DISABLE_PROC  = false;
 var DISABLE_REG   = false;
 var DISABLE_SHELL = false;
 var DISABLE_SLEEP = false;
+var ENABLE_DYN    = false;
 var EXTENSION     = null;
 var engine        = null;
 var WORK_DIR      = null;
@@ -56,6 +57,8 @@ recv('config', function onMessage(setting) {
 	debug(" [*] DISABLE_SHELL: " + DISABLE_SHELL);
 	DISABLE_SLEEP = setting['disable_sleep'];
 	debug(" [*] DISABLE_SLEEP: " + DISABLE_SLEEP);
+	ENABLE_DYN = setting['enable_dyn'];
+	debug(" [*] ENABLE_DYN: " + ENABLE_DYN);
 
 	WORK_DIR  = setting['work_dir'];
 	EXTENSION = setting['extension'];
@@ -266,7 +269,7 @@ function hookCOleScriptCompile(engine) {
 					file.close();
 				}
 				log("   |");
-				hookDispCallFunc();
+				if (ENABLE_DYN) hookDispCallFunc();
 				hookCLSIDFromProgID();
 			}
 		});
@@ -292,7 +295,7 @@ function hookCOleScriptCompileAll() {
 				file.close();
 			}
 			log("   |");
-			hookDispCallFunc();
+			if (ENABLE_DYN) hookDispCallFunc();
 			hookCLSIDFromProgID();
 		}
 	});
@@ -312,7 +315,7 @@ function hookCOleScriptCompileAll() {
 				file.close();
 			}
 			log("   |");
-			hookDispCallFunc();
+			if (ENABLE_DYN) hookDispCallFunc();
 			hookCLSIDFromProgID();
 		}
 	});
@@ -448,7 +451,6 @@ function hookWriteFile() {
 			GetFinalPathNameByHandleW(handle, ptr(lpszFilePath), 256, 0x8);
 			var path = lpszFilePath.readUtf16String();
 			log("   |-- Path  : " + path);
-
 			if (!DISABLE_FILE) deleteFile(path);
 			log("   |");
 		}
@@ -718,7 +720,7 @@ function hookMkParseDisplayName() {
 		onLeave(retval) {
 			if (!DISABLE_PROC)
 				if (moniker.match(/win32_process/i)) {
-					log("   |-- Evasion: Win32_Process (blocked!)");
+					log("   |-- Win32_Process (blocked!)");
 					retval.replace(MK_E_SYNTAX);
 				}
 			log("   |");

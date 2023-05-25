@@ -216,6 +216,7 @@ class Instrumenter:
                    disable_reg=False,
                    disable_shell=False,
                    disable_sleep=False,
+                   enable_dyn=False
                   ):
 
         session = frida.attach(pid)
@@ -239,6 +240,7 @@ class Instrumenter:
             "disable_reg"   : disable_reg,
             "disable_shell" : disable_shell,
             "disable_sleep" : disable_sleep,
+            "enable_dyn"    : enable_dyn,
             "work_dir"      : WORK_DIR,
             "extension"     : EXTENSION
         })
@@ -401,6 +403,12 @@ if __name__ == '__main__':
         help="disable sleep skipping"
     )
     parser.add_argument(
+        '--enable-dyn',
+        dest="enable_dyn",
+        action="store_true",
+        help="enable dynamic hooking (verbose)"
+    )
+    parser.add_argument(
         '--enable-timestamp',
         dest="timestamp",
         action="store_true",
@@ -478,7 +486,8 @@ if __name__ == '__main__':
                                     args.disable_proc,
                                     args.disable_reg,
                                     args.disable_shell,
-                                    args.disable_sleep
+                                    args.disable_sleep,
+                                    args.enable_dyn
                                    )
         else:
             args.file = False

@@ -87,7 +87,7 @@ WSHooker supports a number of options to disable certain protection mechanisms d
 python wshooker.py --help
 usage: wshooker.py [-h] [-p PID | -s SCRIPT] [-a ARGS] [-o FILE] [--debug] [--disable-com] [--disable-dns] [--disable-eval]
                    [--disable-file] [--disable-net] [--disable-proc] [--disable-reg] [--disable-shell] [--disable-sleep]
-                   [--enable-timestamp]
+                   [--enable-dyn] [--enable-timestamp]
 
 WSHooker - Windows Script Hooking with Frida
 
@@ -109,6 +109,7 @@ options:
   --disable-reg         disable registry write protect (dangerous!)
   --disable-shell       disable shell output
   --disable-sleep       disable sleep skipping
+  --enable-dyn          enable dynamic hooking (verbose)
   --enable-timestamp    enable timestamp in output trace
 ```
 
