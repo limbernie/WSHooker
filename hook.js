@@ -721,7 +721,7 @@ function hookMkParseDisplayName() {
 		onLeave(retval) {
 			if (!DISABLE_PROC)
 				if (moniker.match(/win32_process/i)) {
-					log("   |-- Win32_Process (blocked!)");
+					log("   |-- (Win32_Process blocked!)");
 					retval.replace(MK_E_SYNTAX);
 				}
 			log("   |");
