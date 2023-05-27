@@ -484,7 +484,8 @@ var REGDB_E_WRITEREGDB = 0x80040151;
 var S_OK = 0;
 var badCOM = {
 	"internetexplorer.application" : 1,
-	"schedule.service" : 1
+	"schedule.service" : 1,
+	"windowsinstaller.installer" : 1
 };
 
 function hookCLSIDFromProgID() {

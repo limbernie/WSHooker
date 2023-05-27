@@ -57,7 +57,7 @@ WSHooker has several features over AMSI when it comes to analyzing and unpacking
 
 8. Timestamps in output trace — useful for measuring time between function calls
 
-9. Hooks functions dynamically as they are called
+9. Trace functions dynamically as they are called
 
 10. Tracks COM objects creation, WMI queries, and stops `Win32_Process` creation 
 
@@ -109,7 +109,7 @@ options:
   --disable-reg         disable registry write protect (dangerous!)
   --disable-shell       disable shell output
   --disable-sleep       disable sleep skipping
-  --enable-dyn          enable dynamic hooking (verbose)
+  --enable-dyn          enable dynamic tracing (verbose)
   --enable-timestamp    enable timestamp in output trace
 ```
 
