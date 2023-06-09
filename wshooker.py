@@ -61,7 +61,7 @@ def parseHKEY(path):
     return hkey
 
 def search():
-    for file in glob.glob('.\\' + WORK_DIR + '\\' + 'eval*.txt'):
+    for file in glob.glob('.\\' + WORK_DIR + '\\' + '*[gkl]_*.txt'):
         f = open(file, 'r', encoding='utf-8')
         text = f.read()
 
@@ -93,18 +93,18 @@ def search():
         host_re = "(" + hostname_re + domain_re + tld_re + "|localhost)"
 
         url_re = re.compile(
-            r"(?:['\"])"
+            r"(?:['\"]?)"
             r"(?:https?|ftps?)://"
             r"(?:[^\s:@/]+(?::[^\s:@/]*)?@)?"
             r"(?:" + ipv4_re + "|" + ipv6_re + "|" + host_re + ")"
             r"(?::[0-9]{1,5})?"
             r"(?:[/?#][^,\s]*)?"
-            r"(?:['\"])",
+            r"(?:['\"]?)",
             re.IGNORECASE
         )
 
         domain_re = re.compile(
-            r"(?:['\"])"
+            r"(?:['\"]?)"
             r"(?:" + host_re + ")"
         )
 
