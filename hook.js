@@ -398,7 +398,7 @@ function hookShellExecuteExW() {
 				log("   |-- Shell: " + "Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
 				file.close();
 			}
-		log("   |");
+			log("   |");
 		}
 	});
 }
@@ -485,6 +485,7 @@ var S_OK = 0;
 var badCOM = {
 	"internetexplorer.application" : 1,
 	"schedule.service" : 1,
+	"shell.application" : 1,
 	"windowsinstaller.installer" : 1
 };
 
