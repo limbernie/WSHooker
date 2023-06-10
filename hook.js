@@ -376,16 +376,33 @@ function hookWSASend() {
 	});
 }
 
+var SHOW = {
+	0  : "SW_HIDE",
+    1  : "SW_SHOWNORMAL",
+    2  : "SW_SHOWMINIMIZED",
+    3  : "SW_SHOWMAXIMIZED",
+    4  : "SW_SHOWNOACTIVATE",
+    5  : "SW_SHOW",
+    6  : "SW_MINIMIZE",
+    7  : "SW_SHOWMINNOACTIVE",
+    8  : "SW_SHOWNA",
+    9  : "SW_RESTORE",
+    10 : "SW_SHOWDEFAULT"
+}
+
 function hookShellExecuteExW() {
 	hookFunction('shell32.dll', "ShellExecuteExW", {
 		onEnter: function(args) {
 			log(" Call: shell32.dll!ShellExecuteExW()");
 			log("   |");
 			var shellinfo_ptr = args[0];
+			var ptr_verb = Memory.readPointer(shellinfo_ptr.add(12));
 			var ptr_file = Memory.readPointer(shellinfo_ptr.add(16));
 			var ptr_params = Memory.readPointer(shellinfo_ptr.add(20));
+			var nshow = Memory.readInt(shellinfo_ptr.add(28));
 			var lpfile = Memory.readUtf16String(ptr(ptr_file));
 			var lpparams = Memory.readUtf16String(ptr(ptr_params));
+			var lpverb = Memory.readUtf16String(ptr(ptr_verb));
 
 			if (!DISABLE_SHELL) {
 				shell_count++
@@ -395,6 +412,10 @@ function hookShellExecuteExW() {
 				file.write("Command: " + lpfile);
 				file.write("\n");
 				file.write("Params : " + lpparams);
+				file.write("\n");
+				file.write("Verb   : " + lpverb);
+				file.write("\n");
+				file.write("nShow  : " + SHOW[nshow]);
 				log("   |-- Shell: " + "Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
 				file.close();
 			}

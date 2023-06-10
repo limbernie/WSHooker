@@ -52,6 +52,7 @@ WSHooker has several features over AMSI when it comes to analyzing and unpacking
 6. Terminates dangerous COM objects:
    - `InternetExplorer.Application`
    - `Schedule.Service`
+   - `Shell.Application`
    - `WindowsInstaller.Installer`
 
 7. Time skipping in `WScript.Sleep()`
