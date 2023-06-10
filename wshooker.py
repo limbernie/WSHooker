@@ -9,6 +9,17 @@ import frida
 import shutil
 import winreg
 
+banner = '''
+[95m
+ __        ______  _   _             _             
+ \ \      / / ___|| | | | ___   ___ | | _____ _ __ 
+  \ \ /\ / /\___ \| |_| |/ _ \ / _ \| |/ / _ \ '__|
+   \ V  V /  ___) |  _  | (_) | (_) |   <  __/ |   
+    \_/\_/  |____/|_| |_|\___/ \___/|_|\_\___|_|   
+                                                   
+
+[0m'''
+
 # overload builtins.print with extras
 def print(*objects, **kwargs):
     ts = "%012.6fs" % time.perf_counter()
@@ -414,6 +425,12 @@ if __name__ == '__main__':
         action="store_true",
         help="enable timestamp in output trace"
     )
+    parser.add_argument(
+        '--no-banner',
+        dest="no_banner",
+        action="store_true",
+        help="remove banner in output trace"
+    )
     args = parser.parse_args()
 
     with open('hook.js', 'r') as fd:
@@ -457,6 +474,8 @@ if __name__ == '__main__':
                 exit(1)
 
             # start
+            if not args.no_banner:
+                sys.stdout.write(banner)
             print(status)
 
             if os.path.exists(Instrumenter._WSCRIPT_PATH_WOW64):
