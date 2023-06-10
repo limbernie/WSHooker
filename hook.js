@@ -169,7 +169,7 @@ function loadModuleForAddress(address) {
 			var modName = modules[i].path
 			try {
 				DebugSymbol.load(modName)
-			} catch (err) {
+			} catch (e) {
 				return;
 			}
 		}
@@ -211,7 +211,7 @@ function resolveName(dllName, name) {
 
 		try {
 			DebugSymbol.load(dllName);
-		} catch (err) {
+		} catch (e) {
 			debug("   [-] DebugSymbol.load: " + err);
 			return;
 		}
@@ -223,7 +223,7 @@ function resolveName(dllName, name) {
 				debug("   [+] DebugSymbol.getFunctionByName: " + functionName);
 				addr = DebugSymbol.getFunctionByName(moduleName + '!' + name);
 				debug("   [+] DebugSymbol.getFunctionByName: addr = " + addr);
-			} catch (err) {
+			} catch (e) {
 				debug("   [-] DebugSymbol.getFunctionByName: " + err);
 			}
 		} else {
@@ -232,7 +232,7 @@ function resolveName(dllName, name) {
 				var addresses = DebugSymbol.findFunctionsMatching(name);
 				addr = addresses[addresses.length - 1];
 				debug("   [+] DebugSymbol.findFunctionsMatching: addr " + addr);
-			} catch (err) {
+			} catch (e) {
 				debug("   [-] DebugSymbol.findFunctionsMatching: " + err);
 			}
 		}
@@ -419,6 +419,17 @@ function hookShellExecuteExW() {
 				log("   |-- Shell: " + "Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
 				file.close();
 			}
+			
+			// "runas" doesn't spawn child process - dangerous!
+			if (lpverb.match(/runas/i)) {
+				try {
+					ptr_verb.writeUtf16String("open");
+				} catch (e) {
+					log(e);
+				}
+				log("   |-- Verb : " + '"' + lpverb + '"' + " > " + '"open"');
+			}
+			
 			log("   |");
 		}
 	});
@@ -506,7 +517,6 @@ var S_OK = 0;
 var badCOM = {
 	"internetexplorer.application" : 1,
 	"schedule.service" : 1,
-	"shell.application" : 1,
 	"windowsinstaller.installer" : 1
 };
 
