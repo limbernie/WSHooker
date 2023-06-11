@@ -43,11 +43,11 @@ WSHooker has several features over AMSI when it comes to analyzing and unpacking
 
 2. Prevents child processes from spawning when the malicious script tries to run a command or program in a new process
 
-3. Sinkholes DNS query or terminates network socket
+3. Sinkholes DNS query and terminates network socket
 
 4. Prevents file copy/write
 
-5. Prevents Registry key/value write
+5. Prevents Windows Registry key/value write
 
 6. Terminates dangerous COM objects:
    - `InternetExplorer.Application`
@@ -82,13 +82,12 @@ WSHooker may appear unresponsive in the first run as it downloads the required d
 
 ### Options
 
-WSHooker supports a number of options to disable certain protection mechanisms during analysis in order to reveal other behaviors of the malicious script that were blocked.
+WSHooker supports a number of options to allow certain dangerous operations to continue during analysis in order to reveal other behaviors of the malicious script that were blocked by default. 
 
 ```
 python wshooker.py --help
-usage: wshooker.py [-h] [-p PID | -s SCRIPT] [-a ARGS] [-o FILE] [--debug] [--disable-com] [--disable-dns] [--disable-eval]
-                   [--disable-file] [--disable-net] [--disable-proc] [--disable-reg] [--disable-shell] [--disable-sleep]
-                   [--enable-dyn] [--enable-timestamp]
+usage: wshooker.py [-h] [-p PID | -s SCRIPT] [-a ARGS] [-o FILE] [--allow-badcom] [--allow-file] [--allow-net]
+                   [--allow-proc] [--allow-reg] [--allow-sleep] [--debug] [--dynamic] [--no-banner] [--timestamp]
 
 WSHooker - Windows Script Hooking with Frida
 
@@ -100,18 +99,16 @@ options:
   -a ARGS, --args ARGS  arguments to malicious script, e.g., -a "arg1 arg2 arg3 ..."
   -o FILE, --output FILE
                         write output trace to file
-  --debug               display debug message
-  --disable-com         disable COM object termination (dangerous!)
-  --disable-dns         disable DNS sinkhole (dangerous!)
-  --disable-eval        disable eval() output
-  --disable-file        disable file copy/write protect (dangerous!)
-  --disable-net         disable socket termination (dangerous!)
-  --disable-proc        disable Win32_Process termination (dangerous!)
-  --disable-reg         disable registry write protect (dangerous!)
-  --disable-shell       disable shell output
-  --disable-sleep       disable sleep skipping
-  --enable-dyn          enable dynamic tracing (verbose)
-  --enable-timestamp    enable timestamp in output trace
+  --allow-badcom        allow bad COM (dangerous!)
+  --allow-file          allow file copy/write (dangerous!)
+  --allow-net           allow network requests (dangerous!)
+  --allow-proc          allow Win32_Process (dangerous!)
+  --allow-reg           allow registry write (dangerous!)
+  --allow-sleep         allow WScript.Sleep()
+  --debug               display debug message (verbose)
+  --dynamic             enable dynamic tracing (verbose)
+  --no-banner           remove banner in output trace
+  --timestamp           enable timestamp in output trace
 ```
 
 ### Supported OS

@@ -187,7 +187,7 @@ def deleteValue(path):
     with open('.\\' + WORK_DIR + '\\' + filename, 'w') as fd:
         fd.write(data)
     fd.close()
-    print("   |-- Data : Data written to '%s\\%s'" % (WORK_DIR, filename))
+    print("   |>> Data written to '%s\\%s'" % (WORK_DIR, filename))
     winreg.DeleteValue(key, value)
     key.Close()
     print("   |-- (Deleted!)")
@@ -209,16 +209,13 @@ class Instrumenter:
     def instrument(self,
                    pid,
                    debug=False,
-                   disable_com=False,
-                   disable_dns=False,
-                   disable_eval=False,
-                   disable_file=False,
-                   disable_net=False,
-                   disable_proc=False,
-                   disable_reg=False,
-                   disable_shell=False,
-                   disable_sleep=False,
-                   enable_dyn=False
+                   allow_badcom=False,
+                   allow_file=False,
+                   allow_net=False,
+                   allow_proc=False,
+                   allow_reg=False,
+                   allow_sleep=False,
+                   dynamic=False
                   ):
 
         session = frida.attach(pid)
@@ -233,16 +230,13 @@ class Instrumenter:
         script.post({
             "type" : "config",
             "debug" : debug,
-            "disable_com"   : disable_com,
-            "disable_dns"   : disable_dns,
-            "disable_eval"  : disable_eval,
-            "disable_file"  : disable_file,
-            "disable_net"   : disable_net,
-            "disable_proc"  : disable_proc,
-            "disable_reg"   : disable_reg,
-            "disable_shell" : disable_shell,
-            "disable_sleep" : disable_sleep,
-            "enable_dyn"    : enable_dyn,
+            "allow_badcom"  : allow_badcom,
+            "allow_file"    : allow_file,
+            "allow_net"     : allow_net,
+            "allow_proc"    : allow_proc,
+            "allow_reg"     : allow_reg,
+            "allow_sleep"   : allow_sleep,
+            "dynamic"       : dynamic,
             "work_dir"      : WORK_DIR,
             "extension"     : EXTENSION
         })
@@ -345,82 +339,64 @@ if __name__ == '__main__':
         help="write output trace to file"
     )
     parser.add_argument(
+        '--allow-badcom',
+        dest="allow_badcom",
+        action="store_true",
+        help="allow bad COM (dangerous!)"
+    )
+    parser.add_argument(
+        '--allow-file',
+        dest="allow_file",
+        action="store_true",
+        help="allow file copy/write (dangerous!)"
+    )
+    parser.add_argument(
+        '--allow-net',
+        dest="allow_net",
+        action="store_true",
+        help="allow network requests (dangerous!)"
+    )
+    parser.add_argument(
+        '--allow-proc',
+        dest="allow_proc",
+        action="store_true",
+        help="allow Win32_Process (dangerous!)"
+    )
+    parser.add_argument(
+        '--allow-reg',
+        dest="allow_reg",
+        action="store_true",
+        help="allow registry write (dangerous!)"
+    )
+    parser.add_argument(
+        '--allow-sleep',
+        dest="allow_sleep",
+        action="store_true",
+        help="allow WScript.Sleep()"
+    )
+    parser.add_argument(
         '--debug',
         dest="debug",
         action="store_true",
-        help="display debug message"
+        help="display debug message (verbose)"
     )
     parser.add_argument(
-        '--disable-com',
-        dest="disable_com",
+        '--dynamic',
+        dest="dynamic",
         action="store_true",
-        help="disable COM object termination (dangerous!)"
-    )
-    parser.add_argument(
-        '--disable-dns',
-        dest="disable_dns",
-        action="store_true",
-        help="disable DNS sinkhole (dangerous!)"
-    )
-    parser.add_argument(
-        '--disable-eval',
-        dest="disable_eval",
-        action="store_true",
-        help="disable eval() output"
-    )
-    parser.add_argument(
-        '--disable-file',
-        dest="disable_file",
-        action="store_true",
-        help="disable file copy/write protect (dangerous!)"
-    )
-    parser.add_argument(
-        '--disable-net',
-        dest="disable_net",
-        action="store_true",
-        help="disable socket termination (dangerous!)"
-    )
-    parser.add_argument(
-        '--disable-proc',
-        dest="disable_proc",
-        action="store_true",
-        help="disable Win32_Process termination (dangerous!)"
-    )
-    parser.add_argument(
-        '--disable-reg',
-        dest="disable_reg",
-        action="store_true",
-        help="disable registry write protect (dangerous!)"
-    )
-    parser.add_argument(
-        '--disable-shell',
-        dest="disable_shell",
-        action="store_true",
-        help="disable shell output"
-    )
-    parser.add_argument(
-        '--disable-sleep',
-        dest="disable_sleep",
-        action="store_true",
-        help="disable sleep skipping"
-    )
-    parser.add_argument(
-        '--enable-dyn',
-        dest="enable_dyn",
-        action="store_true",
-        help="enable dynamic hooking (verbose)"
-    )
-    parser.add_argument(
-        '--enable-timestamp',
-        dest="timestamp",
-        action="store_true",
-        help="enable timestamp in output trace"
+        help="enable dynamic tracing (verbose)"
     )
     parser.add_argument(
         '--no-banner',
         dest="no_banner",
         action="store_true",
         help="remove banner in output trace"
+    )
+    parser.add_argument(
+        '--timestamp',
+        dest="timestamp",
+        action="store_true",
+        help="enable timestamp in output trace"
     )
     args = parser.parse_args()
 
@@ -460,9 +436,9 @@ if __name__ == '__main__':
                 f.close()
 
             # for your protection!
-            if args.disable_dns and args.disable_net:
-                print(" [!] Error: You can't disable DNS sinkhole AND socket termination")
-                exit(1)
+            #if args.disable_dns and args.disable_net:
+            #    print(" [!] Error: You can't disable DNS sinkhole AND socket termination")
+            #    exit(1)
 
             # start
             if not args.no_banner:
@@ -488,16 +464,13 @@ if __name__ == '__main__':
 
             instrumenter.instrument(pid,
                                     args.debug,
-                                    args.disable_com,
-                                    args.disable_dns,
-                                    args.disable_eval,
-                                    args.disable_file,
-                                    args.disable_net,
-                                    args.disable_proc,
-                                    args.disable_reg,
-                                    args.disable_shell,
-                                    args.disable_sleep,
-                                    args.enable_dyn
+                                    args.allow_badcom,
+                                    args.allow_file,
+                                    args.allow_net,
+                                    args.allow_proc,
+                                    args.allow_reg,
+                                    args.allow_sleep,
+                                    args.dynamic
                                    )
         else:
             args.file = False

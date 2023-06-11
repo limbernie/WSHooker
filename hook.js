@@ -1,20 +1,17 @@
-var DEBUG_FLAG    = false;
-var DISABLE_COM   = false;
-var DISABLE_DNS   = false;
-var DISABLE_EVAL  = false;
-var DISABLE_FILE  = false;
-var DISABLE_NET   = false;
-var DISABLE_PROC  = false;
-var DISABLE_REG   = false;
-var DISABLE_SHELL = false;
-var DISABLE_SLEEP = false;
-var ENABLE_DYN    = false;
-var EXTENSION     = null;
-var engine        = null;
-var WORK_DIR      = null;
-var eval_count    = 0;
-var shell_count   = 0;
-var sock_count    = 0;
+var DEBUG_FLAG   = false;
+var ALLOW_BADCOM = false;
+var ALLOW_FILE   = false;
+var ALLOW_NET    = false;
+var ALLOW_PROC   = false;
+var ALLOW_REG    = false;
+var ALLOW_SLEEP  = false;
+var DYNAMIC      = false;
+var EXTENSION    = null;
+var engine       = null;
+var WORK_DIR     = null;
+var eval_count   = 0;
+var shell_count  = 0;
+var sock_count   = 0;
 
 // filter these functions from dynamic hooking
 var hooked = {
@@ -39,26 +36,20 @@ var hooked = {
 recv('config', function onMessage(setting) {
 	DEBUG_FLAG  = setting['debug'];
 	debug(" [*] DEBUG_FLAG: " + DEBUG_FLAG);
-	DISABLE_COM = setting['disable_com'];
-	debug(" [*] DISABLE_COM: " + DISABLE_COM);
-	DISABLE_DNS = setting['disable_dns'];
-	debug(" [*] DISABLE_DNS: " + DISABLE_DNS);
-	DISABLE_EVAL = setting['disable_eval'];
-	debug(" [*] DISABLE_EVAL: " + DISABLE_EVAL);
-	DISABLE_FILE = setting['disable_file'];
-	debug(" [*] DISABLE_FILE: " + DISABLE_FILE);
-	DISABLE_NET = setting['disable_net'];
-	debug(" [*] DISABLE_NET: " + DISABLE_NET);
-	DISABLE_PROC = setting['disable_proc'];
-	debug(" [*] DISABLE_PROC: " + DISABLE_PROC);
-	DISABLE_REG = setting['disable_reg'];
-	debug(" [*] DISABLE_REG: " + DISABLE_REG);
-	DISABLE_SHELL = setting['disable_shell'];
-	debug(" [*] DISABLE_SHELL: " + DISABLE_SHELL);
-	DISABLE_SLEEP = setting['disable_sleep'];
-	debug(" [*] DISABLE_SLEEP: " + DISABLE_SLEEP);
-	ENABLE_DYN = setting['enable_dyn'];
-	debug(" [*] ENABLE_DYN: " + ENABLE_DYN);
+	ALLOW_BADCOM = setting['allow_badcom'];
+	debug(" [*] ALLOW_BADCOM: " + ALLOW_BADCOM);
+	ALLOW_FILE = setting['allow_file'];
+	debug(" [*] ALLOW_FILE: " + ALLOW_FILE);
+	ALLOW_NET = setting['allow_net'];
+	debug(" [*] ALLOW_NET: " + ALLOW_NET);
+	ALLOW_PROC = setting['allow_proc'];
+	debug(" [*] ALLOW_PROC: " + ALLOW_PROC);
+	ALLOW_REG = setting['allow_reg'];
+	debug(" [*] ALLOW_REG: " + ALLOW_REG);
+	ALLOW_SLEEP = setting['allow_sleep'];
+	debug(" [*] ALLOW_SLEEP: " + ALLOW_SLEEP);
+	DYNAMIC = setting['dynamic'];
+	debug(" [*] DYNAMIC: " + DYNAMIC);
 
 	WORK_DIR  = setting['work_dir'];
 	EXTENSION = setting['extension'];
@@ -258,18 +249,18 @@ function hookCOleScriptCompile(engine) {
 			onEnter: function(args) {
 				log(" Call: " + engine + "!COleScript::Compile()");
 				log("   |");
-				if (!DISABLE_EVAL) {
-					eval_count++;
-					var file_path = '.\\' + WORK_DIR + '\\';
-					var file_name =  'eval_' + eval_count + ".txt";
-					var file = new File(file_path + file_name, 'w');
-					file.write(ptr(args[1]).readUtf16String());
 
-					log("   |-- eval(): " + "Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
-					file.close();
-				}
+				eval_count++;
+				var file_path = '.\\' + WORK_DIR + '\\';
+				var file_name =  'code_' + eval_count + ".txt";
+				var file = new File(file_path + file_name, 'w');
+				file.write(ptr(args[1]).readUtf16String());
+
+				log("   |>> Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
+				file.close();
+
 				log("   |");
-				if (ENABLE_DYN) hookDispCallFunc();
+				if (DYNAMIC) hookDispCallFunc();
 				hookCLSIDFromProgID();
 			}
 		});
@@ -284,18 +275,18 @@ function hookCOleScriptCompileAll() {
 		onEnter: function(args) {
 			log(" Call: " + "jscript.dll" + "!COleScript::Compile()");
 			log("   |");
-			if (!DISABLE_EVAL) {
-				eval_count++;
-				var file_path = '.\\' + WORK_DIR + '\\';
-				var file_name =  'eval_' + eval_count + ".txt";
-				var file = new File(file_path + file_name, 'w');
-				file.write(ptr(args[1]).readUtf16String());
 
-				log("   |-- eval(): " + "Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
-				file.close();
-			}
+			eval_count++;
+			var file_path = '.\\' + WORK_DIR + '\\';
+			var file_name =  'code_' + eval_count + ".txt";
+			var file = new File(file_path + file_name, 'w');
+			file.write(ptr(args[1]).readUtf16String());
+
+			log("   |>> Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
+			file.close();
+
 			log("   |");
-			if (ENABLE_DYN) hookDispCallFunc();
+			if (DYNAMIC) hookDispCallFunc();
 			hookCLSIDFromProgID();
 		}
 	});
@@ -304,18 +295,18 @@ function hookCOleScriptCompileAll() {
 		onEnter: function(args) {
 			log(" Call: " + "vbscript.dll" + "!COleScript::Compile()");
 			log("   |");
-			if (!DISABLE_EVAL) {
-				eval_count++;
-				var file_path = '.\\' + WORK_DIR + '\\';
-				var file_name =  'eval_' + eval_count + ".txt";
-				var file = new File(file_path + file_name, 'w');
-				file.write(ptr(args[1]).readUtf16String());
 
-				log("   |-- eval(): " + "Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
-				file.close();
-			}
+			eval_count++;
+			var file_path = '.\\' + WORK_DIR + '\\';
+			var file_name =  'code_' + eval_count + ".txt";
+			var file = new File(file_path + file_name, 'w');
+			file.write(ptr(args[1]).readUtf16String());
+
+			log("   |>> Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
+			file.close();
+
 			log("   |");
-			if (ENABLE_DYN) hookDispCallFunc();
+			if (DYNAMIC) hookDispCallFunc();
 			hookCLSIDFromProgID();
 		}
 	});
@@ -333,7 +324,7 @@ function hookGetAddrInfoExW() {
 			log("   |-- Query: " + host);
 		},
 		onLeave: function(retval) {
-			if (!DISABLE_DNS) {
+			if (!ALLOW_NET) {
 				log("   |-- (Sinkholed!)");
 				retval.replace(WSAHOST_NOT_FOUND);
 			}
@@ -352,20 +343,20 @@ function hookWSASend() {
 			var size = ptr(args[1]).readInt();
 			log("   |-- Size   : " + size);
 
-			if (!DISABLE_NET) {
-				sock_count++;
-				var lpwbuf = args[1].toInt32() + 4;
-				var dptr = Memory.readInt(ptr(lpwbuf));
-				var data = hexdump(ptr(dptr), { length: size });
+			sock_count++;
+			var lpwbuf = args[1].toInt32() + 4;
+			var dptr = Memory.readInt(ptr(lpwbuf));
+			var data = hexdump(ptr(dptr), { length: size });
 
-				var file_path = '.\\' + WORK_DIR + '\\';
-				var file_name =  'sock_' + sock_count + ".txt";
-				var file = new File(file_path + file_name, 'w');
-				file.write(data);
+			var file_path = '.\\' + WORK_DIR + '\\';
+			var file_name =  'sock_' + sock_count + ".txt";
+			var file = new File(file_path + file_name, 'w');
+			file.write(data);
 
-				log("   |-- Data   : " + "Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
-				file.close();
+			log("   |>> Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
+			file.close();
 
+			if (!ALLOW_NET) {
 				var ptr_closesocket = Module.findExportByName("ws2_32.dll", "closesocket");
 				var closesocket = new NativeFunction(ptr_closesocket, 'int', ['pointer']);
 				closesocket(args[0]);
@@ -404,21 +395,19 @@ function hookShellExecuteExW() {
 			var lpparams = Memory.readUtf16String(ptr(ptr_params));
 			var lpverb = Memory.readUtf16String(ptr(ptr_verb));
 
-			if (!DISABLE_SHELL) {
-				shell_count++
-				var file_path = '.\\' + WORK_DIR + '\\';
-				var file_name = 'shell_' + shell_count + ".txt";
-				var file = new File(file_path + file_name, 'w');
-				file.write("Command: " + lpfile);
-				file.write("\n");
-				file.write("Params : " + lpparams);
-				file.write("\n");
-				file.write("Verb   : " + lpverb);
-				file.write("\n");
-				file.write("nShow  : " + SHOW[nshow]);
-				log("   |-- Shell: " + "Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
-				file.close();
-			}
+			shell_count++
+			var file_path = '.\\' + WORK_DIR + '\\';
+			var file_name = 'shell_' + shell_count + ".txt";
+			var file = new File(file_path + file_name, 'w');
+			file.write("Command: " + lpfile);
+			file.write("\n");
+			file.write("Params : " + lpparams);
+			file.write("\n");
+			file.write("Verb   : " + lpverb);
+			file.write("\n");
+			file.write("nShow  : " + SHOW[nshow]);
+			log("   |>> Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
+			file.close();
 			
 			// "runas" doesn't spawn child process - dangerous!
 			if (lpverb.match(/runas/i)) {
@@ -427,7 +416,7 @@ function hookShellExecuteExW() {
 				} catch (e) {
 					log(e);
 				}
-				log("   |-- Verb : " + '"' + lpverb + '"' + " > " + '"open"');
+				log("   |-- (" + '"' + lpverb + '"' + " > " + '"open")');
 			}
 			
 			log("   |");
@@ -444,11 +433,11 @@ function hookCWshShellRegWrite() {
 
 			if (path.slice(-1) == '\\') {
 				log("   |-- Key: " + path);
-				if (!DISABLE_REG) deleteKey(path);
+				if (!ALLOW_REG) deleteKey(path);
 			}
 			else {
 				log("   |-- Value: " + path);
-				if (!DISABLE_REG) deleteValue(path);
+				if (!ALLOW_REG) deleteValue(path);
 			}
 			log("   |");
 		}
@@ -483,7 +472,7 @@ function hookWriteFile() {
 			GetFinalPathNameByHandleW(handle, ptr(lpszFilePath), 256, 0x8);
 			var path = lpszFilePath.readUtf16String();
 			log("   |-- Path  : " + path);
-			if (!DISABLE_FILE) deleteFile(path);
+			if (!ALLOW_FILE) deleteFile(path);
 			log("   |");
 		}
 	});
@@ -498,7 +487,7 @@ function hookCopyFileA() {
 			var dst = args[2].readUtf16String();
 			log("   |-- Source: " + src);
 			log("   |-- Destination: " + dst);
-			if (!DISABLE_FILE) deleteFile(dst);
+			if (!ALLOW_FILE) deleteFile(dst);
 			log("   |");
 		}
 	});
@@ -534,7 +523,7 @@ function hookCLSIDFromProgID() {
 		getInprocServer32(clsid);
 
 		if (progid.toLowerCase() in badCOM) {
-			if (!DISABLE_COM) {
+			if (!ALLOW_BADCOM) {
 				log("   |-- (Dangerous COM object terminated!)");
 				retval = CO_E_CLASSSTRING;
 			}
@@ -613,8 +602,8 @@ function hookCHostObjSleep() {
 			log(" Call: wscript.exe!CHostObj::Sleep()");
 			log("   |");
 			log("   |-- intTime: " + args[1].toInt32() + "ms" +
-				(DISABLE_SLEEP ? "" : " (Skipping to 0ms)"));
-			if (!DISABLE_SLEEP)
+				(ALLOW_SLEEP ? "" : " (Skipping to 0ms)"));
+			if (!ALLOW_SLEEP)
 				args[1] = ptr(0x0);
 		},
 		onLeave(retval) {
@@ -751,7 +740,7 @@ function hookMkParseDisplayName() {
 			log("   |-- Object: " + moniker);
 		},
 		onLeave(retval) {
-			if (!DISABLE_PROC)
+			if (!ALLOW_PROC)
 				if (moniker.match(/win32_process/i)) {
 					log("   |-- (Win32_Process blocked!)");
 					retval.replace(MK_E_SYNTAX);
