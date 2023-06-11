@@ -435,14 +435,9 @@ if __name__ == '__main__':
                 f.truncate()
                 f.close()
 
-            # for your protection!
-            #if args.disable_dns and args.disable_net:
-            #    print(" [!] Error: You can't disable DNS sinkhole AND socket termination")
-            #    exit(1)
-
-            # start
+            # START
             if not args.no_banner:
-                builtins.print(random.choice(colors) + banner + DEFAULT)
+                builtins.print("%s%s%s" % (random.choice(colors), banner, DEFAULT))
             print(status)
 
             if os.path.exists(Instrumenter._WSCRIPT_PATH_WOW64):
