@@ -437,7 +437,10 @@ if __name__ == '__main__':
 
             # START
             if not args.no_banner:
-                builtins.print("%s%s%s" % (random.choice(colors), banner, DEFAULT))
+                builtins.print("%s%s%s" % (
+                    random.choice(colors), 
+                    random.choice(banners),
+                    DEFAULT))
             print(status)
 
             if os.path.exists(Instrumenter._WSCRIPT_PATH_WOW64):
