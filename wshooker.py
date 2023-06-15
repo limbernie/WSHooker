@@ -214,6 +214,7 @@ class Instrumenter:
                    allow_net=False,
                    allow_proc=False,
                    allow_reg=False,
+                   allow_shell=False,
                    allow_sleep=False,
                    dynamic=False
                   ):
@@ -235,6 +236,7 @@ class Instrumenter:
             "allow_net"     : allow_net,
             "allow_proc"    : allow_proc,
             "allow_reg"     : allow_reg,
+            "allow_shell"   : allow_shell,
             "allow_sleep"   : allow_sleep,
             "dynamic"       : dynamic,
             "work_dir"      : WORK_DIR,
@@ -342,31 +344,37 @@ if __name__ == '__main__':
         '--allow-badcom',
         dest="allow_badcom",
         action="store_true",
-        help="allow bad COM (dangerous!)"
+        help="(dangerous) allow bad COM"
     )
     parser.add_argument(
         '--allow-file',
         dest="allow_file",
         action="store_true",
-        help="allow file copy/write (dangerous!)"
+        help="(dangerous) allow file copy/write"
     )
     parser.add_argument(
         '--allow-net',
         dest="allow_net",
         action="store_true",
-        help="allow network requests (dangerous!)"
+        help="(dangerous) allow network requests"
     )
     parser.add_argument(
         '--allow-proc',
         dest="allow_proc",
         action="store_true",
-        help="allow Win32_Process (dangerous!)"
+        help="(dangerous) allow Win32_Process"
     )
     parser.add_argument(
         '--allow-reg',
         dest="allow_reg",
         action="store_true",
-        help="allow registry write (dangerous!)"
+        help="(dangerous) allow registry write"
+    )
+    parser.add_argument(
+        '--allow-shell',
+        dest="allow_shell",
+        action="store_true",
+        help="(dangerous) allow shell commands"
     )
     parser.add_argument(
         '--allow-sleep',
@@ -378,13 +386,13 @@ if __name__ == '__main__':
         '--debug',
         dest="debug",
         action="store_true",
-        help="display debug message (verbose)"
+        help="(verbose) display debug message"
     )
     parser.add_argument(
         '--dynamic',
         dest="dynamic",
         action="store_true",
-        help="enable dynamic tracing (verbose)"
+        help="(verbose) enable dynamic tracing"
     )
     parser.add_argument(
         '--no-banner',
@@ -467,6 +475,7 @@ if __name__ == '__main__':
                                     args.allow_net,
                                     args.allow_proc,
                                     args.allow_reg,
+                                    args.allow_shell,
                                     args.allow_sleep,
                                     args.dynamic
                                    )

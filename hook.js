@@ -4,6 +4,7 @@ var ALLOW_FILE   = false;
 var ALLOW_NET    = false;
 var ALLOW_PROC   = false;
 var ALLOW_REG    = false;
+var ALLOW_SHELL  = false;
 var ALLOW_SLEEP  = false;
 var DYNAMIC      = false;
 var EXTENSION    = null;
@@ -46,6 +47,8 @@ recv('config', function onMessage(setting) {
 	debug(" [*] ALLOW_PROC: " + ALLOW_PROC);
 	ALLOW_REG = setting['allow_reg'];
 	debug(" [*] ALLOW_REG: " + ALLOW_REG);
+	ALLOW_SHELL = setting['allow_shell'];
+	debug(" [*] ALLOW_SHELL: " + ALLOW_SHELL);
 	ALLOW_SLEEP = setting['allow_sleep'];
 	debug(" [*] ALLOW_SLEEP: " + ALLOW_SLEEP);
 	DYNAMIC = setting['dynamic'];
@@ -410,15 +413,25 @@ function hookShellExecuteExW() {
 			file.close();
 			
 			// "runas" doesn't spawn child process - dangerous!
-			if (lpverb.match(/runas/i)) {
-				try {
-					ptr_verb.writeUtf16String("open");
-				} catch (e) {
-					log(e);
+			if (lpverb.match(/open/i)) {
+				if (ALLOW_SHELL) {
+					try {
+						ptr_verb.writeUtf16String("runas");
+					} catch (e) {
+						log(e);
+					}
+					log("   |-- (" + '"' + lpverb + '"' + " > " + '"runas")');
 				}
-				log("   |-- (" + '"' + lpverb + '"' + " > " + '"open")');
+			} else if (lpverb.match(/runas/i)) {
+				if (!ALLOW_SHELL) {
+					try {
+						ptr_verb.writeUtf16String("open");
+					} catch (e) {
+						log(e);
+					}
+					log("   |-- (" + '"' + lpverb + '"' + " > " + '"open")');
+				}
 			}
-			
 			log("   |");
 		}
 	});
