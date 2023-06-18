@@ -350,7 +350,7 @@ if __name__ == '__main__':
         '--allow-file',
         dest="allow_file",
         action="store_true",
-        help="(dangerous) allow file copy/write"
+        help="(dangerous) allow file copy/move/write"
     )
     parser.add_argument(
         '--allow-net',

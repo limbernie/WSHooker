@@ -31,7 +31,8 @@ var hooked = {
 	"CHttpRequest::Send" : 1,
 	"CTextStream::Close" : 1,
 	"CTextStream::Write" : 1,
-	"CFileSystem::CopyFileA" : 1
+	"CFileSystem::CopyFileA" : 1,
+	"CFileSystem::MoveFileA" : 1
 };
 
 recv('config', function onMessage(setting) {
@@ -82,6 +83,7 @@ recv('config', function onMessage(setting) {
 	hookCHostObjSleep();
 	hookWriteFile();
 	hookCopyFileA();
+	hookMoveFileA();
 	hookGetAddrInfoExW();
 	hookWSASend();
 	hookShellExecuteExW();
@@ -495,6 +497,21 @@ function hookCopyFileA() {
 	hookFunction('scrrun.dll', "CFileSystem::CopyFileA", {
 		onEnter: function(args) {
 			log(" Call: scrrun.dll!CFileSystem::CopyFileA()");
+			log("   |");
+			var src = args[1].readUtf16String();
+			var dst = args[2].readUtf16String();
+			log("   |-- Source: " + src);
+			log("   |-- Destination: " + dst);
+			if (!ALLOW_FILE) deleteFile(dst);
+			log("   |");
+		}
+	});
+}
+
+function hookMoveFileA() {
+	hookFunction('scrrun.dll', "CFileSystem::MoveFileA", {
+		onEnter: function(args) {
+			log(" Call: scrrun.dll!CFileSystem::MoveFileA()");
 			log("   |");
 			var src = args[1].readUtf16String();
 			var dst = args[2].readUtf16String();

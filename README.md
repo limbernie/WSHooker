@@ -45,7 +45,7 @@ WSHooker has several features over AMSI when it comes to analyzing and unpacking
 
 3. Sinkholes DNS query and terminates network socket
 
-4. Prevents file copy/write
+4. Prevents file copy/move/write
 
 5. Prevents Windows Registry key/value write
 
@@ -100,7 +100,7 @@ options:
   -o FILE, --output FILE
                         write output trace to file
   --allow-badcom        (dangerous) allow bad COM
-  --allow-file          (dangerous) allow file copy/write
+  --allow-file          (dangerous) allow file copy/move/write
   --allow-net           (dangerous) allow network requests
   --allow-proc          (dangerous) allow Win32_Process
   --allow-reg           (dangerous) allow registry write
