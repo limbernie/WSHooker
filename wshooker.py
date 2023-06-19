@@ -380,7 +380,7 @@ if __name__ == '__main__':
         '--allow-sleep',
         dest="allow_sleep",
         action="store_true",
-        help="allow WScript.Sleep()"
+        help="(slow-down) allow WScript.Sleep()"
     )
     parser.add_argument(
         '--debug',

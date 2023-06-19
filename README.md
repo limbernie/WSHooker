@@ -1,8 +1,8 @@
 # WSHooker
 
-Have you ever wondered what goes under the hood of unpacking a malicious JavaScript? Well, I certainly did when I saw Joe Sandbox [unpack](https://www.joesecurity.org/blog/4297261482537891261#) GootLoader with Microsoft's Antimalware Scan Interface (AMSI) during an incident response.
+Have you ever wondered what goes under the hood of unpacking a malicious JavaScript? Well, I certainly did when I saw Joe Sandbox [unpack](https://www.joesecurity.org/blog/4297261482537891261#) GootLoader with Microsoft's Antimalware Scan Interface (AMSI) during an investigation.
 
-I present to you WSHooker, a tool I wrote (inspired by OALabs' [frida-wshook](https://github.com/OALabs/frida-wshook) and this blog [post](https://darungrim.com/research/2020-06-17-using-frida-for-windows-reverse-engineering.html)) that aims to do just as good as AMSI, if not better. WSHooker is written in Python, relying heavily on [Frida](https://frida.re), a dynamic binary instrumentation framework that enables developers, malware analysts or security researchers to have full control over a piece of software or malware or code through function or API hooking. WSHooker uses Frida to trace and intercept Windows Scripting Host (WSH) as it executes the malicious script. As such, it supports the analysis of script types such as `.js` (JScript), `.vbs` (VBScript), and even script container like `.wsf` (Windows Script File). 
+I present to you WSHooker, a tool I wrote (inspired by OALabs' [frida-wshook](https://github.com/OALabs/frida-wshook) and this blog [post](https://darungrim.com/research/2020-06-17-using-frida-for-windows-reverse-engineering.html)) that aims to do just as good as AMSI, if not better. WSHooker is written in Python, relying heavily on [Frida](https://frida.re), a dynamic binary instrumentation framework that enables developers, malware analysts or security researchers to have full control over a piece of software or malware or code through function or API hooking. WSHooker uses Frida to trace and intercept Windows Scripting Host (WSH) as it executes the malicious script. As such, it supports the analysis of script types such as `.js` (JScript), `.vbs` (VBScript), and even script container like `.wsf` (Windows Script File).
 
 In theory, you should be able to use WSHooker to analyze and unpack malicious scripts targeted at Windows. I've tested WSHooker against malicious scripts associated with the following malware families:
 
@@ -105,7 +105,7 @@ options:
   --allow-proc          (dangerous) allow Win32_Process
   --allow-reg           (dangerous) allow registry write
   --allow-shell         (dangerous) allow shell commands
-  --allow-sleep         allow WScript.Sleep()
+  --allow-sleep         (slow-down) allow WScript.Sleep()
   --debug               (verbose) display debug message
   --dynamic             (verbose) enable dynamic tracing
   --no-banner           remove banner in output trace
