@@ -13,6 +13,7 @@ var WORK_DIR     = null;
 var eval_count   = 0;
 var shell_count  = 0;
 var sock_count   = 0;
+var text_count   = 0;
 
 // filter these functions from dynamic hooking
 var hooked = {
@@ -32,7 +33,8 @@ var hooked = {
 	"CTextStream::Close" : 1,
 	"CTextStream::Write" : 1,
 	"CFileSystem::CopyFileA" : 1,
-	"CFileSystem::MoveFileA" : 1
+	"CFileSystem::MoveFileA" : 1,
+	"CTextStream::WriteLine" : 1
 };
 
 recv('config', function onMessage(setting) {
@@ -97,6 +99,7 @@ recv('config', function onMessage(setting) {
 	hookCHttpRequestSetRequestHeader();
 	hookCHttpRequestSend();
 	hookMkParseDisplayName();
+	hookWriteLine();
 
 	// done configuring; tell frida to resume process
 	resume();
@@ -776,6 +779,26 @@ function hookMkParseDisplayName() {
 					retval.replace(MK_E_SYNTAX);
 				}
 			log("   |");
+		}
+	});
+}
+
+function hookWriteLine() {
+	hookFunction('scrrun.dll', "CTextStream::WriteLine", {
+		onEnter: function(args) {
+				log(" Call: scrrun.dll!CTextStream::WriteLine()");
+				log("   |");
+
+				text_count++;
+				var file_path = '.\\' + WORK_DIR + '\\';
+				var file_name =  'text_' + text_count + ".txt";
+				var file = new File(file_path + file_name, 'w');
+				file.write(ptr(args[1]).readUtf16String());
+
+				log("   |>> Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
+				file.close();
+
+				log("   |");
 		}
 	});
 }
