@@ -78,7 +78,6 @@ recv('config', function onMessage(setting) {
 	Module.load('wbemdisp.dll');    // WMI Query Language
 	Module.load('msxml3.dll');      // MSXML 3.0
 	Module.load('winhttpcom.dll');  // WinHttpRequest
-	Module.load('taskschd.dll');    // Schedule.Service
 
 	// hook these
 	hookCOleScriptCompile(engine);
@@ -753,10 +752,11 @@ function hookCHttpRequestSend() {
 			log("   |");
 			try {
 				var data = args[3].readUtf16String();
-				if (data)
+				if (data) {
 					log("   |-- Data: " + data);
+					log("   |");
+				}
 			} catch(e) {}
-			log("   |");
 		}
 	});
 }
