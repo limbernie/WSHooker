@@ -28,6 +28,9 @@ def print(*objects, **kwargs):
 # registry keys to be deleted
 regkeys = []
 
+# registry values deleted
+reg_count = 0
+
 # files to be deleted
 files = []
 
@@ -183,9 +186,12 @@ def deleteValue(path):
     time.sleep(0.1)
 
     data = winreg.QueryValueEx(key, value)[0]
-    filename = 'reg_' + '_'.join(path.split('\\')[-2:]) + '.txt'
+    global reg_count
+    reg_count += 1
+    #filename = 'reg_' + '_'.join(path.split('\\')[-2:]) + '.txt'
+    filename = 'reg_' + ("%d" % reg_count) + '.txt'
     with open('.\\' + WORK_DIR + '\\' + filename, 'w') as fd:
-        fd.write(data)
+        fd.write("Value: %s\nData : %s" % (path, data))
     fd.close()
     print("   |>> Data written to '%s\\%s'" % (WORK_DIR, filename))
     winreg.DeleteValue(key, value)
@@ -338,7 +344,8 @@ if __name__ == '__main__':
         '-o',
 		'--output',
         dest='file',
-        help="write output trace to file"
+        default="trace.log",
+        help="write output trace to file (default: trace.log)"
     )
     parser.add_argument(
         '--allow-badcom',
@@ -420,8 +427,9 @@ if __name__ == '__main__':
 
     elif args.script:
         if os.path.exists(args.script):
-            # create working directory from filename of script
-            WORK_DIR  = os.path.basename(args.script).rsplit('.', 1)[0]
+            # create working directory from filename of script appended to ISO 8601 timestamp
+            ISO_8601 = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+            WORK_DIR = ISO_8601 + '_' + os.path.basename(args.script).rsplit('.', 1)[0]
             try:
                 os.mkdir(WORK_DIR)
                 status = ' [*] Working directory: %s' % WORK_DIR
