@@ -124,11 +124,13 @@ def search():
         if (len(domains) > 0 or len(ips) > 0 or len(urls) > 0):
             print(" [*] Searching for IOCs in '%s'..." % file)
             for domain in domains:
-                print("   [+] Keyword: %s" % domain.replace('"','').replace("'",''))
+                domain = domain.replace('"','').replace("'",'').encode('ascii', errors='ignore').decode()
+                print("   [+] Keyword: %s" % domain)
             for ip in ips:
                 print("   [+] IP: %s" % ip)
             for url in urls:
-                print("   [+] URL: %s" % url.replace('"','').replace("'",''))
+                url = url.replace('"','').replace("'",'').encode('ascii', errors='ignore').decode()
+                print("   [+] URL: %s" % url)
 
 def clean_frida_helper():
     # clean up frida-helper stuff as much as possible
