@@ -49,7 +49,7 @@ WSHooker has several features over AMSI when it comes to analyzing and unpacking
 
 5. Prevents Windows Registry key/value write
 
-6. Terminates dangerous COM objects:
+6. Terminates dangerous and evasive COM objects:
    - `InternetExplorer.Application`
    - `Schedule.Service`
    - `WindowsInstaller.Installer`
@@ -82,12 +82,13 @@ WSHooker may appear unresponsive in the first run as it downloads the required d
 
 ### Options
 
-WSHooker supports a number of options to allow certain dangerous operations to continue during analysis in order to reveal other behaviors of the malicious script that were blocked by default. 
+WSHooker supports a number of options to allow certain dangerous operations to continue during analysis in order to reveal other behaviors of the malicious script that were blocked otherwise. 
 
 ```
 python wshooker.py --help
-usage: wshooker.py [-h] [-p PID | -s SCRIPT] [-a ARGS] [-o FILE] [--allow-badcom] [--allow-file] [--allow-net] [--allow-proc]
-                   [--allow-reg] [--allow-shell] [--allow-sleep] [--debug] [--dynamic] [--no-banner] [--timestamp]
+usage: wshooker.py [-h] [-p PID | -s SCRIPT] [-a ARGS] [-o FILE] [--allow-badcom] [--allow-file] [--allow-net]
+                   [--allow-proc] [--allow-reg] [--allow-shell] [--allow-sleep] [--debug] [--dynamic] [--no-banner]
+                   [--timestamp]
 
 WSHooker - Windows Script Hooking with Frida
 
@@ -98,7 +99,7 @@ options:
                         path to malicious script
   -a ARGS, --args ARGS  arguments to malicious script, e.g., -a "arg1 arg2 arg3 ..."
   -o FILE, --output FILE
-                        write output trace to file
+                        write output trace to file (defaults to trace.log)
   --allow-badcom        (dangerous) allow bad COM
   --allow-file          (dangerous) allow file copy/move/write
   --allow-net           (dangerous) allow network requests

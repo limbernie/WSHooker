@@ -347,7 +347,7 @@ if __name__ == '__main__':
 		'--output',
         dest='file',
         default="trace.log",
-        help="write output trace to file (default: trace.log)"
+        help="write output trace to file (defaults to trace.log)"
     )
     parser.add_argument(
         '--allow-badcom',
