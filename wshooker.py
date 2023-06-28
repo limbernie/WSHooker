@@ -66,7 +66,7 @@ def parseHKEY(path):
     return hkey
 
 def search():
-    for file in glob.glob('.\\' + WORK_DIR + '\\' + '*[gkl]_*.txt'):
+    for file in glob.glob('.\\' + WORK_DIR + '\\' + '*[egkl]_*.txt'):
         f = open(file, 'r', encoding='utf-8')
         text = f.read()
 
@@ -153,7 +153,8 @@ def cleanup():
 
 def deleteFile(path):
     try:
-        shutil.copy(path, WORK_DIR)
+        os.mkdir(WORK_DIR + "\\dropped_files")
+        shutil.copy2(path, WORK_DIR + "\\dropped_files")
         os.remove(path)
         print("   [+] Deleted file: %s" % path)
     except FileNotFoundError:
@@ -195,7 +196,7 @@ def deleteValue(path):
     with open('.\\' + WORK_DIR + '\\' + filename, 'w') as fd:
         fd.write("Value: %s\nData : %s" % (path, data))
     fd.close()
-    print("   |>> Data written to '%s\\%s'" % (WORK_DIR, filename))
+    print("   |>> Data written to \"%s\\%s\"" % (WORK_DIR, filename))
     winreg.DeleteValue(key, value)
     key.Close()
     print("   |-- (Deleted!)")

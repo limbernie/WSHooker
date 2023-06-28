@@ -256,7 +256,7 @@ function write(count, type, data) {
 	var file = new File(file_path + file_name, 'w');
 	file.write(data);
 
-	log("   |>> Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
+	log("   |>> Data written to " + '"' + WORK_DIR + '\\' + file_name + '"');
 	file.close();
 }
 
@@ -653,8 +653,9 @@ function hookXMLHttpSend() {
 				var data = args[3].readUtf16String();
 				if (data)
 					log("   |-- Data: " + data);
+                log("   |");
 			} catch(e) {}
-			log("   |");
+
 		}
 	});
 }
