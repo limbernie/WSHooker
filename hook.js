@@ -15,8 +15,8 @@ var shell_count  = 0;
 var sock_count   = 0;
 var text_count   = 0;
 
-// filter these functions from dynamic hooking
-var hooked = {
+// filter these functions from dynamic tracing
+var filtered = {
 	"CWshShell::RegWrite" : 1,
 	"CHostObj::Sleep" : 1,
 	"CSWbemServices::ExecQuery" : 1,
@@ -70,7 +70,7 @@ recv('config', function onMessage(setting) {
 		debug(" [*] ENGINE: Windows Script File");
 	}
 
-	// manually load these
+	// manually load symbols
 	Module.load('jscript.dll');     // JScript Engine
 	Module.load('vbscript.dll');    // VBScript Engine
 	Module.load('scrrun.dll');      // Scripting Runtime
@@ -80,7 +80,7 @@ recv('config', function onMessage(setting) {
 	Module.load('winhttpcom.dll');  // WinHttpRequest
 
 	// hook these
-	hookCOleScriptCompile(engine);
+	hookCOleScriptCompile();
 	hookCHostObjSleep();
 	hookWriteFile();
 	hookCopyFileA();
@@ -175,7 +175,7 @@ function loadModuleForAddress(address) {
     }
 }
 
-function BytesToCLSID(address) {
+function bytesToCLSID(address) {
 	if (address.isNull())
 		return;
 
@@ -250,47 +250,23 @@ function hookFunction(dllName, funcName, callback) {
   Interceptor.attach(addr, callback);
 }
 
-function hookCOleScriptCompile(engine) {
-	if (engine) {
-		hookFunction(engine, "COleScript::Compile", {
-			onEnter: function(args) {
-				log(" Call: " + engine + "!COleScript::Compile()");
-				log("   |");
+function write(count, type, data) {
+	var file_path = '.\\' + WORK_DIR + '\\';
+	var file_name =  type + '_' + count + ".txt";
+	var file = new File(file_path + file_name, 'w');
+	file.write(data);
 
-				eval_count++;
-				var file_path = '.\\' + WORK_DIR + '\\';
-				var file_name =  'code_' + eval_count + ".txt";
-				var file = new File(file_path + file_name, 'w');
-				file.write(ptr(args[1]).readUtf16String());
-
-				log("   |>> Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
-				file.close();
-
-				log("   |");
-				if (DYNAMIC) hookDispCallFunc();
-				hookCLSIDFromProgID();
-			}
-		});
-	} else {
-		// we need to hook COleScript::Compile for both js and vbs
-		hookCOleScriptCompileAll();
-	}
+	log("   |>> Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
+	file.close();
 }
 
-function hookCOleScriptCompileAll() {
+function hookCOleScriptCompile() {
 	hookFunction("jscript.dll", "COleScript::Compile", {
 		onEnter: function(args) {
 			log(" Call: " + "jscript.dll" + "!COleScript::Compile()");
 			log("   |");
-
-			eval_count++;
-			var file_path = '.\\' + WORK_DIR + '\\';
-			var file_name =  'code_' + eval_count + ".txt";
-			var file = new File(file_path + file_name, 'w');
-			file.write(ptr(args[1]).readUtf16String());
-
-			log("   |>> Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
-			file.close();
+			
+			write(++eval_count, "code", ptr(args[1]).readUtf16String());
 
 			log("   |");
 			if (DYNAMIC) hookDispCallFunc();
@@ -302,15 +278,8 @@ function hookCOleScriptCompileAll() {
 		onEnter: function(args) {
 			log(" Call: " + "vbscript.dll" + "!COleScript::Compile()");
 			log("   |");
-
-			eval_count++;
-			var file_path = '.\\' + WORK_DIR + '\\';
-			var file_name =  'code_' + eval_count + ".txt";
-			var file = new File(file_path + file_name, 'w');
-			file.write(ptr(args[1]).readUtf16String());
-
-			log("   |>> Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
-			file.close();
+			
+			write(++eval_count, "code", ptr(args[1]).readUtf16String());
 
 			log("   |");
 			if (DYNAMIC) hookDispCallFunc();
@@ -350,18 +319,11 @@ function hookWSASend() {
 			var size = ptr(args[1]).readInt();
 			log("   |-- Size   : " + size);
 
-			sock_count++;
 			var lpwbuf = args[1].toInt32() + 4;
 			var dptr = Memory.readInt(ptr(lpwbuf));
 			var data = hexdump(ptr(dptr), { length: size });
-
-			var file_path = '.\\' + WORK_DIR + '\\';
-			var file_name =  'sock_' + sock_count + ".txt";
-			var file = new File(file_path + file_name, 'w');
-			file.write(data);
-
-			log("   |>> Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
-			file.close();
+			
+			write(++sock_count, "sock", data);
 
 			if (!ALLOW_NET) {
 				var ptr_closesocket = Module.findExportByName("ws2_32.dll", "closesocket");
@@ -401,20 +363,17 @@ function hookShellExecuteExW() {
 			var lpfile = Memory.readUtf16String(ptr(ptr_file));
 			var lpparams = Memory.readUtf16String(ptr(ptr_params));
 			var lpverb = Memory.readUtf16String(ptr(ptr_verb));
-
-			shell_count++
-			var file_path = '.\\' + WORK_DIR + '\\';
-			var file_name = 'shell_' + shell_count + ".txt";
-			var file = new File(file_path + file_name, 'w');
-			file.write("Command: " + lpfile);
-			file.write("\n");
-			file.write("Params : " + lpparams);
-			file.write("\n");
-			file.write("Verb   : " + lpverb);
-			file.write("\n");
-			file.write("nShow  : " + SHOW[nshow]);
-			log("   |>> Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
-			file.close();
+			
+			var data = "";
+			data += "Command: " + lpfile;
+			data += "\n";
+			data += "Params : " + lpparams;
+			data += "\n";
+			data += "Verb   : " + lpverb;
+			data += "\n";
+			data += "nShow  : " + SHOW[nshow];
+			
+			write(++shell_count, "shell", data);
 			
 			// "runas" doesn't spawn child process - dangerous!
 			if (lpverb.match(/open/i)) {
@@ -535,7 +494,7 @@ HRESULT CLSIDFromProgID(
 var CO_E_CLASSSTRING   = 0x800401F3;
 var REGDB_E_WRITEREGDB = 0x80040151;
 var S_OK = 0;
-var badCOM = {
+var BadProgID = {
 	"internetexplorer.application" : 1,
 	"schedule.service" : 1,
 	"windowsinstaller.installer" : 1
@@ -547,16 +506,16 @@ function hookCLSIDFromProgID() {
 	Interceptor.replace(ptrCLSIDFromProgID, new NativeCallback(function (lpszProgID, lpclsid) {
 		var retval = CLSIDFromProgID(lpszProgID, lpclsid);
 		var progid = lpszProgID.readUtf16String();
-		var clsid  = BytesToCLSID(ptr(lpclsid))
+		var clsid  = bytesToCLSID(ptr(lpclsid))
 		log(" Call: ole32.dll!CLSIDFromProgID()");
 		log("   |");
 		log("   |-- ProgID: " + progid);
 		log("   |-- CLSID : " + clsid);
 		getInprocServer32(clsid);
 
-		if (progid.toLowerCase() in badCOM) {
+		if (progid.toLowerCase() in BadProgID) {
 			if (!ALLOW_BADCOM) {
-				log("   |-- (Dangerous COM object terminated!)");
+				log("   |-- (Bad ProgID terminated!)");
 				retval = CO_E_CLASSSTRING;
 			}
 		}
@@ -566,8 +525,8 @@ function hookCLSIDFromProgID() {
 }
 
 function hookDispCallFunc() {
-	if (!("DispCallFunc" in hooked)) {
-		hooked["DispCallFunc"] = 1;
+	if (!("DispCallFunc" in filtered)) {
+		filtered["DispCallFunc"] = 1;
 		var ptrDispCallFunc = Module.findExportByName('oleaut32.dll', "DispCallFunc");
 		Interceptor.attach(ptrDispCallFunc, {
 			onEnter: function(args) {
@@ -585,8 +544,8 @@ function hookDispCallFunc() {
 				log("   |");
 
 				// hook new functions here if they aren't already hooked
-				if (!(functionName.name in hooked)) {
-					hooked[functionName.name] = 1;
+				if (!(functionName.name in filtered)) {
+					filtered[functionName.name] = 1;
 					Interceptor.attach(functionAddress, {
 						onEnter: function(args) {
 							log(" Call: " + functionName.moduleName + '!' + functionName.name + '()');
@@ -788,15 +747,8 @@ function hookWriteLine() {
 		onEnter: function(args) {
 				log(" Call: scrrun.dll!CTextStream::WriteLine()");
 				log("   |");
-
-				text_count++;
-				var file_path = '.\\' + WORK_DIR + '\\';
-				var file_name =  'text_' + text_count + ".txt";
-				var file = new File(file_path + file_name, 'w');
-				file.write(ptr(args[1]).readUtf16String());
-
-				log("   |>> Data written to " + "'" + WORK_DIR + '\\' + file_name + "'");
-				file.close();
+				
+				write(++text_count, "text", ptr(args[1]).readUtf16String());
 
 				log("   |");
 		}
