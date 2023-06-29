@@ -152,16 +152,17 @@ def cleanup():
     clean_frida_helper()
 
 def deleteFile(path):
-    try:
-        if not os.path.exists(WORK_DIR + "\\dropped_files"):
-            os.mkdir(WORK_DIR + "\\dropped_files")
-        shutil.copy2(path, WORK_DIR + "\\dropped_files")
-        os.remove(path)
-        print("   [+] Deleted file: %s" % path)
-    except FileExistsError:
-        pass
-    except FileNotFoundError:
-        pass
+    if os.path.exists(path):
+        try:
+            if not os.path.exists(WORK_DIR + "\\dropped_files"):
+                os.mkdir(WORK_DIR + "\\dropped_files")
+            shutil.copy2(path, WORK_DIR + "\\dropped_files")
+            os.remove(path)
+            print("   [+] Deleted file: %s" % path)
+        except FileExistsError:
+            pass
+        except FileNotFoundError:
+            pass
 
 def deleteKey(key):
     hkey = parseHKEY(key)
