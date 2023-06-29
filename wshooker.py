@@ -153,10 +153,13 @@ def cleanup():
 
 def deleteFile(path):
     try:
-        os.mkdir(WORK_DIR + "\\dropped_files")
+        if not os.path.exists(WORK_DIR + "\\dropped_files"):
+            os.mkdir(WORK_DIR + "\\dropped_files")
         shutil.copy2(path, WORK_DIR + "\\dropped_files")
         os.remove(path)
         print("   [+] Deleted file: %s" % path)
+    except FileExistsError:
+        pass
     except FileNotFoundError:
         pass
 
