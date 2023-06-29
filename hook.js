@@ -27,14 +27,15 @@ var filtered = {
 	"XMLHttp::setRequestHeader" : 1,
 	"XMLHttp::send" : 1,
 	"CFileSystem::GetSpecialFolder" : 1,
+    "CFileSystem::CopyFileA" : 1,
+	"CFileSystem::MoveFileA" : 1,
+    "CFileSystem::CreateFolder" : 1,
 	"CHttpRequest::Open" : 1,
 	"CHttpRequest::SetRequestHeader" : 1,
 	"CHttpRequest::Send" : 1,
 	"CTextStream::Close" : 1,
 	"CTextStream::Write" : 1,
-	"CFileSystem::CopyFileA" : 1,
-	"CFileSystem::MoveFileA" : 1,
-	"CTextStream::WriteLine" : 1
+    "CTextStream::WriteLine" : 1
 };
 
 recv('config', function onMessage(setting) {
@@ -99,6 +100,7 @@ recv('config', function onMessage(setting) {
 	hookCHttpRequestSend();
 	hookMkParseDisplayName();
 	hookWriteLine();
+    hookCreateFolder();
 
 	// done configuring; tell frida to resume process
 	resume();
@@ -123,6 +125,14 @@ function deleteFile(path) {
 		action : "delete",
 		path   : path
 	});
+}
+
+function deleteFolder(path) {
+    send({
+        target : "folder",
+        action : "delete",
+        path   : path
+    });
 }
 
 function deleteKey(path) {
@@ -482,6 +492,19 @@ function hookMoveFileA() {
 			log("   |");
 		}
 	});
+}
+
+function hookCreateFolder() {
+    hookFunction('scrrun.dll', "CFileSystem::CreateFolder", {
+        onEnter: function(args) {
+            log(" Call: scrrun.dll!CFileSystem::CreateFolder()");
+            log("   |");
+            var path = ptr(args[1]).readUtf16String();
+            log("   |-- Path: " + path);
+            if (!ALLOW_FILE) deleteFolder(path);
+            log("   |");
+        }
+    });
 }
 
 /*

@@ -34,6 +34,9 @@ reg_count = 0
 # files to be deleted
 files = []
 
+# folders to be deleted
+folders = []
+
 # working directory
 WORK_DIR = ''
 
@@ -149,6 +152,9 @@ def cleanup():
     if len(files) > 0:
         for file in files:
             deleteFile(file)
+    if len(folders) > 0:
+        for folder in folders:
+            deleteFolder(folder)
     clean_frida_helper()
 
 def deleteFile(path):
@@ -161,6 +167,14 @@ def deleteFile(path):
             print("   [+] Deleted file: %s" % path)
         except FileExistsError:
             pass
+        except FileNotFoundError:
+            pass
+
+def deleteFolder(path):
+    if os.path.exists(path):
+        try:
+            os.rmdir(path)
+            print("   [+] Deleted folder: %s" % path)
         except FileNotFoundError:
             pass
 
@@ -298,6 +312,10 @@ class Instrumenter:
                 if msg_data['action'] == 'delete':
                     if msg_data['path'] not in files:
                         files.append(msg_data['path'])
+            elif msg_data['target'] == 'folder':
+                if msg_data['action'] == 'delete':
+                    if msg_data['path'] not in folders:
+                        folders.append(msg_data['path'])
             elif msg_data['target'] == 'frida':
                 if msg_data['action'] == 'resume':
                     print(' [*] Hooking process: %s' % pid)
