@@ -433,6 +433,15 @@ if __name__ == '__main__':
 
     elif args.script:
         if os.path.exists(args.script):
+            valid_extensions = ['js', 'vbs', 'wsf']
+            try:
+                EXTENSION = os.path.basename(args.script).rsplit('.', 1)[1]
+            except:
+                pass
+            if EXTENSION.lower() not in valid_extensions:
+                builtins.print(" [!] Error: Invalid extension or no extension")
+                exit(1)
+            
             # create working directory from filename of script appended to ISO 8601 timestamp
             ISO_8601 = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
             WORK_DIR = ISO_8601 + '_' + os.path.basename(args.script).rsplit('.', 1)[0]
@@ -441,14 +450,6 @@ if __name__ == '__main__':
                 status = ' [*] Working directory: %s' % WORK_DIR
             except FileExistsError:
                 status = ' [*] Working directory already exists: %s' % WORK_DIR
-            valid_extensions = ['js', 'vbs', 'wsf']
-            try:
-                EXTENSION = os.path.basename(args.script).rsplit('.', 1)[1]
-            except:
-                pass
-            if EXTENSION.lower() not in valid_extensions:
-                print(" [!] Error: Invalid extension or no extension")
-                exit(1)
 
             # truncate file if it exists
             if args.file:
