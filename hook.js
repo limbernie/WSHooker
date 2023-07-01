@@ -747,13 +747,41 @@ function hookCHttpRequestSend() {
 var MK_E_SYNTAX = 0x800401E4;
 
 function hookMkParseDisplayName() {
-	var moniker = null;
+	var moniker;
+    var szProgID;
 	hookFunction('ole32.dll', "MkParseDisplayName", {
 		onEnter: function(args) {
 			moniker = args[1].readUtf16String();
 			log(" Call: ole32.dll!MkParseDisplayName()");
 			log("   |");
-			log("   |-- Object: " + moniker);
+			log("   |-- Moniker: " + moniker);
+            
+            // ProgIDFromCLSID() to expose bad ProgIDs from CLSID
+            var ptrCLSIDFromString = Module.findExportByName('ole32.dll', "CLSIDFromString");
+            var CLSIDFromString = new NativeFunction(ptrCLSIDFromString, 'uint', ['pointer', 'pointer']);
+            var ptrProgIDFromCLSID = Module.findExportByName('ole32.dll', "ProgIDFromCLSID");
+            var ProgIDFromCLSID = new NativeFunction(ptrProgIDFromCLSID, 'uint', ['pointer', 'pointer']);
+            
+            var clsid_re = /(.*)(\{[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\})/;
+            var clsid;
+            
+            if (moniker.match(clsid_re)) {
+                clsid = moniker.replace(clsid_re, "$2");
+                log("   |-- CLSID  : " + clsid);
+                
+                var lpsz = Memory.allocUtf16String(clsid);
+                var pclsid = Memory.alloc(16);
+                var lplpszProgID = Memory.alloc(256);
+                
+                try {
+                    CLSIDFromString(lpsz, ptr(pclsid));
+                    ProgIDFromCLSID(pclsid, lplpszProgID);
+                    szProgID = ptr(lplpszProgID).readPointer().readUtf16String();
+                    log("   |-- ProgID : " + szProgID);
+                } catch (e) {
+                    log(e);
+                }
+            }
 		},
 		onLeave(retval) {
 			if (!ALLOW_PROC)
@@ -761,6 +789,11 @@ function hookMkParseDisplayName() {
 					log("   |-- (Win32_Process blocked!)");
 					retval.replace(MK_E_SYNTAX);
 				}
+            if (!ALLOW_BADCOM)
+                if (szProgID.toLowerCase() in BadProgID) {
+                    log("   |-- (Bad ProgID terminated!)");
+                    retval.replace(MK_E_SYNTAX);
+                }
 			log("   |");
 		}
 	});
