@@ -632,6 +632,7 @@ var HRESULT = {
   0x80070006 : "E_HANDLE",
   0x8007000E : "E_OUTOFMEMORY",
   0x80070057 : "E_INVALIDARG",
+  0x800401E4 : "MK_E_SYNTAX",
   0x80040154 : "REGDB_E_CLASSNOTREG",
   0x80040150 : "REGDB_E_READREGDB"
 };
@@ -770,63 +771,74 @@ function hookCHttpRequestSend() {
   });
 }
 
+/*
+HRESULT MkParseDisplayName(
+  [in]  LPBC      pbc,
+  [in]  LPCOLESTR szUserName,
+  [out] ULONG     *pchEaten,
+  [out] LPMONIKER *ppmk
+);
+*/
+
 var MK_E_SYNTAX = 0x800401E4;
 
 function hookMkParseDisplayName() {
-  var moniker;
-  var szProgID;
-  hookFunction('ole32.dll', "MkParseDisplayName", {
-    onEnter: function(args) {
-      moniker = args[1].readUtf16String();
-
-      log(" Call: ole32.dll!MkParseDisplayName()");
-      log("  |");
-      log("  |-- Moniker: " + moniker);
-            
-      // ProgIDFromCLSID() to expose bad ProgIDs from CLSID
-      var ptrCLSIDFromString = Module.findExportByName('ole32.dll', "CLSIDFromString");
-      var CLSIDFromString = new NativeFunction(ptrCLSIDFromString, 'uint', ['pointer', 'pointer']);
-      var ptrProgIDFromCLSID = Module.findExportByName('ole32.dll', "ProgIDFromCLSID");
-      var ProgIDFromCLSID = new NativeFunction(ptrProgIDFromCLSID, 'uint', ['pointer', 'pointer']);
+  var ptrMkParseDisplayName = Module.findExportByName('ole32.dll', "MkParseDisplayName");
+  var MkParseDisplayName = new NativeFunction(ptrMkParseDisplayName, 'uint', ['pointer', 'pointer', 'pointer', 'pointer']);
+  Interceptor.replace(ptrMkParseDisplayName, new NativeCallback(function(pbc, szUserName, pchEaten, ppmk) {
+    var retval = MkParseDisplayName(pbc, szUserName, pchEaten, ppmk);
+    var moniker = ptr(szUserName).readUtf16String();
+    
+    log(" Call: ole32.dll!MkParseDisplayName");
+    log("  |");
+    log("  |-- Moniker: " + moniker);
+    
+    // ProgIDFromCLSID() to expose bad ProgIDs from CLSID
+    var ptrCLSIDFromString = Module.findExportByName('ole32.dll', "CLSIDFromString");
+    var CLSIDFromString = new NativeFunction(ptrCLSIDFromString, 'uint', ['pointer', 'pointer']);
+    var ptrProgIDFromCLSID = Module.findExportByName('ole32.dll', "ProgIDFromCLSID");
+    var ProgIDFromCLSID = new NativeFunction(ptrProgIDFromCLSID, 'uint', ['pointer', 'pointer']);
+    
+    var clsid_re = /(new:)(\{[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\})/;
+    var clsid;
+    
+    if (moniker.match(clsid_re)) {
+      clsid = moniker.replace(clsid_re, "$2");
+      log("  |-- CLSID  : " + clsid);
       
-      var clsid_re = /(.*)(\{[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\})/;
-      var clsid;
-            
-      if (moniker.match(clsid_re)) {
-        clsid = moniker.replace(clsid_re, "$2");
-        log("  |-- CLSID  : " + clsid);
-        
-        var lpsz = Memory.allocUtf16String(clsid);
-        var pclsid = Memory.alloc(16);
-        var lplpszProgID = Memory.alloc(256);
-        var result;
-        
-        result = CLSIDFromString(lpsz, ptr(pclsid));
-        result = ProgIDFromCLSID(pclsid, lplpszProgID);
-        szProgID = ptr(lplpszProgID).readPointer().readUtf16String();
-        
-        if (result === S_OK)
-          log("  |-- ProgID : " + szProgID);
-        else {
-          log("  |-- HRESULT: " + HRESULT[result]);
+      var lpsz = Memory.allocUtf16String(clsid);
+      var pclsid = Memory.alloc(16);
+      var lplpszProgID = Memory.alloc(256);
+      var result, szProgID;
+      
+      result = CLSIDFromString(lpsz, ptr(pclsid));
+      result = ProgIDFromCLSID(pclsid, lplpszProgID);
+      szProgID = ptr(lplpszProgID).readPointer().readUtf16String();
+      
+      if (result === S_OK)
+        log("  |-- ProgID : " + szProgID);
+      else {
+        log("  |");
+      }
+      
+      if (szProgID.toLowerCase() in BadProgIDs) {
+        if (!ALLOW_BADCOM) {
+          log("  |-- (Bad ProgID terminated!)");
           log("  |");
+          retval = MK_E_SYNTAX;
+          return retval;
         }
       }
-    },
-    onLeave(retval) {
-      if (!ALLOW_PROC)
-        if (moniker.match(/win32_process/i)) {
+    } else if (moniker.match(/win32_process/i)) {
+        if (!ALLOW_PROC) {
           log("  |-- (Win32_Process blocked!)");
-          retval.replace(MK_E_SYNTAX);
+          log("  |");
+          retval = MK_E_SYNTAX;
+          return retval;
         }
-      if (!ALLOW_BADCOM)
-        if (szProgID.toLowerCase() in BadProgIDs) {
-          log("  |-- (Bad ProgID terminated!)");
-          retval.replace(MK_E_SYNTAX);
-        }
-      log("  |");
     }
-  });
+    log("  |");
+  }, 'uint', ['pointer', 'pointer', 'pointer', 'pointer']));
 }
 
 function hookWriteLine() {
