@@ -540,7 +540,9 @@ var REGDB_E_WRITEREGDB = 0x80040151;
 var S_OK = 0;
 var BadProgIDs = {
   "internetexplorer.application" : 1,
+  "internetexplorer.application.1" : 1,
   "schedule.service" : 1,
+  "schedule.service.1" : 1,
   "windowsinstaller.installer" : 1
 };
 
@@ -629,7 +631,9 @@ var HRESULT = {
   0x80070005 : "E_ACCESSDENIED",
   0x80070006 : "E_HANDLE",
   0x8007000E : "E_OUTOFMEMORY",
-  0x80070057 : "E_INVALIDARG"
+  0x80070057 : "E_INVALIDARG",
+  0x80040154 : "REGDB_E_CLASSNOTREG",
+  0x80040150 : "REGDB_E_READREGDB"
 };
 
 function hookCHostObjSleep() {
@@ -795,14 +799,17 @@ function hookMkParseDisplayName() {
         var lpsz = Memory.allocUtf16String(clsid);
         var pclsid = Memory.alloc(16);
         var lplpszProgID = Memory.alloc(256);
+        var result;
         
-        try {
-            CLSIDFromString(lpsz, ptr(pclsid));
-            ProgIDFromCLSID(pclsid, lplpszProgID);
-            szProgID = ptr(lplpszProgID).readPointer().readUtf16String();
-            log("  |-- ProgID : " + szProgID);
-        } catch (e) {
-            log(e);
+        result = CLSIDFromString(lpsz, ptr(pclsid));
+        result = ProgIDFromCLSID(pclsid, lplpszProgID);
+        szProgID = ptr(lplpszProgID).readPointer().readUtf16String();
+        
+        if (result === S_OK)
+          log("  |-- ProgID : " + szProgID);
+        else {
+          log("  |-- HRESULT: " + HRESULT[result]);
+          log("  |");
         }
       }
     },
