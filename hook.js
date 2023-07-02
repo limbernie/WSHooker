@@ -704,8 +704,9 @@ function hookXMLHttpSend() {
         if (data)
           log("  |-- Data: " + data);
         log("  |");
-      } catch(e) {}
-
+      } catch(e) {
+      log("  |");
+      }
     }
   });
 }
@@ -766,7 +767,9 @@ function hookCHttpRequestSend() {
         if (data)
           log("  |-- Data: " + data);
         log("  |");
-      } catch(e) {}
+      } catch(e) {
+        log("  |");
+      }
     }
   });
 }
