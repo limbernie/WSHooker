@@ -721,27 +721,22 @@ function hookDispCallFunc()
             {
               log(" Call: " + functionName.moduleName + '!' + functionName.name + '()');
               log("  |");
-              var i;
-              for (i = 1; i < 3; i++) 
+              var i, out;
+              
+              for (i = 0; i < 5; i++)
               {
-                var out;
-                try 
+                if (args[i] === 0) 
                 {
-                  out = args[i].readUtf16String();
-                  if (out === '') 
-                  {
-                    out = "NULL";
-                  }
-                  else if (out.length === 1) 
-                  {
-                    out = null;
-                  }
-                } 
+                  continue;
+                }
+                try {
+                  out = ptr(args[i]).readUtf16String();
+                }
                 catch(e) 
                 {
-                  out = null;
+                  out = ptr(args[i]).readPointer().readUtf16String();
                 }
-                if (out) 
+                if (out && out.length > 1) 
                 {
                   log("  |-- Arg: " + out);
                 }
