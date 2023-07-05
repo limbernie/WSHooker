@@ -1,4 +1,4 @@
-var DEBUG_FLAG   = false;
+var DEBUG        = false;
 var ALLOW_BADCOM = false;
 var ALLOW_FILE   = false;
 var ALLOW_NET    = false;
@@ -40,8 +40,8 @@ var filtered =
 
 recv('config', function onMessage(setting) 
 {
-  DEBUG_FLAG  = setting['debug'];
-  debug(" [*] DEBUG_FLAG: " + DEBUG_FLAG);
+  DEBUG = setting['debug'];
+  debug(" [*] DEBUG: " + DEBUG);
   ALLOW_BADCOM = setting['allow_badcom'];
   debug(" [*] ALLOW_BADCOM: " + ALLOW_BADCOM);
   ALLOW_FILE = setting['allow_file'];
@@ -122,7 +122,7 @@ function log(message)
 
 function debug(message) 
 {
-  if (DEBUG_FLAG) 
+  if (DEBUG) 
   {
     log(message);
   }
@@ -721,8 +721,8 @@ function hookDispCallFunc()
             {
               log(" Call: " + functionName.moduleName + '!' + functionName.name + '()');
               log("  |");
-              var i, out;
               
+              var i, out;
               for (i = 0; i < 5; i++)
               {
                 if (args[i] === 0) 
