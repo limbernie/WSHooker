@@ -732,9 +732,9 @@ function hookDispCallFunc()
                 try {
                   out = ptr(args[i]).readUtf16String();
                 }
-                catch(e) 
+                catch (e) 
                 {
-                  out = ptr(args[i]).readPointer().readUtf16String();
+                  continue;
                 }
                 if (out && out.length > 1) 
                 {
@@ -776,19 +776,13 @@ function hookCHostObjSleep()
     {
       log(" Call: wscript.exe!CHostObj::Sleep()");
       log("  |");
-      log("  |-- intTime: " + args[1].toInt32() + "ms" +
-        (ALLOW_SLEEP ? "" : " (Skipping to 0ms)"));
-      
+      log("  |-- intTime: " + args[1].toInt32() + "ms");
       if (!ALLOW_SLEEP) 
       {
         args[1] = ptr(0x0);
+        log("  |-- (Skipping to 0ms)");
       }
-    },
-    onLeave(retval) 
-    {
-      log("  |-- HRESULT: " + HRESULT[retval.toInt32()]);
       log("  |");
-
     }
   });
 }
@@ -858,7 +852,7 @@ function hookXMLHttpSend()
         }
         log("  |");
       } 
-      catch(e) 
+      catch (e) 
       {
         log("  |");
       }
@@ -939,7 +933,7 @@ function hookCHttpRequestSend()
         }
         log("  |");
       } 
-      catch(e) 
+      catch (e) 
       {
         log("  |");
       }

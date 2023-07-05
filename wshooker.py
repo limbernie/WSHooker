@@ -13,7 +13,7 @@ from colors import *
 
 # overload builtins.print with extras
 def print(*objects, **kwargs):
-  ts = "%012.6fs" % time.perf_counter()
+  ts = "%09.3fs" % time.perf_counter()
   if args.file:
     with open('.\\' + WORK_DIR + '\\' + args.file, 'a') as f:
       if args.timestamp:
