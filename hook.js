@@ -316,10 +316,11 @@ function writeToFile(count, type, data)
   var filepath = '.\\' + WORK_DIR;
   var filename =  type + '_' + count + ".txt";
   var file = new File(filepath + '\\' + filename, 'w');
+
   file.write(data);
+  file.close();
 
   log("  |>> Data written to " + '"' + WORK_DIR + '\\' + filename + '"');
-  file.close();
 }
 
 function hookCOleScriptCompile() 
@@ -584,8 +585,8 @@ function hookCopyFileA()
       
       log(" Call: scrrun.dll!CFileSystem::CopyFileA()");
       log("  |");
-      log("  |-- Source: " + src);
-      log("  |-- Destination: " + dst);
+      log("  |-- From: " + src);
+      log("  |-- To  : " + dst);
       
       if (!ALLOW_FILE) 
       {
@@ -607,8 +608,8 @@ function hookMoveFileA()
       
       log(" Call: scrrun.dll!CFileSystem::MoveFileA()");
       log("  |");
-      log("  |-- Source: " + src);
-      log("  |-- Destination: " + dst);
+      log("  |-- From: " + src);
+      log("  |-- To  : " + dst);
       
       if (!ALLOW_FILE) 
       {
@@ -653,11 +654,11 @@ var REGDB_E_WRITEREGDB = 0x80040151;
 var S_OK = 0;
 var BADPROGID = 
 {
-  "internetexplorer.application" : 1,
+  "internetexplorer.application"   : 1,
   "internetexplorer.application.1" : 1,
-  "schedule.service" : 1,
-  "schedule.service.1" : 1,
-  "windowsinstaller.installer" : 1
+  "schedule.service"               : 1,
+  "schedule.service.1"             : 1,
+  "windowsinstaller.installer"     : 1
 };
 
 function hookCLSIDFromProgID() 
