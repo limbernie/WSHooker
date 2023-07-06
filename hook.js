@@ -85,7 +85,7 @@ recv('config', function onMessage(setting)
   Module.load('msxml3.dll');      // MSXML 3.0
   Module.load('winhttpcom.dll');  // WinHttpRequest
 
-  // hook these
+  // hook these functions
   hookCOleScriptCompile();
   hookCHostObjSleep();
   hookWriteFile();
@@ -331,10 +331,9 @@ function hookCOleScriptCompile()
     {
       log(" Call: " + "jscript.dll" + "!COleScript::Compile()");
       log("  |");
-      
       writeToFile(++eval_count, "code", ptr(args[1]).readUtf16String());
-
       log("  |");
+      
       if (DYNAMIC) 
       {
         hookDispCallFunc();
@@ -348,10 +347,9 @@ function hookCOleScriptCompile()
     {
       log(" Call: " + "vbscript.dll" + "!COleScript::Compile()");
       log("  |");
-      
       writeToFile(++eval_count, "code", ptr(args[1]).readUtf16String());
-
       log("  |");
+      
       if (DYNAMIC) 
       {
         hookDispCallFunc();
@@ -562,14 +560,14 @@ function hookWriteFile()
       log(" Call: kernel32.dll!WriteFile()");
       log("  |");
       log("  |-- Handle: " + handle);
-      log("  |-- Size  : " + size);
+      log("  |-- Size  : " + size + " bytes");
       log("  |-- Path  : " + path);
+      log("  |");
       
       if (!ALLOW_FILE) 
       {
         deleteFile(path);
       }
-      log("  |");
     }
   });
 }
@@ -587,12 +585,12 @@ function hookCopyFileA()
       log("  |");
       log("  |-- From: " + src);
       log("  |-- To  : " + dst);
+      log("  |");
       
       if (!ALLOW_FILE) 
       {
         deleteFile(dst);
       }
-      log("  |");
     }
   });
 }
@@ -610,12 +608,12 @@ function hookMoveFileA()
       log("  |");
       log("  |-- From: " + src);
       log("  |-- To  : " + dst);
+      log("  |");
       
       if (!ALLOW_FILE) 
       {
         deleteFile(dst);
       }
-      log("  |");
     }
   });
 }
@@ -631,12 +629,12 @@ function hookCreateFolder()
       log(" Call: scrrun.dll!CFileSystem::CreateFolder()");
       log("  |");
       log("  |-- Path: " + path);
+      log("  |");
       
       if (!ALLOW_FILE) 
       {
         deleteFolder(path);
       }
-      log("  |");
     }
   });
 }
@@ -650,7 +648,6 @@ HRESULT CLSIDFromProgID
 */
 
 var CO_E_CLASSSTRING   = 0x800401F3;
-var REGDB_E_WRITEREGDB = 0x80040151;
 var S_OK = 0;
 var BADPROGID = 
 {
@@ -670,10 +667,12 @@ function hookCLSIDFromProgID()
     var retval = CLSIDFromProgID(lpszProgID, lpclsid);
     var progid = lpszProgID.readUtf16String();
     var clsid  = bytesToCLSID(ptr(lpclsid))
+    
     log(" Call: ole32.dll!CLSIDFromProgID()");
     log("  |");
     log("  |-- ProgID: " + progid);
     log("  |-- CLSID : " + clsid);
+    
     getInprocServer32(clsid);
 
     if (progid.toLowerCase() in BADPROGID) 
@@ -752,24 +751,6 @@ function hookDispCallFunc()
   }
 }
 
-var HRESULT = 
-{
-  0x00000000 : "S_OK",
-  0x80004001 : "E_NOTIMPL",
-  0x80004002 : "E_NOINTERFACE",
-  0x80004003 : "E_POINTER",
-  0x80004004 : "E_ABORT",
-  0x80004005 : "E_FAIL",
-  0x8000FFFF : "E_UNEXPECTED",
-  0x80070005 : "E_ACCESSDENIED",
-  0x80070006 : "E_HANDLE",
-  0x8007000E : "E_OUTOFMEMORY",
-  0x80070057 : "E_INVALIDARG",
-  0x800401E4 : "MK_E_SYNTAX",
-  0x80040154 : "REGDB_E_CLASSNOTREG",
-  0x80040150 : "REGDB_E_READREGDB"
-};
-
 function hookCHostObjSleep() 
 {
   hookFunction('wscript.exe', "CHostObj::Sleep", 
@@ -811,6 +792,7 @@ function hookXMLHttpOpen()
     {
       var verb = args[1].readUtf16String();
       var url  = args[2].readUtf16String();
+      
       log(" Call: msxml3.dll!XMLHttp::open()");
       log("  |");
       log("  |-- Verb: " + verb);
@@ -828,6 +810,7 @@ function hookXMLHttpsetRequestHeader()
     {
       var header = args[1].readUtf16String();
       var value  = args[2].readUtf16String();
+      
       log(" Call: msxml3.dll!XMLHttp::setRequestHeader()");
       log("  |");
       log("  |-- Header: " + header);
@@ -876,6 +859,7 @@ function hookCFileSystemGetSpecialFolder()
     onEnter: function(args) 
     {
       var folder = FOLDERSPEC[args[1].toInt32()];
+      
       log(" Call: scrrun.dll!CFileSystem::GetSpecialFolder()");
       log("  |");
       log("  |-- Folder: " + folder);
@@ -892,6 +876,7 @@ function hookCHttpRequestOpen()
     {
       var verb = args[1].readUtf16String();
       var url  = args[2].readUtf16String();
+      
       log(" Call: winhttpcom.dll!CHttpRequest::Open()");
       log("  |");
       log("  |-- Verb: " + verb);
@@ -909,6 +894,7 @@ function hookCHttpRequestSetRequestHeader()
     {
       var header = args[1].readUtf16String();
       var value  = args[2].readUtf16String();
+      
       log(" Call: winhttpcom.dll!CHttpRequest::SetRequestHeader()");
       log("  |");
       log("  |-- Header: " + header);
@@ -1033,9 +1019,7 @@ function hookWriteLine()
     {
         log(" Call: scrrun.dll!CTextStream::WriteLine()");
         log("  |");
-        
         writeToFile(++text_count, "text", ptr(args[1]).readUtf16String());
-
         log("  |");
     }
   });
