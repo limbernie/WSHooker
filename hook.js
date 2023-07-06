@@ -223,14 +223,14 @@ function bytesToCLSID(address)
   var data = new Uint8Array(ptr(address).readByteArray(0x10));
   var clsid = "";
   clsid += "{";
-  clsid += ChrToHexStr(data[3])  + ChrToHexStr(data[2]);
-  clsid += ChrToHexStr(data[1])  + ChrToHexStr(data[0]) + '-';
-  clsid += ChrToHexStr(data[5])  + ChrToHexStr(data[4]) + '-';
-  clsid += ChrToHexStr(data[7])  + ChrToHexStr(data[6]) + '-';
-  clsid += ChrToHexStr(data[8])  + ChrToHexStr(data[9]) + '-';
-  clsid += ChrToHexStr(data[10]) + ChrToHexStr(data[11]);
-  clsid += ChrToHexStr(data[12]) + ChrToHexStr(data[13]);
-  clsid += ChrToHexStr(data[14]) + ChrToHexStr(data[15]);
+  clsid += chrToHexStr(data[3])  + chrToHexStr(data[2]);
+  clsid += chrToHexStr(data[1])  + chrToHexStr(data[0]) + '-';
+  clsid += chrToHexStr(data[5])  + chrToHexStr(data[4]) + '-';
+  clsid += chrToHexStr(data[7])  + chrToHexStr(data[6]) + '-';
+  clsid += chrToHexStr(data[8])  + chrToHexStr(data[9]) + '-';
+  clsid += chrToHexStr(data[10]) + chrToHexStr(data[11]);
+  clsid += chrToHexStr(data[12]) + chrToHexStr(data[13]);
+  clsid += chrToHexStr(data[14]) + chrToHexStr(data[15]);
   clsid += '}';
 
   return clsid;
