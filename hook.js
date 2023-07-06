@@ -1,4 +1,3 @@
-var DEBUG        = false;
 var ALLOW_BADCOM = false;
 var ALLOW_FILE   = false;
 var ALLOW_NET    = false;
@@ -6,16 +5,18 @@ var ALLOW_PROC   = false;
 var ALLOW_REG    = false;
 var ALLOW_SHELL  = false;
 var ALLOW_SLEEP  = false;
+var DEBUG        = false;
 var DYNAMIC      = false;
 var EXTENSION    = null;
 var WORK_DIR     = null;
+
 var eval_count   = 0;
 var shell_count  = 0;
 var sock_count   = 0;
 var text_count   = 0;
 
 // filter these functions from dynamic tracing
-var filtered = 
+var FILTER = 
 {
   "CWshShell::RegWrite" : 1,
   "CHostObj::Sleep" : 1,
@@ -235,7 +236,7 @@ function bytesToCLSID(address)
   return clsid;
 }
 
-function ChrToHexStr(chr) 
+function chrToHexStr(chr) 
 {
   var hstr = chr.toString(16);
   return hstr.length < 2 ? "0" + hstr : hstr;
@@ -312,12 +313,12 @@ function hookFunction(dllName, funcName, callback)
 
 function writeToFile(count, type, data) 
 {
-  var file_path = '.\\' + WORK_DIR + '\\';
-  var file_name =  type + '_' + count + ".txt";
-  var file = new File(file_path + file_name, 'w');
+  var filepath = '.\\' + WORK_DIR;
+  var filename =  type + '_' + count + ".txt";
+  var file = new File(filepath + '\\' + filename, 'w');
   file.write(data);
 
-  log("  |>> Data written to " + '"' + WORK_DIR + '\\' + file_name + '"');
+  log("  |>> Data written to " + '"' + WORK_DIR + '\\' + filename + '"');
   file.close();
 }
 
@@ -650,7 +651,7 @@ HRESULT CLSIDFromProgID
 var CO_E_CLASSSTRING   = 0x800401F3;
 var REGDB_E_WRITEREGDB = 0x80040151;
 var S_OK = 0;
-var BadProgIDs = 
+var BADPROGID = 
 {
   "internetexplorer.application" : 1,
   "internetexplorer.application.1" : 1,
@@ -674,7 +675,7 @@ function hookCLSIDFromProgID()
     log("  |-- CLSID : " + clsid);
     getInprocServer32(clsid);
 
-    if (progid.toLowerCase() in BadProgIDs) 
+    if (progid.toLowerCase() in BADPROGID) 
     {
       if (!ALLOW_BADCOM) 
       {
@@ -689,9 +690,9 @@ function hookCLSIDFromProgID()
 
 function hookDispCallFunc() 
 {
-  if (!("DispCallFunc" in filtered)) 
+  if (!("DispCallFunc" in FILTER)) 
   {
-    filtered["DispCallFunc"] = 1;
+    FILTER["DispCallFunc"] = 1;
     var ptrDispCallFunc = Module.findExportByName('oleaut32.dll', "DispCallFunc");
     Interceptor.attach(ptrDispCallFunc, 
     {
@@ -712,9 +713,9 @@ function hookDispCallFunc()
         log("  |");
 
         // hook new functions here if they aren't already hooked
-        if (!(functionName.name in filtered)) 
+        if (!(functionName.name in FILTER)) 
         {
-          filtered[functionName.name] = 1;
+          FILTER[functionName.name] = 1;
           Interceptor.attach(functionAddress, 
           {
             onEnter: function(args) 
@@ -998,7 +999,7 @@ function hookMkParseDisplayName()
         log("  |");
       }
       
-      if (szProgID.toLowerCase() in BadProgIDs) 
+      if (szProgID.toLowerCase() in BADPROGID) 
       {
         if (!ALLOW_BADCOM) 
         {
