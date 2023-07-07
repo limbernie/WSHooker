@@ -414,7 +414,7 @@ function hookWSASend()
       log("  |");
       log("  |-- Socket : " + socket);
       log("  |-- Buffers: " + buffers);
-      log("  |-- Size   : " + size);
+      log("  |-- Size   : " + size + " bytes");
 
       var lpwbuf = args[1].toInt32() + 4;
       var dptr = Memory.readInt(ptr(lpwbuf));
