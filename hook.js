@@ -360,18 +360,6 @@ function hookCOleScriptCompile()
 }
 
 var WSAHOST_NOT_FOUND = 11001;
-var WSA_ERROR_CODES = 
-{
-  0x0   : "NO_ERROR",
-  10022 : "WSAEINVAL",
-  10044 : "WSAESOCKTNOSUPPORT",
-  10047 : "WSAEAFNOSUPPORT",
-  10055 : "WSA_NOT_ENOUGH_MEMORY",
-  10109 : "WSATYPE_NOT_FOUND",
-  11001 : "WSAHOST_NOT_FOUND",
-  11002 : "WSATRY_AGAIN",
-  11003 : "WSANO_RECOVERY"
-};
 
 function hookGetAddrInfoExW() 
 {
@@ -391,10 +379,6 @@ function hookGetAddrInfoExW()
       {
         log("  |-- (Sinkholed!)");
         retval.replace(WSAHOST_NOT_FOUND);
-      }
-      else 
-      {
-        log("  |-- Result: " + WSA_ERROR_CODES[retval.toInt32()]);
       }
       log("  |");
     }
