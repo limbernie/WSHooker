@@ -765,8 +765,12 @@ function hookCHostObjSleep()
     {
       log(" Call: wscript.exe!CHostObj::Sleep()");
       log("  |");
-      log("  |-- intTime: " + args[1].toInt32() + "ms" + 
-        ((!ALLOW_SLEEP) ? "(Skipping to 0ms)" : ""));
+      log("  |-- Delay: " + args[1].toInt32() + "ms" + 
+        ((!ALLOW_SLEEP) ? " (Skipping to 0ms)" : ""));
+      if (!ALLOW_SLEEP) 
+      {
+        args[1] = ptr(0);
+      }
       log("  |");
     }
   });
