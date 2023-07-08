@@ -15,7 +15,7 @@ var shell_count  = 0;
 var sock_count   = 0;
 var text_count   = 0;
 
-// filter these functions from dynamic tracing
+// Filter these functions from dynamic tracing
 var FILTER = 
 {
   "CWshShell::RegWrite" : 1,
@@ -76,7 +76,7 @@ recv('config', function onMessage(setting)
     debug(" [*] ENGINE: Windows Script File");
   }
 
-  // manually load symbols
+  // Load these modules
   Module.load('jscript.dll');     // JScript Engine
   Module.load('vbscript.dll');    // VBScript Engine
   Module.load('scrrun.dll');      // Scripting Runtime
@@ -85,7 +85,7 @@ recv('config', function onMessage(setting)
   Module.load('msxml3.dll');      // MSXML 3.0
   Module.load('winhttpcom.dll');  // WinHttpRequest
 
-  // hook these functions
+  // Hook these functions
   hookCOleScriptCompile();
   hookCHostObjSleep();
   hookWriteFile();
@@ -107,7 +107,7 @@ recv('config', function onMessage(setting)
   hookWriteLine();
   hookCreateFolder();
 
-  // done configuring; tell frida to resume process
+  // Configuration done; tell frida to resume
   resume();
 });
 
@@ -149,7 +149,7 @@ function deleteFolder(path)
   });
 }
 
-function deleteKey(path) 
+function deleteRegKey(path) 
 {
   send
   ({
@@ -160,7 +160,7 @@ function deleteKey(path)
   });
 }
 
-function deleteValue(path) 
+function deleteRegValue(path) 
 {
   send
   ({
@@ -377,8 +377,14 @@ function hookGetAddrInfoExW()
     {
       if (!ALLOW_NET) 
       {
-        log("  |-- (Sinkholed!)");
+        log("  |-- Action: BLOCK");
         retval.replace(WSAHOST_NOT_FOUND);
+      } else 
+      {
+        if (retval.toInt32() === WSAHOST_NOT_FOUND) 
+        {
+          log("  |-- Result: WSAHOST_NOT_FOUND");
+        }
       }
       log("  |");
     }
@@ -411,7 +417,7 @@ function hookWSASend()
         var ptr_closesocket = Module.findExportByName("ws2_32.dll", "closesocket");
         var closesocket = new NativeFunction(ptr_closesocket, 'int', ['pointer']);
         closesocket(args[0]);
-        log("  |-- (Socket terminated!)");
+        log("  |-- Action : BLOCK)");
       }
       log("  |");
     }
@@ -475,7 +481,7 @@ function hookShellExecuteExW()
           {
             log(e);
           }
-          log("  |-- (" + '"' + lpverb + '"' + " > " + '"runas")');
+          log("  |-- Action: ALLOW");
         }
       } 
       else if (lpverb.match(/runas/i)) 
@@ -490,7 +496,7 @@ function hookShellExecuteExW()
           {
             log(e);
           }
-          log("  |-- (" + '"' + lpverb + '"' + " > " + '"open")');
+          log("  |-- Action: BLOCK");
         }
       }
       log("  |");
@@ -514,7 +520,7 @@ function hookCWshShellRegWrite()
         log("  |-- Key: " + path);
         if (!ALLOW_REG) 
         {
-          deleteKey(path);
+          deleteRegKey(path);
         }
       }
       else 
@@ -522,7 +528,7 @@ function hookCWshShellRegWrite()
         log("  |-- Value: " + path);
         if (!ALLOW_REG) 
         {
-          deleteValue(path);
+          deleteRegValue(path);
         }
       }
       
@@ -679,7 +685,7 @@ function hookCLSIDFromProgID()
     {
       if (!ALLOW_BADCOM) 
       {
-        log("  |-- (Bad ProgID terminated!)");
+        log("  |-- Action: BLOCK");
         retval = CO_E_CLASSSTRING;
       }
     }
@@ -759,12 +765,8 @@ function hookCHostObjSleep()
     {
       log(" Call: wscript.exe!CHostObj::Sleep()");
       log("  |");
-      log("  |-- intTime: " + args[1].toInt32() + "ms");
-      if (!ALLOW_SLEEP) 
-      {
-        args[1] = ptr(0x0);
-        log("  |-- (Skipping to 0ms)");
-      }
+      log("  |-- intTime: " + args[1].toInt32() + "ms" + 
+        ((!ALLOW_SLEEP) ? "(Skipping to 0ms)" : ""));
       log("  |");
     }
   });
@@ -940,6 +942,12 @@ HRESULT MkParseDisplayName
 */
 
 var MK_E_SYNTAX = 0x800401E4;
+var HRESULT = 
+{
+  0x00000000 : "S_OK",
+  0x80040154 : "REGDB_E_CLASSNOTREG",
+  0x80040150 : "REGDB_E_READREGDB"
+};
 
 function hookMkParseDisplayName() 
 {
@@ -977,12 +985,13 @@ function hookMkParseDisplayName()
       result = ProgIDFromCLSID(pclsid, lplpszProgID);
       szProgID = ptr(lplpszProgID).readPointer().readUtf16String();
       
-      if (result === S_OK) 
+      if (HRESULT[result] === "S_OK") 
       {
         log("  |-- ProgID : " + szProgID);
       }
       else 
       {
+        log("  |-- Result : " + HRESULT[result]);
         log("  |");
       }
       
@@ -990,7 +999,7 @@ function hookMkParseDisplayName()
       {
         if (!ALLOW_BADCOM) 
         {
-          log("  |-- (Bad ProgID terminated!)");
+          log("  |-- Action : BLOCK");
           log("  |");
           retval = MK_E_SYNTAX;
           return retval;
@@ -1001,7 +1010,7 @@ function hookMkParseDisplayName()
     {
         if (!ALLOW_PROC) 
         {
-          log("  |-- (Win32_Process blocked!)");
+          log("  |-- Action : BLOCK");
           log("  |");
           retval = MK_E_SYNTAX;
           return retval;
