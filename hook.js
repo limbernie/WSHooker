@@ -171,7 +171,7 @@ function deleteRegValue(path)
   });
 }
 
-function getInprocServer32(clsid) 
+function printInprocServer32(clsid) 
 {
   send
   ({
@@ -679,7 +679,7 @@ function hookCLSIDFromProgID()
     log("  |-- ProgID: " + progid);
     log("  |-- CLSID : " + clsid);
     
-    getInprocServer32(clsid);
+    printInprocServer32(clsid);
 
     if (progid.toLowerCase() in BADPROGID) 
     {
@@ -729,23 +729,24 @@ function hookDispCallFunc()
               log(" Call: " + functionName.moduleName + '!' + functionName.name + '()');
               log("  |");
               
-              var i, out;
-              for (i = 0; i < 5; i++)
+              var i, arg;
+              var MAX_ARGS = 5;
+              for (i = 0; i < MAX_ARGS; i++)
               {
                 if (args[i] === 0) 
                 {
                   continue;
                 }
                 try {
-                  out = ptr(args[i]).readUtf16String();
+                  arg = ptr(args[i]).readUtf16String();
                 }
                 catch (e) 
                 {
                   continue;
                 }
-                if (out && out.length > 1) 
+                if (arg && arg.length > 1) 
                 {
-                  log("  |-- Arg: " + out);
+                  log("  |-- Arg: " + arg);
                 }
               }
               log("  |");
