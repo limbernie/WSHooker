@@ -333,12 +333,6 @@ function hookCOleScriptCompile()
       log("  |");
       writeToFile(++eval_count, "code", ptr(args[1]).readUtf16String());
       log("  |");
-      
-      if (DYNAMIC) 
-      {
-        hookDispCallFunc();
-      }
-      hookCLSIDFromProgID();
     }
   });
   hookFunction("vbscript.dll", "COleScript::Compile", 
@@ -349,14 +343,13 @@ function hookCOleScriptCompile()
       log("  |");
       writeToFile(++eval_count, "code", ptr(args[1]).readUtf16String());
       log("  |");
-      
-      if (DYNAMIC) 
-      {
-        hookDispCallFunc();
-      }
-      hookCLSIDFromProgID();
     }
   });
+  if (DYNAMIC) 
+  {
+    hookDispCallFunc();
+  }
+  hookCLSIDFromProgID();
 }
 
 var WSAHOST_NOT_FOUND = 11001;
