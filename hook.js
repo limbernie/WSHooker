@@ -313,14 +313,15 @@ function hookFunction(dllName, funcName, callback)
 
 function writeToFile(count, type, data) 
 {
-  var filepath = '.\\' + WORK_DIR;
-  var filename =  type + '_' + count + ".txt";
-  var file = new File(filepath + '\\' + filename, 'w');
+  var directory = '.\\' + WORK_DIR;
+  var filename  =  type + '_' + count + ".txt";
+  var filepath  = directory + '\\' + filename;
+  var file      = new File(filepath, 'w');
 
   file.write(data);
   file.close();
 
-  log("  |>> Data written to " + '"' + WORK_DIR + '\\' + filename + '"');
+  log("  |>> Data written to " + '"' + filepath + '"');
 }
 
 function hookCOleScriptCompile() 
