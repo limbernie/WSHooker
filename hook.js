@@ -129,6 +129,16 @@ function debug(message)
   }
 }
 
+function decodePowerShell(encoded) 
+{
+  send
+  ({
+    target : "system",
+    action : "decode",
+    value  : encoded
+  });
+}
+
 function deleteFile(path) 
 {
   send
@@ -461,6 +471,14 @@ function hookShellExecuteExW()
       log("  |");
       
       writeToFile(++shell_count, "shell", data);
+      
+      var encodedCommand_re = /.*powershell.*-e[nc]*\s+(.*)/i;
+      var encodedCommand;
+      if (lpparams.match(encodedCommand_re)) 
+      {
+        encodedCommand = lpparams.replace(encodedCommand_re, "$1");
+        decodePowerShell(encodedCommand);
+      }
       
       // "runas" doesn't spawn child process - dangerous!
       if (lpverb.match(/open/i)) 

@@ -1,4 +1,5 @@
 import argparse
+import base64
 import builtins
 import glob
 import frida
@@ -30,6 +31,9 @@ regkeys = []
 
 # registry values deleted
 reg_count = 0
+
+# EncodedCommand decoded
+decode_count = 0
 
 # files to be deleted
 files = []
@@ -67,7 +71,7 @@ def parseHKEY(path):
     return hkey
 
 def search():
-  for file in glob.glob('.\\' + WORK_DIR + '\\' + '*[egkl]_*.txt'):
+  for file in glob.glob('.\\' + WORK_DIR + '\\' + '*[degkl]_*.txt'):
     f = open(file, 'r', encoding='utf-8')
     text = f.read()
 
@@ -211,10 +215,20 @@ def deleteValue(path):
   with open('.\\' + WORK_DIR + '\\' + filename, 'w') as fd:
     fd.write("Value: %s\nData : %s" % (path, data))
   fd.close()
-  print("  |>> Data written to \"%s\\%s\"" % (WORK_DIR, filename))
+  print("  |>> Data written to \".\\%s\\%s\"" % (WORK_DIR, filename))
   winreg.DeleteValue(key, value)
   key.Close()
   print("  |-- (Deleted!)")
+
+def decodePowerShell(encoded):
+  global decode_count
+  decode_count += 1
+  filename = 'decoded_' + ("%d" % decode_count) + '.txt'
+  decoded = base64.b64decode(encoded).decode('utf-16le')
+  with open('.\\' + WORK_DIR + '\\' + filename, 'w') as fd:
+    fd.write(decoded)
+  fd.close()
+  print("  |>> Data written to \".\\%s\\%s\"" % (WORK_DIR, filename))
 
 class Instrumenter:
   # path to wscript.exe
@@ -326,6 +340,8 @@ class Instrumenter:
             print(msg_data['message'])
           except UnicodeEncodeError:
             pass
+        elif msg_data['action'] == 'decode':
+          decodePowerShell(msg_data['value'])
 
   def _on_child_added(self, child):
     print(" [*] %s spawned child process: %s" % (pid, child.pid))
