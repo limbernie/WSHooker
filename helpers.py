@@ -108,12 +108,12 @@ def search():
     if (len(keywords) > 0 or len(ips) > 0 or len(urls) > 0):
       print(" [*] Searching for IOCs in '%s'..." % file)
       for keyword in keywords:
-        keyword = keyword.replace('"','').replace("'",'').encode('ascii', errors='ignore').decode()
+        keyword = re.sub(r'[\'"();]', '', keyword).encode('ascii', errors='ignore').decode()
         print("  [+] Keyword: %s" % keyword)
       for ip in ips:
         print("  [+] IP: %s" % ip)
       for url in urls:
-        url = url.replace('"','').replace("'",'').encode('ascii', errors='ignore').decode()
+        url = re.sub(r'[\'"();]', '', url).encode('ascii', errors='ignore').decode()
         print("  [+] URL: %s" % url)
 
 def clean_frida_helper():
