@@ -1,23 +1,23 @@
 # colors!
-DEFAULT = '\033[0m'
-BLACK = '\033[30m'
-BOLD = '\033[1m'
-UNDERLINE = '\033[4m'
-WHITE = '\033[97m'
-DARK_RED = '\033[31m'
-DARK_GREEN = '\033[32m'
-DARK_YELLOW = '\033[33m'
-DARK_BLUE = '\033[34m'
-DARK_MAGENTA = '\033[35m'
-DARK_CYAN = '\033[36m'
-DARK_WHITE = '\033[37m'
-BRIGHT_BLACK = '\033[90m'
-BRIGHT_RED = '\033[91m'
-BRIGHT_GREEN = '\033[92m'
-BRIGHT_YELLOW = '\033[93m'
-BRIGHT_BLUE = '\033[94m'
+DEFAULT        = '\033[0m'
+BLACK          = '\033[30m'
+BOLD           = '\033[1m'
+UNDERLINE      = '\033[4m'
+WHITE          = '\033[97m'
+DARK_RED       = '\033[31m'
+DARK_GREEN     = '\033[32m'
+DARK_YELLOW    = '\033[33m'
+DARK_BLUE      = '\033[34m'
+DARK_MAGENTA   = '\033[35m'
+DARK_CYAN      = '\033[36m'
+DARK_WHITE     = '\033[37m'
+BRIGHT_BLACK   = '\033[90m'
+BRIGHT_RED     = '\033[91m'
+BRIGHT_GREEN   = '\033[92m'
+BRIGHT_YELLOW  = '\033[93m'
+BRIGHT_BLUE    = '\033[94m'
 BRIGHT_MAGENTA = '\033[95m'
-BRIGHT_CYAN = '\033[96m'
+BRIGHT_CYAN    = '\033[96m'
 
 colors = [
 DARK_RED,
@@ -118,27 +118,6 @@ banner7 = '''
 
 banner8 = '''
 
-▄▄▌ ▐ ▄▌.▄▄ ·  ▄ .▄            ▄ •▄ ▄▄▄ .▄▄▄  
-██· █▌▐█▐█ ▀. ██▪▐█▪     ▪     █▌▄▌▪▀▄.▀·▀▄ █·
-██▪▐█▐▐▌▄▀▀▀█▄██▀▐█ ▄█▀▄  ▄█▀▄ ▐▀▀▄·▐▀▀▪▄▐▀▀▄ 
-▐█▌██▐█▌▐█▄▪▐███▌▐▀▐█▌.▐▌▐█▌.▐▌▐█.█▌▐█▄▄▌▐█•█▌
- ▀▀▀▀ ▀▪ ▀▀▀▀ ▀▀▀ · ▀█▄▀▪ ▀█▄▀▪·▀  ▀ ▀▀▀ .▀  ▀
-
-'''
-
-banner9 = '''
-
- .       __   _____ __  __               \                 
- /       |   (      |   |    __.    __.  |   ,   ___  .___ 
- |       |    `--.  |___|  .'   \ .'   \ |  /  .'   ` /   \
- |  /\   /       |  |   |  |    | |    | |-<   |----' |   '
- |,'  \,'   \___.'  /   /   `._.'  `._.' /  \_ `.___, /    
-                                                           
-
-'''
-
-banner10 = '''
-
                                                                                        
  _|          _|    _|_|_|  _|    _|                      _|                            
  _|          _|  _|        _|    _|    _|_|      _|_|    _|  _|      _|_|    _|  _|_|  
@@ -150,7 +129,7 @@ banner10 = '''
 
 '''
 
-banner11 = '''
+banner9 = '''
 
  ________ _______ _______               __               
 |  |  |  |     __|   |   |.-----.-----.|  |--.-----.----.
@@ -160,7 +139,7 @@ banner11 = '''
 
 '''
 
-banner12 = '''
+banner10 = '''
 
 888       888  .d8888b.  888    888                   888                       
 888   o   888 d88P  Y88b 888    888                   888                       
@@ -183,8 +162,6 @@ banner5,
 banner6,
 banner7,
 banner8,
-#banner9,
-banner10,
-banner11,
-banner12
+banner9,
+banner10
 ]

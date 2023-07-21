@@ -495,6 +495,10 @@ function hookShellExecuteExW()
           }
           log("  |-- Action: ALLOW");
         }
+        else 
+        {
+          log("  |-- Action: BLOCK");
+        }
       } 
       else if (lpverb.match(/runas/i)) 
       {
@@ -509,6 +513,9 @@ function hookShellExecuteExW()
             log(e);
           }
           log("  |-- Action: BLOCK");
+        }
+        else {
+          log("  |-- Action: ALLOW");
         }
       }
       log("  |");
