@@ -19,6 +19,9 @@ WORK_DIR = ''
 # Script extension
 EXTENSION = ''
 
+# Name of directory containing traces
+TRACES = "traces"
+
 # Trace log
 TRACE = ''
 

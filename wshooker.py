@@ -134,9 +134,9 @@ if __name__ == '__main__':
         helpers.print_banner()
 
       ISO_8601 = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
-      WORK_DIR = ISO_8601 + '_' + os.path.basename(args.script).rsplit('.', 1)[0]
+      WORK_DIR = config.TRACES + "\\" + ISO_8601 + '_' + os.path.basename(args.script).rsplit('.', 1)[0]
       try:
-        os.mkdir(WORK_DIR)
+        os.makedirs(WORK_DIR)
         print(' [*] Working directory: %s' % WORK_DIR)
       except FileExistsError:
         print(' [*] Working directory already exists: %s' % WORK_DIR)
