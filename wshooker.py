@@ -75,7 +75,7 @@ if __name__ == '__main__':
     '--allow-shell',
     dest="allow_shell",
     action="store_true",
-    help="(dangerous) allow shell commands"
+    help="(dangerous) allow shell commands as Administrator"
   )
   parser.add_argument(
     '--allow-sleep',

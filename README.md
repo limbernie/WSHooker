@@ -86,9 +86,8 @@ WSHooker supports a number of options to allow certain dangerous operations to c
 
 ```
 python wshooker.py --help
-usage: wshooker.py [-h] [-p PID | -s SCRIPT] [-a ARGS] [-o FILE] [--allow-badcom] [--allow-file] [--allow-net]
-                   [--allow-proc] [--allow-reg] [--allow-shell] [--allow-sleep] [--debug] [--dynamic] [--no-banner]
-                   [--timestamp]
+usage: wshooker.py [-h] [-p PID | -s SCRIPT] [-a ARGS] [-o TRACE] [--allow-badcom] [--allow-file] [--allow-net] [--allow-proc]
+                   [--allow-reg] [--allow-shell] [--allow-sleep] [--debug] [--dynamic] [--no-banner] [--timestamp]
 
 WSHooker - Windows Script Hooking with Frida
 
@@ -98,14 +97,14 @@ options:
   -s SCRIPT, --script SCRIPT
                         path to malicious script
   -a ARGS, --args ARGS  arguments to malicious script, e.g., -a "arg1 arg2 arg3 ..."
-  -o FILE, --output FILE
+  -o TRACE, --output TRACE
                         write output trace to file (defaults to trace.log)
   --allow-badcom        (dangerous) allow bad COM
   --allow-file          (dangerous) allow file copy/move/write
   --allow-net           (dangerous) allow network requests
   --allow-proc          (dangerous) allow Win32_Process
   --allow-reg           (dangerous) allow registry write
-  --allow-shell         (dangerous) allow shell commands
+  --allow-shell         (dangerous) allow shell commands as Administrator
   --allow-sleep         (slow-down) allow WScript.Sleep()
   --debug               (verbose) display debug message
   --dynamic             (verbose) enable dynamic tracing

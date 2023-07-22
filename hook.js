@@ -493,7 +493,7 @@ function hookShellExecuteExW()
           {
             log(e);
           }
-          log("  |-- Action: ALLOW");
+          log("  |-- Action: ALLOW (as Administrator!)");
         }
         else 
         {
@@ -515,7 +515,7 @@ function hookShellExecuteExW()
           log("  |-- Action: BLOCK");
         }
         else {
-          log("  |-- Action: ALLOW");
+          log("  |-- Action: ALLOW (as Administrator!)");
         }
       }
       log("  |");
