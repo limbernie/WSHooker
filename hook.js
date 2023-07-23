@@ -42,38 +42,38 @@ var FILTER =
 recv('config', function onMessage(setting) 
 {
   DEBUG = setting['debug'];
-  debug(" [*] DEBUG: " + DEBUG);
+  debug("[*] DEBUG: " + DEBUG);
   ALLOW_BADCOM = setting['allow_badcom'];
-  debug(" [*] ALLOW_BADCOM: " + ALLOW_BADCOM);
+  debug("[*] ALLOW_BADCOM: " + ALLOW_BADCOM);
   ALLOW_FILE = setting['allow_file'];
-  debug(" [*] ALLOW_FILE: " + ALLOW_FILE);
+  debug("[*] ALLOW_FILE: " + ALLOW_FILE);
   ALLOW_NET = setting['allow_net'];
-  debug(" [*] ALLOW_NET: " + ALLOW_NET);
+  debug("[*] ALLOW_NET: " + ALLOW_NET);
   ALLOW_PROC = setting['allow_proc'];
-  debug(" [*] ALLOW_PROC: " + ALLOW_PROC);
+  debug("[*] ALLOW_PROC: " + ALLOW_PROC);
   ALLOW_REG = setting['allow_reg'];
-  debug(" [*] ALLOW_REG: " + ALLOW_REG);
+  debug("[*] ALLOW_REG: " + ALLOW_REG);
   ALLOW_SHELL = setting['allow_shell'];
-  debug(" [*] ALLOW_SHELL: " + ALLOW_SHELL);
+  debug("[*] ALLOW_SHELL: " + ALLOW_SHELL);
   ALLOW_SLEEP = setting['allow_sleep'];
-  debug(" [*] ALLOW_SLEEP: " + ALLOW_SLEEP);
+  debug("[*] ALLOW_SLEEP: " + ALLOW_SLEEP);
   DYNAMIC = setting['dynamic'];
-  debug(" [*] DYNAMIC: " + DYNAMIC);
+  debug("[*] DYNAMIC: " + DYNAMIC);
 
   WORK_DIR  = setting['work_dir'];
   EXTENSION = setting['extension'];
 
   if (EXTENSION === 'js') 
   {
-    debug(" [*] ENGINE: JScript");
+    debug("[*] ENGINE: JScript");
   } 
   else if (EXTENSION === 'vbs') 
   {
-    debug(" [*] ENGINE: VBScript");
+    debug("[*] ENGINE: VBScript");
   } 
   else if (EXTENSION === 'wsf') 
   {
-    debug(" [*] ENGINE: Windows Script File");
+    debug("[*] ENGINE: Windows Script File");
   }
 
   // Load these modules
@@ -113,12 +113,24 @@ recv('config', function onMessage(setting)
 
 function log(message) 
 {
-  send
-  ({
-    target : "system",
-    action : "print",
-    message: message
-  });
+  if (message.match(/^(\[\*\]|Call)/)) 
+  {
+    send
+    ({
+      target : "system",
+      action : "print",
+      message: message
+    });
+  }
+  else 
+  {
+    send
+    ({
+      target : "system",
+      action : "indent",
+      message: message
+    });
+  }
 }
 
 function debug(message) 
@@ -257,13 +269,13 @@ function resolveName(dllName, name)
   var moduleName = dllName.split('.')[0];
   var functionName = dllName + "!" + name;
 
-  debug(" [*] Finding " + functionName);
-  debug(" [*] Module.findExportByName " + functionName);
+  debug("[*] Finding " + functionName);
+  debug("[*] Module.findExportByName " + functionName);
   var addr = Module.findExportByName(dllName, name);
 
   if (!addr || addr.isNull()) 
   {
-    debug("  [+] DebugSymbol.load " + dllName);
+    debug("[+] DebugSymbol.load " + dllName);
 
     try 
     {
@@ -271,37 +283,37 @@ function resolveName(dllName, name)
     }
     catch (e) 
     {
-      debug("  [-] DebugSymbol.load: " + err);
+      debug("[-] DebugSymbol.load: " + err);
       return;
     }
 
-    debug("  [+] DebugSymbol.load finished");
+    debug("[+] DebugSymbol.load finished");
 
     if (functionName.indexOf('*') === -1) 
     {
       try 
       {
-        debug("  [+] DebugSymbol.getFunctionByName: " + functionName);
+        debug("[+] DebugSymbol.getFunctionByName: " + functionName);
         addr = DebugSymbol.getFunctionByName(moduleName + '!' + name);
-        debug("  [+] DebugSymbol.getFunctionByName: addr = " + addr);
+        debug("[+] DebugSymbol.getFunctionByName: addr = " + addr);
       }
       catch (e) 
       {
-        debug("  [-] DebugSymbol.getFunctionByName: " + err);
+        debug("[-] DebugSymbol.getFunctionByName: " + err);
       }
     }
     else 
     {
       try 
       {
-        debug("  [+] DebugSymbol.findFunctionsMatching: " + functionName);
+        debug("[+] DebugSymbol.findFunctionsMatching: " + functionName);
         var addresses = DebugSymbol.findFunctionsMatching(name);
         addr = addresses[addresses.length - 1];
-        debug("  [+] DebugSymbol.findFunctionsMatching: addr " + addr);
+        debug("[+] DebugSymbol.findFunctionsMatching: addr " + addr);
       }
       catch (e) 
       {
-        debug("  [-] DebugSymbol.findFunctionsMatching: " + err);
+        debug("[-] DebugSymbol.findFunctionsMatching: " + err);
       }
     }
   }
@@ -317,7 +329,7 @@ function hookFunction(dllName, funcName, callback)
   {
     return;
   }
-  debug(' [*] Interceptor.attach: ' + symbolName + '@' + addr);
+  debug("[*] Interceptor.attach: " + symbolName + '@' + addr);
   Interceptor.attach(addr, callback);
 }
 
@@ -331,7 +343,7 @@ function writeToFile(count, type, data)
   file.write(data);
   file.close();
 
-  log("  |>> Data written to " + '"' + filepath + '"');
+  log("|>> Data written to " + '"' + filepath + '"');
 }
 
 function hookCOleScriptCompile() 
@@ -340,20 +352,20 @@ function hookCOleScriptCompile()
   {
     onEnter: function(args) 
     {
-      log(" Call: " + "jscript.dll" + "!COleScript::Compile()");
-      log("  |");
+      log("Call: " + "jscript.dll" + "!COleScript::Compile()");
+      log("|");
       writeToFile(++eval_count, "code", ptr(args[1]).readUtf16String());
-      log("  |");
+      log("|");
     }
   });
   hookFunction("vbscript.dll", "COleScript::Compile", 
   {
     onEnter: function(args) 
     {
-      log(" Call: " + "vbscript.dll" + "!COleScript::Compile()");
-      log("  |");
+      log("Call: " + "vbscript.dll" + "!COleScript::Compile()");
+      log("|");
       writeToFile(++eval_count, "code", ptr(args[1]).readUtf16String());
-      log("  |");
+      log("|");
     }
   });
   if (DYNAMIC) 
@@ -373,24 +385,24 @@ function hookGetAddrInfoExW()
     onEnter: function(args) 
     {
       host = args[0].readUtf16String();
-      log(" Call: ws2_32.dll!GetAddrInfoExW()");
-      log("  |");
-      log("  |-- Query : " + host);
+      log("Call: ws2_32.dll!GetAddrInfoExW()");
+      log("|");
+      log("|-- Query : " + host);
     },
     onLeave: function(retval) 
     {
       if (!ALLOW_NET) 
       {
-        log("  |-- Action: BLOCK");
+        log("|-- Action: BLOCK");
         retval.replace(WSAHOST_NOT_FOUND);
       } else 
       {
         if (retval.toInt32() === WSAHOST_NOT_FOUND) 
         {
-          log("  |-- Result: WSAHOST_NOT_FOUND");
+          log("|-- Result: WSAHOST_NOT_FOUND");
         }
       }
-      log("  |");
+      log("|");
     }
   });
 }
@@ -404,11 +416,11 @@ function hookWSASend()
       var socket = args[0];
       var buffers = args[2].toInt32();
       var size = ptr(args[1]).readInt();
-      log(" Call: ws2_32.dll!WSASend()");
-      log("  |");
-      log("  |-- Socket : " + socket);
-      log("  |-- Buffers: " + buffers);
-      log("  |-- Size   : " + size + " bytes");
+      log("Call: ws2_32.dll!WSASend()");
+      log("|");
+      log("|-- Socket : " + socket);
+      log("|-- Buffers: " + buffers);
+      log("|-- Size   : " + size + " bytes");
 
       var lpwbuf = args[1].toInt32() + 4;
       var dptr = Memory.readInt(ptr(lpwbuf));
@@ -421,9 +433,9 @@ function hookWSASend()
         var ptr_closesocket = Module.findExportByName("ws2_32.dll", "closesocket");
         var closesocket = new NativeFunction(ptr_closesocket, 'int', ['pointer']);
         closesocket(args[0]);
-        log("  |-- Action : BLOCK)");
+        log("|-- Action : BLOCK)");
       }
-      log("  |");
+      log("|");
     }
   });
 }
@@ -467,8 +479,8 @@ function hookShellExecuteExW()
       data += "\n";
       data += "nShow  : " + SHOW[nshow];
       
-      log(" Call: shell32.dll!ShellExecuteExW()");
-      log("  |");
+      log("Call: shell32.dll!ShellExecuteExW()");
+      log("|");
       
       writeToFile(++shell_count, "shell", data);
       
@@ -493,11 +505,11 @@ function hookShellExecuteExW()
           {
             log(e);
           }
-          log("  |-- Action: ALLOW (as Administrator!)");
+          log("|-- Action: ALLOW (as Administrator!)");
         }
         else 
         {
-          log("  |-- Action: BLOCK");
+          log("|-- Action: BLOCK");
         }
       } 
       else if (lpverb.match(/runas/i)) 
@@ -512,13 +524,13 @@ function hookShellExecuteExW()
           {
             log(e);
           }
-          log("  |-- Action: BLOCK");
+          log("|-- Action: BLOCK");
         }
         else {
-          log("  |-- Action: ALLOW (as Administrator!)");
+          log("|-- Action: ALLOW (as Administrator!)");
         }
       }
-      log("  |");
+      log("|");
     }
   });
 }
@@ -531,12 +543,12 @@ function hookCWshShellRegWrite()
     {
       var path = args[1].readUtf16String();
       
-      log(" Call: wshom.ocx!CWshShell::RegWrite()");
-      log("  |");
+      log("Call: wshom.ocx!CWshShell::RegWrite()");
+      log("|");
       
       if (path.slice(-1) == '\\') 
       {
-        log("  |-- Key: " + path);
+        log("|-- Key: " + path);
         if (!ALLOW_REG) 
         {
           deleteRegKey(path);
@@ -544,14 +556,14 @@ function hookCWshShellRegWrite()
       }
       else 
       {
-        log("  |-- Value: " + path);
+        log("|-- Value: " + path);
         if (!ALLOW_REG) 
         {
           deleteRegValue(path);
         }
       }
       
-      log("  |");
+      log("|");
     }
   });
 }
@@ -582,12 +594,12 @@ function hookWriteFile()
       GetFinalPathNameByHandleW(handle, ptr(lpszFilePath), 256, 0x8);
       var path = lpszFilePath.readUtf16String();
       
-      log(" Call: kernel32.dll!WriteFile()");
-      log("  |");
-      log("  |-- Handle: " + handle);
-      log("  |-- Size  : " + size + " bytes");
-      log("  |-- Path  : " + path);
-      log("  |");
+      log("Call: kernel32.dll!WriteFile()");
+      log("|");
+      log("|-- Handle: " + handle);
+      log("|-- Size  : " + size + " bytes");
+      log("|-- Path  : " + path);
+      log("|");
       
       if (!ALLOW_FILE) 
       {
@@ -606,11 +618,11 @@ function hookCopyFileA()
       var src = args[1].readUtf16String();
       var dst = args[2].readUtf16String();
       
-      log(" Call: scrrun.dll!CFileSystem::CopyFileA()");
-      log("  |");
-      log("  |-- From: " + src);
-      log("  |-- To  : " + dst);
-      log("  |");
+      log("Call: scrrun.dll!CFileSystem::CopyFileA()");
+      log("|");
+      log("|-- From: " + src);
+      log("|-- To  : " + dst);
+      log("|");
       
       if (!ALLOW_FILE) 
       {
@@ -629,11 +641,11 @@ function hookMoveFileA()
       var src = args[1].readUtf16String();
       var dst = args[2].readUtf16String();
       
-      log(" Call: scrrun.dll!CFileSystem::MoveFileA()");
-      log("  |");
-      log("  |-- From: " + src);
-      log("  |-- To  : " + dst);
-      log("  |");
+      log("Call: scrrun.dll!CFileSystem::MoveFileA()");
+      log("|");
+      log("|-- From: " + src);
+      log("|-- To  : " + dst);
+      log("|");
       
       if (!ALLOW_FILE) 
       {
@@ -651,10 +663,10 @@ function hookCreateFolder()
     {
       var path = ptr(args[1]).readUtf16String();
       
-      log(" Call: scrrun.dll!CFileSystem::CreateFolder()");
-      log("  |");
-      log("  |-- Path: " + path);
-      log("  |");
+      log("Call: scrrun.dll!CFileSystem::CreateFolder()");
+      log("|");
+      log("|-- Path: " + path);
+      log("|");
       
       if (!ALLOW_FILE) 
       {
@@ -693,10 +705,10 @@ function hookCLSIDFromProgID()
     var progid = lpszProgID.readUtf16String();
     var clsid  = bytesToCLSID(ptr(lpclsid))
     
-    log(" Call: ole32.dll!CLSIDFromProgID()");
-    log("  |");
-    log("  |-- ProgID: " + progid);
-    log("  |-- CLSID : " + clsid);
+    log("Call: ole32.dll!CLSIDFromProgID()");
+    log("|");
+    log("|-- ProgID: " + progid);
+    log("|-- CLSID : " + clsid);
     
     printInprocServer32(clsid);
 
@@ -704,11 +716,11 @@ function hookCLSIDFromProgID()
     {
       if (!ALLOW_BADCOM) 
       {
-        log("  |-- Action: BLOCK");
+        log("|-- Action: BLOCK");
         retval = CO_E_CLASSSTRING;
       }
     }
-    log("  |");
+    log("|");
     return retval;
   }, 'uint', ['pointer', 'pointer'], 'stdcall'));
 }
@@ -732,10 +744,10 @@ function hookDispCallFunc()
         loadModuleForAddress(functionAddress)
         var functionName = DebugSymbol.fromAddress(functionAddress)
         
-        log(" Call: oleaut32.dll!DispCallFunc()");
-        log("  |");
-        log("  |-- Function: " + functionName);
-        log("  |");
+        log("Call: oleaut32.dll!DispCallFunc()");
+        log("|");
+        log("|-- Function: " + functionName);
+        log("|");
 
         // hook new functions here if they aren't already hooked
         if (!(functionName.name in FILTER)) 
@@ -745,8 +757,8 @@ function hookDispCallFunc()
           {
             onEnter: function(args) 
             {
-              log(" Call: " + functionName.moduleName + '!' + functionName.name + '()');
-              log("  |");
+              log("Call: " + functionName.moduleName + '!' + functionName.name + '()');
+              log("|");
               
               var i, arg;
               var MAX_ARGS = 5;
@@ -765,10 +777,10 @@ function hookDispCallFunc()
                 }
                 if (arg && arg.length > 1) 
                 {
-                  log("  |-- Arg: " + arg);
+                  log("|-- Arg: " + arg);
                 }
               }
-              log("  |");
+              log("|");
             }
           });
         }
@@ -783,15 +795,15 @@ function hookCHostObjSleep()
   {
     onEnter: function(args) 
     {
-      log(" Call: wscript.exe!CHostObj::Sleep()");
-      log("  |");
-      log("  |-- Delay: " + args[1].toInt32() + "ms" + 
+      log("Call: wscript.exe!CHostObj::Sleep()");
+      log("|");
+      log("|-- Delay: " + args[1].toInt32() + "ms" + 
         ((!ALLOW_SLEEP) ? " (Skipping to 0ms)" : ""));
       if (!ALLOW_SLEEP) 
       {
         args[1] = ptr(0);
       }
-      log("  |");
+      log("|");
     }
   });
 }
@@ -802,10 +814,10 @@ function hookCSWbemServicesExecQuery()
   {
     onEnter: function(args) 
     {
-      log(" Call: wbemdisp.dll!CSWbemServices::ExecQuery()");
-      log("  |");
-      log("  |-- Query: " + args[1].readUtf16String());
-      log("  |");
+      log("Call: wbemdisp.dll!CSWbemServices::ExecQuery()");
+      log("|");
+      log("|-- Query: " + args[1].readUtf16String());
+      log("|");
     }
   });
 }
@@ -819,11 +831,11 @@ function hookXMLHttpOpen()
       var verb = args[1].readUtf16String();
       var url  = args[2].readUtf16String();
       
-      log(" Call: msxml3.dll!XMLHttp::open()");
-      log("  |");
-      log("  |-- Verb: " + verb);
-      log("  |-- URL : " + url);
-      log("  |");
+      log("Call: msxml3.dll!XMLHttp::open()");
+      log("|");
+      log("|-- Verb: " + verb);
+      log("|-- URL : " + url);
+      log("|");
     }
   });
 }
@@ -837,11 +849,11 @@ function hookXMLHttpsetRequestHeader()
       var header = args[1].readUtf16String();
       var value  = args[2].readUtf16String();
       
-      log(" Call: msxml3.dll!XMLHttp::setRequestHeader()");
-      log("  |");
-      log("  |-- Header: " + header);
-      log("  |-- Value : " + value);
-      log("  |");
+      log("Call: msxml3.dll!XMLHttp::setRequestHeader()");
+      log("|");
+      log("|-- Header: " + header);
+      log("|-- Value : " + value);
+      log("|");
     }
   });
 }
@@ -852,20 +864,20 @@ function hookXMLHttpSend()
   {
     onEnter: function(args) 
     {
-      log(" Call: msxml3.dll!XMLHttp::send()");
-      log("  |");
+      log("Call: msxml3.dll!XMLHttp::send()");
+      log("|");
       try 
       {
         var data = args[3].readUtf16String();
         if (data) 
         {
-          log("  |-- Data: " + data);
+          log("|-- Data: " + data);
         }
-        log("  |");
+        log("|");
       } 
       catch (e) 
       {
-        log("  |");
+        log("|");
       }
     }
   });
@@ -886,10 +898,10 @@ function hookCFileSystemGetSpecialFolder()
     {
       var folder = FOLDERSPEC[args[1].toInt32()];
       
-      log(" Call: scrrun.dll!CFileSystem::GetSpecialFolder()");
-      log("  |");
-      log("  |-- Folder: " + folder);
-      log("  |");
+      log("Call: scrrun.dll!CFileSystem::GetSpecialFolder()");
+      log("|");
+      log("|-- Folder: " + folder);
+      log("|");
     }
   });
 }
@@ -903,11 +915,11 @@ function hookCHttpRequestOpen()
       var verb = args[1].readUtf16String();
       var url  = args[2].readUtf16String();
       
-      log(" Call: winhttpcom.dll!CHttpRequest::Open()");
-      log("  |");
-      log("  |-- Verb: " + verb);
-      log("  |-- URL : " + url);
-      log("  |");
+      log("Call: winhttpcom.dll!CHttpRequest::Open()");
+      log("|");
+      log("|-- Verb: " + verb);
+      log("|-- URL : " + url);
+      log("|");
     }
   });
 }
@@ -921,11 +933,11 @@ function hookCHttpRequestSetRequestHeader()
       var header = args[1].readUtf16String();
       var value  = args[2].readUtf16String();
       
-      log(" Call: winhttpcom.dll!CHttpRequest::SetRequestHeader()");
-      log("  |");
-      log("  |-- Header: " + header);
-      log("  |-- Value : " + value);
-      log("  |");
+      log("Call: winhttpcom.dll!CHttpRequest::SetRequestHeader()");
+      log("|");
+      log("|-- Header: " + header);
+      log("|-- Value : " + value);
+      log("|");
     }
   });
 }
@@ -936,20 +948,20 @@ function hookCHttpRequestSend()
   {
     onEnter: function(args) 
     {
-      log(" Call: winhttpcom.dll!CHttpRequest::Send()");
-      log("  |");
+      log("Call: winhttpcom.dll!CHttpRequest::Send()");
+      log("|");
       try 
       {
         var data = args[3].readUtf16String();
         if (data) 
         {
-          log("  |-- Data: " + data);
+          log("|-- Data: " + data);
         }
-        log("  |");
+        log("|");
       } 
       catch (e) 
       {
-        log("  |");
+        log("|");
       }
     }
   });
@@ -982,9 +994,9 @@ function hookMkParseDisplayName()
     var retval = MkParseDisplayName(pbc, szUserName, pchEaten, ppmk);
     var moniker = ptr(szUserName).readUtf16String();
     
-    log(" Call: ole32.dll!MkParseDisplayName");
-    log("  |");
-    log("  |-- Moniker: " + moniker);
+    log("Call: ole32.dll!MkParseDisplayName");
+    log("|");
+    log("|-- Moniker: " + moniker);
     
     // ProgIDFromCLSID() to expose bad ProgIDs from CLSID
     var ptrCLSIDFromString = Module.findExportByName('ole32.dll', "CLSIDFromString");
@@ -998,7 +1010,7 @@ function hookMkParseDisplayName()
     if (moniker.match(clsid_re)) 
     {
       clsid = moniker.replace(clsid_re, "$2");
-      log("  |-- CLSID  : " + clsid);
+      log("|-- CLSID  : " + clsid);
       
       var lpsz = Memory.allocUtf16String(clsid);
       var pclsid = Memory.alloc(16);
@@ -1011,20 +1023,20 @@ function hookMkParseDisplayName()
       
       if (HRESULT[result] === "S_OK") 
       {
-        log("  |-- ProgID : " + szProgID);
+        log("|-- ProgID : " + szProgID);
       }
       else 
       {
-        log("  |-- Result : " + HRESULT[result]);
-        log("  |");
+        log("|-- Result : " + HRESULT[result]);
+        log("|");
       }
       
       if (szProgID.toLowerCase() in BADPROGID) 
       {
         if (!ALLOW_BADCOM) 
         {
-          log("  |-- Action : BLOCK");
-          log("  |");
+          log("|-- Action : BLOCK");
+          log("|");
           retval = MK_E_SYNTAX;
           return retval;
         }
@@ -1034,13 +1046,13 @@ function hookMkParseDisplayName()
     {
         if (!ALLOW_PROC) 
         {
-          log("  |-- Action : BLOCK");
-          log("  |");
+          log("|-- Action : BLOCK");
+          log("|");
           retval = MK_E_SYNTAX;
           return retval;
         }
     }
-    log("  |");
+    log("|");
   }, 'uint', ['pointer', 'pointer', 'pointer', 'pointer']));
 }
 
@@ -1050,10 +1062,10 @@ function hookWriteLine()
   {
     onEnter: function(args) 
     {
-        log(" Call: scrrun.dll!CTextStream::WriteLine()");
-        log("  |");
+        log("Call: scrrun.dll!CTextStream::WriteLine()");
+        log("|");
         writeToFile(++text_count, "text", ptr(args[1]).readUtf16String());
-        log("  |");
+        log("|");
     }
   });
 }

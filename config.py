@@ -27,3 +27,9 @@ TRACE = ''
 
 # Timestamp
 TIMESTAMP = False
+
+# Space character
+SPACE = ' '
+
+# Indent size
+INDENT = SPACE * 2

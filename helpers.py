@@ -11,16 +11,19 @@ import winreg
 import config
 import extras
 
+def indent(message):
+  print(config.INDENT + message)
+
 def print(*objects, **kwargs):
   try:
     with open('.\\' + config.WORK_DIR + '\\' + config.TRACE, 'a') as f:
       if config.TIMESTAMP:
-        timestamp = "%09.3fs" % time.perf_counter()
-        builtins.print(' '.join([timestamp, *objects]), file=f, **kwargs)
-        builtins.print(' '.join([timestamp, *objects]), flush=True, **kwargs)
+        timestamp = "[%10.3f]" % time.perf_counter()
+        builtins.print(config.SPACE.join([timestamp, *objects]), file=f, **kwargs)
+        builtins.print(config.SPACE.join([timestamp, *objects]), flush=True, **kwargs)
       else:
-        builtins.print(*objects, file=f, **kwargs)
-        builtins.print(*objects, flush=True, **kwargs)
+        builtins.print(config.SPACE.join(['', *objects]), file=f, **kwargs)
+        builtins.print(config.SPACE.join(['', *objects]), flush=True, **kwargs)
   except FileNotFoundError:
     builtins.print(*objects, **kwargs)
   except UnicodeEncodeError:
@@ -30,11 +33,11 @@ def InprocServer32FromCLSID(clsid):
   try:
     key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, "CLSID" + "\\" + clsid + "\\" + "InprocServer32")
     module = winreg.QueryValueEx(key, '')[0]
-    print("  |-- InprocServer32: %s" % module)
+    indent("|-- InprocServer32: %s" % module)
   except:
     key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, "CLSID" + "\\" + clsid + "\\" + "LocalServer32")
     module = winreg.QueryValueEx(key, '')[0]
-    print("  |-- LocalServer32: %s" % module)
+    indent("|-- LocalServer32: %s" % module)
   return module.split('\\')[-1]
 
 def parseHKEY(path):
@@ -106,15 +109,15 @@ def search():
     ips      = [x.group() for x in ip_re.finditer(text)]
 
     if (len(keywords) > 0 or len(ips) > 0 or len(urls) > 0):
-      print(" [*] Searching for IOCs in '%s'..." % file)
+      print("[*] Searching for IOCs in \"%s\"..." % file)
       for keyword in keywords:
         keyword = re.sub(r'[\'"();]', '', keyword).encode('ascii', errors='ignore').decode()
-        print("  [+] Keyword: %s" % keyword)
+        indent("[+] Keyword: %s" % keyword)
       for ip in ips:
-        print("  [+] IP: %s" % ip)
+        indent("[+] IP: %s" % ip)
       for url in urls:
         url = re.sub(r'[\'"();]', '', url).encode('ascii', errors='ignore').decode()
-        print("  [+] URL: %s" % url)
+        indent("[+] URL: %s" % url)
 
 def clean_frida_helper():
   for helper in glob.glob(os.path.expandvars("%TEMP%\\frida-*")):
@@ -125,7 +128,7 @@ def clean_frida_helper():
 
 def cleanup():
   search()
-  print(" [*] Cleaning up...")
+  print("[*] Cleaning up...")
   if len(config.REG_KEYS) > 0:
     for key in config.REG_KEYS:
       deleteKey(key)
@@ -144,7 +147,7 @@ def deleteFile(path):
         os.mkdir(config.WORK_DIR + "\\dropped_files")
       shutil.copy2(path, config.WORK_DIR + "\\dropped_files")
       os.remove(path)
-      print("  [+] Deleted file: %s" % path)
+      indent("[+] Deleted file: %s" % path)
     except FileExistsError:
       pass
     except FileNotFoundError:
@@ -154,7 +157,7 @@ def deleteFolder(path):
   if os.path.exists(path):
     try:
       os.rmdir(path)
-      print("  [+] Deleted folder: %s" % path)
+      indent("[+] Deleted folder: %s" % path)
     except FileNotFoundError:
       pass
 
@@ -165,7 +168,7 @@ def deleteKey(key):
     winreg.DeleteKey(hkey, subkey)
   except FileNotFoundError:
     return
-  print("  [+] Deleted registry key: %s" % key)
+  indent("[+] Deleted registry key: %s" % key)
 
 def deleteValue(path):
   hkey   = parseHKEY(path)
@@ -180,7 +183,7 @@ def deleteValue(path):
       winreg.KEY_QUERY_VALUE|winreg.KEY_SET_VALUE
     )
   except PermissionError:
-    print("  |-- (Access is denied!)")
+    indent("|-- (Access is denied!)")
     return
 
   # pause for value to be written
@@ -192,10 +195,10 @@ def deleteValue(path):
   with open('.\\' + config.WORK_DIR + '\\' + filename, 'w') as fd:
     fd.write("Value: %s\nData : %s" % (path, data))
   fd.close()
-  print("  |>> Data written to \".\\%s\\%s\"" % (config.WORK_DIR, filename))
+  indent("|>> Data written to \".\\%s\\%s\"" % (config.WORK_DIR, filename))
   winreg.DeleteValue(key, value)
   key.Close()
-  print("  |-- (Deleted!)")
+  indent("|-- (Deleted!)")
 
 def decodePowerShell(encoded):
   decode_count = config.DECODE_COUNT + 1
@@ -204,7 +207,7 @@ def decodePowerShell(encoded):
   with open('.\\' + config.WORK_DIR + '\\' + filename, 'w') as fd:
     fd.write(decoded)
   fd.close()
-  print("  |>> Data written to \".\\%s\\%s\"" % (config.WORK_DIR, filename))
+  indent("|>> Data written to \".\\%s\\%s\"" % (config.WORK_DIR, filename))
 
 def print_banner():
   builtins.print("%s%s%s" % 

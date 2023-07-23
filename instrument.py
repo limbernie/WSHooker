@@ -4,6 +4,9 @@ import time
 import config
 import helpers
 
+def indent(message):
+  print(config.INDENT + message)
+
 def print(*objects, **kwargs):
   helpers.print(*objects, **kwargs)
 
@@ -63,23 +66,23 @@ class Instrumenter:
         if self._process_terminated:
           break
       except KeyboardInterrupt:
-        print(" [*] Warning: Instrumentation script is destroyed")
+        print("[*] Warning: Instrumentation script is destroyed")
         helpers.cleanup()
         break
 
     if not self._process_terminated:
-      print("  [+] Killed process: %s" % self.pid)
-      print(" [*] Exiting...")
+      indent("[+] Killed process: %s" % self.pid)
+      print("[*] Exiting...")
       frida.kill(self.pid)
 
   def on_detached(self, message, data):
     helpers.cleanup()
-    print("  [+] Killed process: %s" % self.pid)
-    print(" [*] Exiting...")
+    indent("[+] Killed process: %s" % self.pid)
+    print("[*] Exiting...")
     self._process_terminated = True
 
   def on_destroyed(self):
-    print(" [*] Warning: Instrumentation script is destroyed")
+    print("[*] Warning: Instrumentation script is destroyed")
 
   def on_message(self, message, data):
     if message['type'] == 'send':
@@ -104,23 +107,25 @@ class Instrumenter:
             config.FOLDERS.append(msg_data['path'])
       elif msg_data['target'] == 'frida':
         if msg_data['action'] == 'resume':
-          print(' [*] Hooking process: %s' % self.pid)
+          print("[*] Hooking process: %s" % self.pid)
           frida.resume(self.pid)
-          print(' [*] Press Ctrl-C to kill the process...')
-          print(" +---------+")
-          print(" |  Trace  |")
-          print(" +---------+")
+          print("[*] Press Ctrl-C to kill the process...")
+          print("+---------+")
+          print("|  Trace  |")
+          print("+---------+")
       elif msg_data['target'] == 'system':
         if msg_data['action'] == 'print':
           print(msg_data['message'])
+        elif msg_data['action'] == 'indent':
+          indent(msg_data['message'])
         elif msg_data['action'] == 'decode':
           helpers.decodePowerShell(msg_data['value'])
 
   def _on_child_added(self, child):
-    print(" [*] %s spawned child process: %s" % (self.pid, child.pid))
+    print("[*] %s spawned child process: %s" % (self.pid, child.pid))
     frida.kill(child.pid)
 
   def _on_child_removed(self, child):
-    print("  [+] Killed child process: %s" % child.pid)
-    print("  |")
+    indent("[+] Killed child process: %s" % child.pid)
+    indent("|")
 

@@ -1,5 +1,6 @@
 import argparse
 import frida
+import logging
 import os
 import time
 
@@ -124,11 +125,12 @@ if __name__ == '__main__':
       valid_extensions = ['js', 'vbs', 'wsf']
       try:
         EXTENSION = os.path.basename(args.script).rsplit('.', 1)[1]
-      except:
-        pass
-      if EXTENSION.lower() not in valid_extensions:
-        print(" [!] Error: Invalid extension or no extension")
-        exit(1)
+        if EXTENSION.lower() not in valid_extensions:
+          print("Error: Invalid file extension")
+          exit(1)
+      except IndexError:
+          print("Error: No file extension")
+          exit(1)
 
       if not args.no_banner:
         helpers.print_banner()
@@ -137,20 +139,22 @@ if __name__ == '__main__':
       WORK_DIR = config.TRACES + "\\" + ISO_8601 + '_' + os.path.basename(args.script).rsplit('.', 1)[0]
       try:
         os.makedirs(WORK_DIR)
-        print(' [*] Working directory: %s' % WORK_DIR)
+        workdir = "[*] Working directory: \".\\%s\"" % WORK_DIR
       except FileExistsError:
-        print(' [*] Working directory already exists: %s' % WORK_DIR)
+        workdir = "[*] Working directory already exists: \".\\%s\"" % WORK_DIR
 
       config.EXTENSION = EXTENSION
       config.TIMESTAMP = args.timestamp
       config.TRACE     = args.trace
       config.WORK_DIR  = WORK_DIR
 
+      print(workdir)
+
       if os.path.exists(Instrumenter._WSCRIPT_PATH_WOW64):
-        print(' [*] x64 detected...using SysWOW64')
+        print("[*] x64 detected...using SysWOW64")
         wshost = Instrumenter._WSCRIPT_PATH_WOW64 + Instrumenter._WSCRIPT_EXE
       else:
-        print(' [*] Using System32')
+        print("[*] Using System32")
         wshost = Instrumenter._WSCRIPT_PATH + Instrumenter._WSCRIPT_EXE
 
       # use '/b' to suppress alerts, errors or prompts
@@ -176,7 +180,7 @@ if __name__ == '__main__':
         args.dynamic
      )
     else:
-      print(" [!] Error: No such file")
+      print("Error: File not found")
       exit(1)
   else:
     parser.print_usage()
