@@ -1,6 +1,5 @@
 import argparse
 import frida
-import logging
 import os
 import time
 
