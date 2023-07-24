@@ -14,8 +14,8 @@ class Instrumenter:
   def __init__(self, hook):
     self.hook = hook
     self._device = frida.get_local_device()
-    self._device.on("child-added", self._on_child_added)
-    self._device.on("child-removed", self._on_child_removed)
+    self._device.on("child-added", self.on_child_added)
+    self._device.on("child-removed", self.on_child_removed)
     self._process_terminated = False
 
   def instrument(self,
