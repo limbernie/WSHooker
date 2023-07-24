@@ -11,33 +11,17 @@ import winreg
 import config
 import extras
 
-def indent(message):
-  print(config.INDENT + message)
-
-def print(*objects, **kwargs):
-  try:
-    with open('.\\' + config.WORK_DIR + '\\' + config.TRACE, 'a') as f:
-      if config.TIMESTAMP:
-        timestamp = "[%10.3f]" % time.perf_counter()
-        builtins.print(config.SPACE.join([timestamp, *objects]), file=f, **kwargs)
-        builtins.print(config.SPACE.join([timestamp, *objects]), flush=True, **kwargs)
-      else:
-        builtins.print(config.SPACE.join(['', *objects]), file=f, **kwargs)
-        builtins.print(config.SPACE.join(['', *objects]), flush=True, **kwargs)
-  except FileNotFoundError:
-    builtins.print(*objects, **kwargs)
-  except UnicodeEncodeError:
-    pass
+from printer import *
 
 def InprocServer32FromCLSID(clsid):
   try:
-    key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, "CLSID" + "\\" + clsid + "\\" + "InprocServer32")
+    key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, ''.join(["CLSID", "\\", clsid, "\\", "InprocServer32"]))
     module = winreg.QueryValueEx(key, '')[0]
-    indent("|-- InprocServer32: %s" % module)
+    param("InprocServer32", module)
   except:
-    key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, "CLSID" + "\\" + clsid + "\\" + "LocalServer32")
+    key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, ''.join(["CLSID", "\\", clsid, "\\", "LocalServer32"]))
     module = winreg.QueryValueEx(key, '')[0]
-    indent("|-- LocalServer32: %s" % module)
+    param("LocalServer32", module)
   return module.split('\\')[-1]
 
 def parseHKEY(path):
@@ -53,7 +37,7 @@ def parseHKEY(path):
     return hkey
 
 def search():
-  for file in glob.glob('.\\' + config.WORK_DIR + '\\' + '*[degkl]_*.txt'):
+  for file in glob.glob(''.join(['.\\', config.WORK_DIR, '\\', '*[degkl]_*.txt'])):
     f = open(file, 'r', encoding='utf-8')
     text = f.read()
 
@@ -69,11 +53,11 @@ def search():
 
     # Host patterns
     hostname_re = (
-      r"[a-z" + ul + r"0-9](?:[a-z" + ul + r"0-9-]{0,61}[a-z" + ul + r"0-9])?"
+      ''.join([r"[a-z", ul, r"0-9](?:[a-z", ul, r"0-9-]{0,61}[a-z", ul, r"0-9])?"])
     )
 
     # Max length for domain name labels is 63 characters per RFC 1034 sec. 3.1
-    domain_re = r"(?:\.(?!-)[a-z" + ul + r"0-9-]{1,63}(?<!-))*"
+    domain_re = ''.join([r"(?:\.(?!-)[a-z", ul, r"0-9-]{1,63}(?<!-))*"])
     tld_re = (
       r"\."
       r"(?!-)"
@@ -82,7 +66,7 @@ def search():
       r"(?<!-)"
       r"\.?"
     )
-    host_re = "(" + hostname_re + domain_re + tld_re + "|localhost)"
+    host_re = ''.join(["(", hostname_re, domain_re, tld_re, "|localhost)"])
 
     url_re = re.compile(
       r"(?:['\"]?)"
@@ -101,7 +85,7 @@ def search():
     )
 
     ip_re = re.compile(
-      r"(?:" + ipv4_re + ")"
+      ''.join([r"(?:", ipv4_re, ")"])
     )
 
     urls     = [x.group() for x in url_re.finditer(text)]
@@ -109,15 +93,15 @@ def search():
     ips      = [x.group() for x in ip_re.finditer(text)]
 
     if (len(keywords) > 0 or len(ips) > 0 or len(urls) > 0):
-      print("[*] Searching for IOCs in \"%s\"..." % file)
+      status("Searching for IOCs in \"%s\"..." % file)
       for keyword in keywords:
         keyword = re.sub(r'[\'"();]', '', keyword).encode('ascii', errors='ignore').decode()
-        indent("[+] Keyword: %s" % keyword)
+        info("Keyword: %s" % keyword)
       for ip in ips:
-        indent("[+] IP: %s" % ip)
+        info("IP: %s" % ip)
       for url in urls:
         url = re.sub(r'[\'"();]', '', url).encode('ascii', errors='ignore').decode()
-        indent("[+] URL: %s" % url)
+        info("URL: %s" % url)
 
 def clean_frida_helper():
   for helper in glob.glob(os.path.expandvars("%TEMP%\\frida-*")):
@@ -128,7 +112,7 @@ def clean_frida_helper():
 
 def cleanup():
   search()
-  print("[*] Cleaning up...")
+  status("Cleaning up...")
   if len(config.REG_KEYS) > 0:
     for key in config.REG_KEYS:
       deleteKey(key)
@@ -142,12 +126,13 @@ def cleanup():
 
 def deleteFile(path):
   if os.path.exists(path):
+    dropped_files = ''.join([config.WORK_DIR, "\\", "dropped_files"])
     try:
-      if not os.path.exists(config.WORK_DIR + "\\dropped_files"):
-        os.mkdir(config.WORK_DIR + "\\dropped_files")
-      shutil.copy2(path, config.WORK_DIR + "\\dropped_files")
+      if not os.path.exists(dropped_files):
+        os.mkdir(dropped_files)
+      shutil.copy2(path, dropped_files)
       os.remove(path)
-      indent("[+] Deleted file: %s" % path)
+      info("Deleted file: %s" % path)
     except FileExistsError:
       pass
     except FileNotFoundError:
@@ -157,7 +142,7 @@ def deleteFolder(path):
   if os.path.exists(path):
     try:
       os.rmdir(path)
-      indent("[+] Deleted folder: %s" % path)
+      info("Deleted folder: %s" % path)
     except FileNotFoundError:
       pass
 
@@ -168,7 +153,7 @@ def deleteKey(key):
     winreg.DeleteKey(hkey, subkey)
   except FileNotFoundError:
     return
-  indent("[+] Deleted registry key: %s" % key)
+  info("Deleted registry key: %s" % key)
 
 def deleteValue(path):
   hkey   = parseHKEY(path)
@@ -183,7 +168,7 @@ def deleteValue(path):
       winreg.KEY_QUERY_VALUE|winreg.KEY_SET_VALUE
     )
   except PermissionError:
-    indent("|-- (Access is denied!)")
+    param("Access", "Denied")
     return
 
   # pause for value to be written
@@ -191,23 +176,23 @@ def deleteValue(path):
 
   data = winreg.QueryValueEx(key, value)[0]
   reg_count = config.REG_COUNT + 1
-  filename = 'reg_' + ("%d" % reg_count) + '.txt'
-  with open('.\\' + config.WORK_DIR + '\\' + filename, 'w') as fd:
+  filename = ''.join(["reg", '_', ("%d" % reg_count), '.', "txt"])
+  with open(''.join(['.\\', config.WORK_DIR, '\\', filename]), 'w') as fd:
     fd.write("Value: %s\nData : %s" % (path, data))
   fd.close()
-  indent("|>> Data written to \".\\%s\\%s\"" % (config.WORK_DIR, filename))
+  param("Data", "\".\\%s\\%s\"" % (config.WORK_DIR, filename))
   winreg.DeleteValue(key, value)
   key.Close()
-  indent("|-- (Deleted!)")
+  param("Status" "Deleted")
 
 def decodePowerShell(encoded):
   decode_count = config.DECODE_COUNT + 1
-  filename = 'decoded_' + ("%d" % decode_count) + '.txt'
+  filename = ''.join(["decoded", '_', ("%d" % decode_count), '.', "txt"])
   decoded = base64.b64decode(encoded).decode('utf-16le')
-  with open('.\\' + config.WORK_DIR + '\\' + filename, 'w') as fd:
+  with open(''.join(['.\\', config.WORK_DIR, '\\', filename]), 'w') as fd:
     fd.write(decoded)
   fd.close()
-  indent("|>> Data written to \".\\%s\\%s\"" % (config.WORK_DIR, filename))
+  param("Data", "\".\\%s\\%s\"" % (config.WORK_DIR, filename))
 
 def print_banner():
   builtins.print("%s%s%s" % 

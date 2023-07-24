@@ -7,9 +7,7 @@ import config
 import helpers
 
 from instrument import Instrumenter
-
-def print(*objects, **kwargs):
-  helpers.print(*objects, **kwargs)
+from printer import *
 
 if __name__ == '__main__':
   helpers.clean_frida_helper()
@@ -135,26 +133,26 @@ if __name__ == '__main__':
         helpers.print_banner()
 
       ISO_8601 = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
-      WORK_DIR = config.TRACES + "\\" + ISO_8601 + '_' + os.path.basename(args.script).rsplit('.', 1)[0]
+      WORK_DIR = ''.join([config.TRACES, '\\', ISO_8601, '_', os.path.basename(args.script).rsplit('.', 1)[0]])
       try:
         os.makedirs(WORK_DIR)
-        workdir = "[*] Working directory: \".\\%s\"" % WORK_DIR
+        workdir = "Working directory: \".\\%s\"" % WORK_DIR
       except FileExistsError:
-        workdir = "[*] Working directory already exists: \".\\%s\"" % WORK_DIR
+        workdir = "Working directory already exists: \".\\%s\"" % WORK_DIR
 
       config.EXTENSION = EXTENSION
       config.TIMESTAMP = args.timestamp
       config.TRACE     = args.trace
       config.WORK_DIR  = WORK_DIR
 
-      print(workdir)
+      status(workdir)
 
       if os.path.exists(Instrumenter._WSCRIPT_PATH_WOW64):
-        print("[*] x64 detected...using SysWOW64")
-        wshost = Instrumenter._WSCRIPT_PATH_WOW64 + Instrumenter._WSCRIPT_EXE
+        status("x64 detected...using SysWOW64")
+        wshost = ''.join([Instrumenter._WSCRIPT_PATH_WOW64, Instrumenter._WSCRIPT_EXE])
       else:
-        print("[*] Using System32")
-        wshost = Instrumenter._WSCRIPT_PATH + Instrumenter._WSCRIPT_EXE
+        status("Using System32")
+        wshost = ''.join([Instrumenter._WSCRIPT_PATH, Instrumenter._WSCRIPT_EXE])
 
       # use '/b' to suppress alerts, errors or prompts
       cmd = [wshost, '/b', args.script]
