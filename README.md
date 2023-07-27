@@ -72,7 +72,7 @@ pip install frida-tools
 
 ### Setting Symbol Path
 
-To use `c:\symbols` as the local symbol cache as WSHooker downloads debug symbols from the Microsoft symbol server, use the following:
+To set `c:\symbols` as the local symbol cache as WSHooker downloads debug symbols from the Microsoft symbol server, use the following:
 
 ```
 setx _NT_SYMBOL_PATH SRV*c:\symbols*https://msdl.microsoft.com/downloads/symbols
