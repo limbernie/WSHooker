@@ -1,91 +1,106 @@
-var ALLOW_BADCOM = false;
-var ALLOW_FILE   = false;
-var ALLOW_NET    = false;
-var ALLOW_PROC   = false;
-var ALLOW_REG    = false;
-var ALLOW_SHELL  = false;
-var ALLOW_SLEEP  = false;
-var DEBUG        = false;
-var DYNAMIC      = false;
-var EXTENSION    = null;
-var WORK_DIR     = null;
+/*
+ * hook.js - Frida instrumentation script
+ */
 
-var eval_count   = 0;
-var shell_count  = 0;
-var sock_count   = 0;
-var text_count   = 0;
+/* Global variables */
+let ALLOW_BADCOM = false;
+let ALLOW_FILE   = false;
+let ALLOW_NET    = false;
+let ALLOW_PROC   = false;
+let ALLOW_REG    = false;
+let ALLOW_SHELL  = false;
+let ALLOW_SLEEP  = false;
+let DEBUG        = false;
+let DYNAMIC      = false;
+let EXTENSION, WORK_DIR;
 
-// Filter these functions from dynamic tracing
-var FILTER =
+/* File write counters */
+let code_count = 0;
+let exec_count = 0;
+let sock_count = 0;
+let text_count = 0;
+
+/* Filter these functions from dynamic tracing. */
+let FILTER =
 {
-  "CWshShell::RegWrite" : 1,
-  "CHostObj::Sleep" : 1,
-  "CSWbemServices::ExecQuery" : 1,
-  "CHostObj::CreateObject" : 1,
-  "CWshShell::Run" : 1,
-  "CShellDispatch::ShellExecuteW" : 1,
-  "XMLHttp::open" : 1,
-  "XMLHttp::setRequestHeader" : 1,
-  "XMLHttp::send" : 1,
-  "CFileSystem::GetSpecialFolder" : 1,
-  "CFileSystem::CopyFileA" : 1,
-  "CFileSystem::MoveFileA" : 1,
-  "CFileSystem::CreateFolder" : 1,
-  "CHttpRequest::Open" : 1,
+  "CWshShell::RegWrite"            : 1,
+  "CHostObj::Sleep"                : 1,
+  "CSWbemServices::ExecQuery"      : 1,
+  "CHostObj::CreateObject"         : 1,
+  "CWshShell::Run"                 : 1,
+  "CShellDispatch::ShellExecuteW"  : 1,
+  "XMLHttp::open"                  : 1,
+  "XMLHttp::setRequestHeader"      : 1,
+  "XMLHttp::send"                  : 1,
+  "CFileSystem::GetSpecialFolder"  : 1,
+  "CFileSystem::CopyFileA"         : 1,
+  "CFileSystem::MoveFileA"         : 1,
+  "CFileSystem::CreateFolder"      : 1,
+  "CHttpRequest::Open"             : 1,
   "CHttpRequest::SetRequestHeader" : 1,
-  "CHttpRequest::Send" : 1,
-  "CTextStream::Close" : 1,
-  "CTextStream::Write" : 1,
-  "CTextStream::WriteLine" : 1
+  "CHttpRequest::Send"             : 1,
+  "CTextStream::Close"             : 1,
+  "CTextStream::Write"             : 1,
+  "CTextStream::WriteLine"         : 1
 };
 
-recv('config', function onMessage(setting)
+/* Bad ProgIDs known to evade detection based on parent-child process relationship. */
+let BADPROGID =
 {
-  DEBUG = setting['debug'];
+  "internetexplorer.application"   : 1,
+  "internetexplorer.application.1" : 1,
+  "schedule.service"               : 1,
+  "schedule.service.1"             : 1,
+  "windowsinstaller.installer"     : 1
+};
+
+recv("config", function onMessage(setting)
+{
+  DEBUG = setting["debug"];
   status(["DEBUG", '=', DEBUG].join(''));
-  ALLOW_BADCOM = setting['allow_badcom'];
+  ALLOW_BADCOM = setting["allow_badcom"];
   status(["ALLOW_BADCOM", '=', ALLOW_BADCOM].join(''));
-  ALLOW_FILE = setting['allow_file'];
+  ALLOW_FILE = setting["allow_file"];
   status(["ALLOW_FILE", '=', ALLOW_FILE].join(''));
-  ALLOW_NET = setting['allow_net'];
+  ALLOW_NET = setting["allow_net"];
   status(["ALLOW_NET", '=', ALLOW_NET].join(''));
-  ALLOW_PROC = setting['allow_proc'];
+  ALLOW_PROC = setting["allow_proc"];
   status(["ALLOW_PROC", '=', ALLOW_PROC].join(''));
-  ALLOW_REG = setting['allow_reg'];
+  ALLOW_REG = setting["allow_reg"];
   status(["ALLOW_REG", '=', ALLOW_REG].join(''));
-  ALLOW_SHELL = setting['allow_shell'];
+  ALLOW_SHELL = setting["allow_shell"];
   status(["ALLOW_SHELL", '=', ALLOW_SHELL].join(''));
-  ALLOW_SLEEP = setting['allow_sleep'];
+  ALLOW_SLEEP = setting["allow_sleep"];
   status(["ALLOW_SLEEP", '=', ALLOW_SLEEP].join(''));
-  DYNAMIC = setting['dynamic'];
+  DYNAMIC = setting["dynamic"];
   status(["DYNAMIC", '=', DYNAMIC].join(''));
 
-  WORK_DIR  = setting['work_dir'];
-  EXTENSION = setting['extension'];
+  WORK_DIR  = setting["work_dir"];
+  EXTENSION = setting["extension"];
 
-  if (EXTENSION === 'js')
+  if (EXTENSION === "js")
   {
     status(["ENGINE", '=', "JScript"].join(''));
   }
-  else if (EXTENSION === 'vbs')
+  else if (EXTENSION === "vbs")
   {
     status(["ENGINE", '=', "VBScript"].join(''));
   }
-  else if (EXTENSION === 'wsf')
+  else if (EXTENSION === "wsf")
   {
     status(["ENGINE", '=', "Windows Script File"].join(''));
   }
 
-  // Load these modules
-  Module.load('jscript.dll');     // JScript Engine
-  Module.load('vbscript.dll');    // VBScript Engine
-  Module.load('scrrun.dll');      // Scripting Runtime
-  Module.load('wshom.ocx');       // Windows Script Host Runtime
-  Module.load('wbemdisp.dll');    // WMI Query Language
-  Module.load('msxml3.dll');      // MSXML 3.0
-  Module.load('winhttpcom.dll');  // WinHttpRequest
+  /* Load these modules; debug symbols are needed. */
+  Module.load("jscript.dll");     // JScript Engine
+  Module.load("vbscript.dll");    // VBScript Engine
+  Module.load("scrrun.dll");      // Scripting Runtime
+  Module.load("wshom.ocx");       // Windows Script Host Runtime
+  Module.load("wbemdisp.dll");    // WMI Query Language
+  Module.load("msxml3.dll");      // MSXML 3.0
+  Module.load("winhttpcom.dll");  // WinHttpRequest
 
-  // Hook these functions
+  /* Hook these essential functions. */
   hookCOleScriptCompile();
   hookCHostObjSleep();
   hookWriteFile();
@@ -107,10 +122,20 @@ recv('config', function onMessage(setting)
   hookWriteLine();
   hookCreateFolder();
 
-  // Configuration done; tell frida to resume
+  /* We're done here; tell frida to resume. */
   resume();
 });
 
+function resume()
+{
+  send
+  ({
+    target : "frida",
+    action : "resume"
+  });
+}
+
+/* Print functions related to trace */
 function log(message)
 {
   send
@@ -121,6 +146,36 @@ function log(message)
   });
 }
 
+function action(action)
+{
+  param("Action", action);
+}
+
+function call(module, functionName)
+{
+  log(["Call", ':', ' ', module, '!', functionName, '()'].join(''));
+}
+
+function whereis(filepath)
+{
+  param("Data", ['"', filepath, '"'].join(''));
+}
+
+function param(type, value)
+{
+  log(["|--", ' ', type, " => ", value].join(''));
+}
+
+function separator()
+{
+  log('|');
+}
+
+/* Print functions related to debug.
+ *
+ * Three types of debug message: [*] for status, [+] for info, and [-] for error.
+ *
+ */
 function debug(message)
 {
   if (DEBUG)
@@ -129,6 +184,22 @@ function debug(message)
   }
 }
 
+function status(message)
+{
+  debug(["[*]", ' ', message].join(''));
+}
+
+function info(message)
+{
+  debug(["[+]", ' ', message].join(''));
+}
+
+function error(message)
+{
+  debug(["[-]", ' ', message].join(''));
+}
+
+/* Helper functions */
 function decodePowerShell(encoded)
 {
   send
@@ -192,75 +263,26 @@ function printInprocServer32(clsid)
   });
 }
 
-function resume()
-{
-  send
-  ({
-    target : "frida",
-    action : "resume"
-  });
-}
-
 function loadModuleForAddress(address)
 {
-  var modules = Process.enumerateModules();
-  var i;
-  for (i = 0; i < modules.length; i++)
+  let modules = Process.enumerateModules();
+
+  for (let i = 0; i < modules.length; i++)
   {
     if (address >= modules[i].base && address <= modules[i].base.add(modules[i].size))
     {
-      var modName = modules[i].path
+      let modName = modules[i].path
       try
       {
         DebugSymbol.load(modName)
       }
       catch (e)
       {
-        return;
+        error(e);
       }
     }
     break;
   }
-}
-
-function action(action)
-{
-  param("Action", action);
-}
-
-function call(module, name)
-{
-  log(["Call", ':', ' ', module, '!', name, "()"].join(''));
-}
-
-function whereis(filepath)
-{
-  param("Data", ['"', filepath, '"'].join(''));
-}
-
-function param(type, value)
-{
-  log(["|--", ' ', type, " => ", value].join(''));
-}
-
-function separator()
-{
-  log('|');
-}
-
-function status(message)
-{
-  debug(["[*]", ' ', message].join(''));
-}
-
-function info(message)
-{
-  debug(["[+]", ' ', message].join(''));
-}
-
-function error(message)
-{
-  debug(["[-]", ' ', message].join(''));
 }
 
 function bytesToCLSID(address)
@@ -270,8 +292,8 @@ function bytesToCLSID(address)
     return;
   }
 
-  var data = new Uint8Array(ptr(address).readByteArray(0x10));
-  var clsid =
+  let data = new Uint8Array(ptr(address).readByteArray(0x10));
+  let clsid =
   [
     '{',
     chrToHexStr(data[3]),
@@ -302,18 +324,19 @@ function bytesToCLSID(address)
 
 function chrToHexStr(chr)
 {
-  var hstr = chr.toString(16);
+  let hstr = chr.toString(16);
   return hstr.length < 2 ? "0" + hstr : hstr;
 }
 
 function resolveName(dllName, name)
 {
-  var moduleName = dllName.split('.')[0];
-  var functionName = [dllName, '!', name].join('');
+  let moduleName = dllName.split('.')[0];
+  let functionName = [dllName, '!', name].join('');
 
   status(["Finding", ' ', functionName].join(''));
   status(["Module.findExportByName", ' ', functionName].join(''));
-  var addr = Module.findExportByName(dllName, name);
+
+  let addr = Module.findExportByName(dllName, name);
 
   if (!addr || addr.isNull())
   {
@@ -326,7 +349,6 @@ function resolveName(dllName, name)
     catch (e)
     {
       error(["DebugSymbol.load", ' ', e].join(''));
-      return;
     }
 
     info("DebugSymbol.load finished");
@@ -348,7 +370,7 @@ function resolveName(dllName, name)
     {
       try
       {
-        var addresses = DebugSymbol.findFunctionsMatching(name);
+        let addresses = DebugSymbol.findFunctionsMatching(name);
         addr = addresses[addresses.length - 1];
         info(["DebugSymbol.findFunctionsMatching", ' ', functionName].join(''));
         info(["DebugSymbol.findFunctionsMatching", ' ', addr].join(''));
@@ -364,23 +386,24 @@ function resolveName(dllName, name)
 
 function hookFunction(dllName, funcName, callback)
 {
-  var symbolName = [dllName, '!', funcName].join('');
+  let symbolName = [dllName, '!', funcName].join('');
+  let addr = resolveName(dllName, funcName);
 
-  var addr = resolveName(dllName, funcName);
   if (!addr || addr.isNull())
   {
     return;
   }
+
   status(["Interceptor.attach", ' ', symbolName, '@', addr].join(''));
   Interceptor.attach(addr, callback);
 }
 
 function writeToFile(count, type, data)
 {
-  var directory = ['.\\', WORK_DIR].join('');
-  var filename  = [type, '_', count, '.', "txt"].join('');
-  var filepath  = [directory, '\\', filename].join('');
-  var file      = new File(filepath, 'w');
+  let directory = ['.\\', WORK_DIR].join('');
+  let filename  = [type, '_', count, '.', "txt"].join('');
+  let filepath  = [directory, '\\', filename].join('');
+  let file      = new File(filepath, 'w');
 
   file.write(data);
   file.close();
@@ -388,25 +411,32 @@ function writeToFile(count, type, data)
   whereis(filepath);
 }
 
+/* Hooks */
 function hookCOleScriptCompile()
 {
-  hookFunction("jscript.dll", "COleScript::Compile",
+  let jsmodule = "jscript.dll";
+  const fnName = "COleScript::Compile";
+
+  hookFunction(jsmodule, fnName,
   {
     onEnter: function(args)
     {
-      call("jscript.dll", "COleScript::Compile");
+      call(jsmodule, fnName);
       separator();
-      writeToFile(++eval_count, "code", ptr(args[1]).readUtf16String());
+      writeToFile(++code_count, "code", ptr(args[1]).readUtf16String());
       separator();
     }
   });
-  hookFunction("vbscript.dll", "COleScript::Compile",
+
+  let vbmodule = "vbscript.dll";
+
+  hookFunction(vbmodule, fnName,
   {
     onEnter: function(args)
     {
-      call("vbscript.dll", "COleScript::Compile");
+      call(vbmodule, fnName);
       separator();
-      writeToFile(++eval_count, "code", ptr(args[1]).readUtf16String());
+      writeToFile(++code_count, "code", ptr(args[1]).readUtf16String());
       separator();
     }
   });
@@ -417,17 +447,19 @@ function hookCOleScriptCompile()
   hookCLSIDFromProgID();
 }
 
-var WSAHOST_NOT_FOUND = 11001;
+const WSAHOST_NOT_FOUND = 11001;
 
 function hookGetAddrInfoExW()
 {
-  var host;
-  hookFunction('ws2_32.dll', "GetAddrInfoExW",
+  let module = "ws2_32.dll";
+  let fnName = "GetAddrInfoExW";
+
+  hookFunction(module, fnName,
   {
     onEnter: function(args)
     {
-      host = args[0].readUtf16String();
-      call("ws2_32.dll", "GetAddrInfoExW");
+      let host = args[0].readUtf16String();
+      call(module, fnName);
       separator();
       param("Query", host);
     },
@@ -451,30 +483,33 @@ function hookGetAddrInfoExW()
 
 function hookWSASend()
 {
-  hookFunction('ws2_32.dll', 'WSASend',
+  let module = "ws2_32.dll";
+  let fnName = "WSASend";
+
+  hookFunction(module, fnName,
   {
     onEnter: function(args)
     {
-      var socket = args[0];
-      var buffers = args[2].toInt32();
-      var size = ptr(args[1]).readInt();
+      let socket = args[0];
+      let buffers = args[2].toInt32();
+      let size = ptr(args[1]).readInt();
 
-      call("ws2_32.dll", "WSASend");
+      call(module, fnName);
       separator();
-      param("Socket", socket);
+      param("Socket ", socket);
       param("Buffers", buffers);
-      param("Size", size);
+      param("Size   ", size);
 
-      var lpwbuf = args[1].toInt32() + 4;
-      var dptr = Memory.readInt(ptr(lpwbuf));
-      var data = hexdump(ptr(dptr), { length: size });
+      let lpwbuf = args[1].toInt32() + 4;
+      let dptr = Memory.readInt(ptr(lpwbuf));
+      let data = hexdump(ptr(dptr), { length: size });
 
       writeToFile(++sock_count, "sock", data);
 
       if (!ALLOW_NET)
       {
-        var ptr_closesocket = Module.findExportByName("ws2_32.dll", "closesocket");
-        var closesocket = new NativeFunction(ptr_closesocket, 'int', ['pointer']);
+        let ptr_closesocket = Module.findExportByName("ws2_32.dll", "closesocket");
+        let closesocket = new NativeFunction(ptr_closesocket, "int", ["pointer"]);
         closesocket(args[0]);
         action("Block)");
       }
@@ -483,7 +518,7 @@ function hookWSASend()
   });
 }
 
-var SHOW =
+const SHOW =
 {
   0  : "SW_HIDE",
   1  : "SW_SHOWNORMAL",
@@ -500,41 +535,44 @@ var SHOW =
 
 function hookShellExecuteExW()
 {
-  hookFunction('shell32.dll', "ShellExecuteExW",
+  let module = "shell32.dll";
+  let fnName = "ShellExecuteExW";
+
+  hookFunction(module, fnName,
   {
     onEnter: function(args)
     {
-      var shellinfo_ptr = args[0];
-      var ptr_verb = Memory.readPointer(shellinfo_ptr.add(12));
-      var ptr_file = Memory.readPointer(shellinfo_ptr.add(16));
-      var ptr_params = Memory.readPointer(shellinfo_ptr.add(20));
-      var nshow = Memory.readInt(shellinfo_ptr.add(28));
-      var lpfile = Memory.readUtf16String(ptr(ptr_file));
-      var lpparams = Memory.readUtf16String(ptr(ptr_params));
-      var lpverb = Memory.readUtf16String(ptr(ptr_verb));
+      let shellinfo_ptr = args[0];
+      let ptr_verb = Memory.readPointer(shellinfo_ptr.add(12));
+      let ptr_file = Memory.readPointer(shellinfo_ptr.add(16));
+      let ptr_params = Memory.readPointer(shellinfo_ptr.add(20));
+      let nshow = Memory.readInt(shellinfo_ptr.add(28));
+      let lpfile = Memory.readUtf16String(ptr(ptr_file));
+      let lpparams = Memory.readUtf16String(ptr(ptr_params));
+      let lpverb = Memory.readUtf16String(ptr(ptr_verb));
 
-      var data =
+      const data =
       [
-        "Command", '=', lpfile,   '\n',
-        "Params" , '=', lpparams, '\n',
-        "Verb"   , '=', lpverb,   '\n',
-        "nShow"  , '=', SHOW[nshow]
+        "Command", ': ', lpfile,   '\n',
+        "Params ", ': ', lpparams, '\n',
+        "Verb   ", ': ', lpverb,   '\n',
+        "Style  ", ': ', SHOW[nshow]
       ];
 
-      call("shell32.dll", "ShellExecuteExW");
+      call(module, fnName);
       separator();
 
-      writeToFile(++shell_count, "shell", data.join(''));
+      writeToFile(++exec_count, "shell", data.join(''));
 
-      var encodedCommand_re = /.*powershell.*-e[nc]*\s+(.*)/i;
-      var encodedCommand;
+      const encodedCommand_re = /.*powershell.*-e[nc]*\s+(.*)/i;
+      let encodedCommand;
       if (lpparams.match(encodedCommand_re))
       {
         encodedCommand = lpparams.replace(encodedCommand_re, "$1");
         decodePowerShell(encodedCommand);
       }
 
-      // "runas" doesn't spawn child process - dangerous!
+      /* "runas" doesn't spawn child process; dangerous! */
       if (lpverb.match(/open/i))
       {
         if (ALLOW_SHELL)
@@ -579,13 +617,16 @@ function hookShellExecuteExW()
 
 function hookCWshShellRegWrite()
 {
-  hookFunction('wshom.ocx', "CWshShell::RegWrite",
+  let module = "wshom.ocx";
+  let fnName = "CWshShell::RegWrite";
+
+  hookFunction(module, fnName,
   {
     onEnter: function(args)
     {
-      var path = args[1].readUtf16String();
+      let path = args[1].readUtf16String();
 
-      call("wshom.ocx", "CWshShell::RegWrite");
+      call(module, fnName);
       separator();
 
       if (path.slice(-1) == '\\')
@@ -609,37 +650,30 @@ function hookCWshShellRegWrite()
   });
 }
 
-/*
-DWORD GetFinalPathNameByHandleW
-(
-  [in]  HANDLE hFile,
-  [out] LPWSTR lpszFilePath,
-  [in]  DWORD  cchFilePath,
-  [in]  DWORD  dwFlags
-);
-*/
-
 function hookWriteFile()
 {
-  hookFunction('kernel32.dll', "WriteFile",
+  let module = "kernel32.dll";
+  let fnName = "WriteFile";
+  hookFunction(module, fnName,
   {
     onEnter: function(args)
     {
-      var handle = args[0];
-      var size = args[2].toInt32();
+      let handle = args[0];
+      let size = args[2].toInt32();
 
-      var ptrGetFinalPathNameByHandleW = Module.findExportByName('kernel32.dll', 'GetFinalPathNameByHandleW');
-      var GetFinalPathNameByHandleW = new NativeFunction(ptrGetFinalPathNameByHandleW, 'int', ['pointer', 'pointer', 'int', 'int']);
+      let ptrGetFinalPathNameByHandleW = Module.findExportByName("kernel32.dll", "GetFinalPathNameByHandleW");
+      let GetFinalPathNameByHandleW = new NativeFunction(ptrGetFinalPathNameByHandleW, "int", ["pointer", "pointer", "int", "int"]);
 
-      var lpszFilePath = Memory.alloc(256);
+      let lpszFilePath = Memory.alloc(256);
       GetFinalPathNameByHandleW(handle, ptr(lpszFilePath), 256, 0x8);
-      var path = lpszFilePath.readUtf16String();
 
-      call("kernel32.dll", "WriteFile");
+      let path = lpszFilePath.readUtf16String();
+
+      call(module, fnName);
       separator();
       param("Handle", handle);
-      param("Size", size);
-      param("Path", path);
+      param("Size  ", size);
+      param("Path  ", path);
       separator();
 
       if (!ALLOW_FILE)
@@ -652,17 +686,20 @@ function hookWriteFile()
 
 function hookCopyFileA()
 {
-  hookFunction('scrrun.dll', "CFileSystem::CopyFileA",
+  let module = "scrrun.dll";
+  let fnName = "CFileSystem::CopyFileA";
+
+  hookFunction(module, fnName,
   {
     onEnter: function(args)
     {
-      var src = args[1].readUtf16String();
-      var dst = args[2].readUtf16String();
+      let src = args[1].readUtf16String();
+      let dst = args[2].readUtf16String();
 
-      call("scrrun.dll", "CFileSystem::CopyFileA");
+      call(module, fnName);
       separator();
       param("From", src);
-      param("To", dst);
+      param("To  ", dst);
       separator();
 
       if (!ALLOW_FILE)
@@ -675,17 +712,20 @@ function hookCopyFileA()
 
 function hookMoveFileA()
 {
-  hookFunction('scrrun.dll', "CFileSystem::MoveFileA",
+  let module = "scrrun.dll";
+  let fnName = "CFileSystem::MoveFileA";
+
+  hookFunction(module, fnName,
   {
     onEnter: function(args)
     {
-      var src = args[1].readUtf16String();
-      var dst = args[2].readUtf16String();
+      let src = args[1].readUtf16String();
+      let dst = args[2].readUtf16String();
 
-      call("scrrun.dll", "CFileSystem::MoveFileA");
+      call(module, fnName);
       separator();
       param("From", src);
-      param("To", dst);
+      param("To  ", dst);
       separator();
 
       if (!ALLOW_FILE)
@@ -698,13 +738,16 @@ function hookMoveFileA()
 
 function hookCreateFolder()
 {
-  hookFunction('scrrun.dll', "CFileSystem::CreateFolder",
+  let module = "scrrun.dll";
+  let fnName = "CFileSystem::CreateFolder";
+
+  hookFunction(module, fnName,
   {
     onEnter: function(args)
     {
-      var path = ptr(args[1]).readUtf16String();
+      let path = ptr(args[1]).readUtf16String();
 
-      call("scrrun.dll", "CFileSystem::CreateFolder");
+      call(module, fnName);
       separator();
       param("Path", path);
       separator();
@@ -717,39 +760,27 @@ function hookCreateFolder()
   });
 }
 
-/*
-HRESULT CLSIDFromProgID
-(
-  [in]  LPCOLESTR lpszProgID,
-  [out] LPCLSID   lpclsid
-);
-*/
-
-var CO_E_CLASSSTRING   = 0x800401F3;
-var S_OK = 0;
-var BADPROGID =
-{
-  "internetexplorer.application"   : 1,
-  "internetexplorer.application.1" : 1,
-  "schedule.service"               : 1,
-  "schedule.service.1"             : 1,
-  "windowsinstaller.installer"     : 1
-};
+const CO_E_CLASSSTRING = 0x800401F3;
+const S_OK = 0;
 
 function hookCLSIDFromProgID()
 {
-  var ptrCLSIDFromProgID = Module.findExportByName('ole32.dll', "CLSIDFromProgID");
-  var CLSIDFromProgID = new NativeFunction(ptrCLSIDFromProgID, 'uint', ['pointer', 'pointer']);
+  let module = "ole32.dll";
+  let fnName = "CLSIDFromProgID";
+
+  let ptrCLSIDFromProgID = Module.findExportByName(module, fnName);
+  let CLSIDFromProgID = new NativeFunction(ptrCLSIDFromProgID, "uint", ["pointer", "pointer"]);
+
   Interceptor.replace(ptrCLSIDFromProgID, new NativeCallback(function (lpszProgID, lpclsid)
   {
-    var retval = CLSIDFromProgID(lpszProgID, lpclsid);
-    var progid = lpszProgID.readUtf16String();
-    var clsid  = bytesToCLSID(ptr(lpclsid))
+    let retval = CLSIDFromProgID(lpszProgID, lpclsid);
+    let progid = lpszProgID.readUtf16String();
+    let clsid  = bytesToCLSID(ptr(lpclsid))
 
-    call("ole32.dll", "CLSIDFromProgID");
+    call(module, fnName);
     separator();
     param("ProgID", progid);
-    param("CLSID", clsid);
+    param("CLSID ", clsid);
 
     printInprocServer32(clsid);
 
@@ -763,7 +794,7 @@ function hookCLSIDFromProgID()
     }
     separator();
     return retval;
-  }, 'uint', ['pointer', 'pointer'], 'stdcall'));
+  }, "uint", ["pointer", "pointer"], "stdcall"));
 }
 
 function hookDispCallFunc()
@@ -771,25 +802,29 @@ function hookDispCallFunc()
   if (!("DispCallFunc" in FILTER))
   {
     FILTER["DispCallFunc"] = 1;
-    hookFunction("oleaut32.dll", "DispCallFunc",
+
+    let module = "oleaut32.dll";
+    let fnName = "DispCallFunc";
+
+    hookFunction(module, fnName,
     {
       onEnter: function(args)
       {
-        var pvInstance = args[0];
-        var oVft = args[1];
-        var instance = ptr(ptr(pvInstance).readULong());
-        var vftbPtr = instance.add(oVft);
-        var functionAddress = ptr(ptr(vftbPtr).readULong());
+        let pvInstance = args[0];
+        let oVft = args[1];
+        let instance = ptr(ptr(pvInstance).readULong());
+        let vftbPtr = instance.add(oVft);
+        let functionAddress = ptr(ptr(vftbPtr).readULong());
 
         loadModuleForAddress(functionAddress)
-        var functionName = DebugSymbol.fromAddress(functionAddress)
+        let functionName = DebugSymbol.fromAddress(functionAddress)
 
-        call("oleaut32.dll", "DispCallFunc");
+        call(module, fnName);
         separator();
         param("Function", functionName);
         separator();
 
-        // hook new functions here if they aren't already hooked
+        /* Hook new functions here if they aren't already hooked. */
         if (!(functionName.name in FILTER))
         {
           FILTER[functionName.name] = 1;
@@ -800,8 +835,8 @@ function hookDispCallFunc()
               call(functionName.moduleName, functionName.name);
               separator();
 
-              var i, arg;
-              var MAX_ARGS = 5;
+              let i, arg;
+              let MAX_ARGS = 5;
               for (i = 0; i < MAX_ARGS; i++)
               {
                 if (args[i] === 0)
@@ -831,11 +866,14 @@ function hookDispCallFunc()
 
 function hookCHostObjSleep()
 {
-  hookFunction('wscript.exe', "CHostObj::Sleep",
+  let module = "wscript.exe";
+  let fnName = "CHostObj::Sleep";
+
+  hookFunction(module, fnName,
   {
     onEnter: function(args)
     {
-      call("wscript.exe", "CHostObj::Sleep");
+      call(module, fnName);
       separator();
       param("Delay", args[1].toInt32() + "ms" +
         ((!ALLOW_SLEEP) ? " (Skipping to 0ms)" : ""));
@@ -850,11 +888,14 @@ function hookCHostObjSleep()
 
 function hookCSWbemServicesExecQuery()
 {
-  hookFunction('wbemdisp.dll', 'CSWbemServices::ExecQuery',
+  let module = "wbemdisp.dll";
+  let fnName = "CSWbemServices::ExecQuery";
+
+  hookFunction(module, fnName,
   {
     onEnter: function(args)
     {
-      call("wbemdisp.dll", "CSWbemServices::ExecQuery");
+      call(module, fnName);
       separator();
       param("Query", args[1].readUtf16String());
       separator();
@@ -864,17 +905,20 @@ function hookCSWbemServicesExecQuery()
 
 function hookXMLHttpOpen()
 {
-  hookFunction('msxml3.dll', 'XMLHttp::open',
+  let module = "msxml3.dll";
+  let fnName = "XMLHttp::open";
+
+  hookFunction(module, fnName,
   {
     onEnter: function(args)
     {
-      var verb = args[1].readUtf16String();
-      var url  = args[2].readUtf16String();
+      let verb = args[1].readUtf16String();
+      let url  = args[2].readUtf16String();
 
-      call("msxml3.dll", "XMLHttp::open");
+      call(module, fnName);
       separator();
       param("Verb", verb);
-      param("URL", url);
+      param("URL ", url);
       separator();
     }
   });
@@ -882,17 +926,20 @@ function hookXMLHttpOpen()
 
 function hookXMLHttpsetRequestHeader()
 {
-  hookFunction('msxml3.dll', 'XMLHttp::setRequestHeader',
+  let module = "msxml3.dll";
+  let fnName = "XMLHttp::setRequestHeader";
+
+  hookFunction(module, fnName,
   {
     onEnter: function(args)
     {
-      var header = args[1].readUtf16String();
-      var value  = args[2].readUtf16String();
+      let header = args[1].readUtf16String();
+      let value  = args[2].readUtf16String();
 
-      call("msxml3.dll", "XMLHttp::setRequestHeader");
+      call(module, fnName);
       separator();
       param("Header", header);
-      param("Value", value);
+      param("Value ", value);
       separator();
     }
   });
@@ -900,15 +947,18 @@ function hookXMLHttpsetRequestHeader()
 
 function hookXMLHttpSend()
 {
-  hookFunction('msxml3.dll', 'XMLHttp::send',
+  let module = "msxml3.dll";
+  let fnName = "XMLHttp::send";
+
+  hookFunction(module, fnName,
   {
     onEnter: function(args)
     {
-      call("msxml3.dll", "XMLHttp::send");
+      call(module, fnName);
       separator();
       try
       {
-        var data = args[3].readUtf16String();
+        let data = args[3].readUtf16String();
         if (data)
         {
           param("Data", data);
@@ -923,7 +973,7 @@ function hookXMLHttpSend()
   });
 }
 
-var FOLDERSPEC =
+const FOLDERSPEC =
 {
   0x0 : "WindowsFolder",
   0x1 : "SystemFolder",
@@ -932,13 +982,16 @@ var FOLDERSPEC =
 
 function hookCFileSystemGetSpecialFolder()
 {
-  hookFunction("scrrun.dll", "CFileSystem::GetSpecialFolder",
+  let module = "scrrun.dll";
+  let fnName = "CFileSystem::GetSpecialFolder";
+
+  hookFunction(module, fnName,
   {
     onEnter: function(args)
     {
-      var folder = FOLDERSPEC[args[1].toInt32()];
+      let folder = FOLDERSPEC[args[1].toInt32()];
 
-      call("scrrun.dll", "CFileSystem::GetSpecialFolder");
+      call(module, fnName);
       separator();
       param("Folder", folder);
       separator();
@@ -948,17 +1001,20 @@ function hookCFileSystemGetSpecialFolder()
 
 function hookCHttpRequestOpen()
 {
-  hookFunction('winhttpcom.dll', 'CHttpRequest::Open',
+  let module = "winhttpcom.dll";
+  let fnName = "CHttpRequest::Open";
+
+  hookFunction(module, fnName,
   {
     onEnter: function(args)
     {
-      var verb = args[1].readUtf16String();
-      var url  = args[2].readUtf16String();
+      let verb = args[1].readUtf16String();
+      let url  = args[2].readUtf16String();
 
-      call("winhttpcom.dll", "CHttpRequest::Open");
+      call(module, fnName);
       separator();
       param("Verb", verb);
-      param("URL", url);
+      param("URL ", url);
       separator();
     }
   });
@@ -966,17 +1022,20 @@ function hookCHttpRequestOpen()
 
 function hookCHttpRequestSetRequestHeader()
 {
-  hookFunction('winhttpcom.dll', 'CHttpRequest::SetRequestHeader',
+  let module = "winhttpcom.dll";
+  let fnName = "CHttpRequest::SetRequestHeader";
+
+  hookFunction(module, fnName,
   {
     onEnter: function(args)
     {
-      var header = args[1].readUtf16String();
-      var value  = args[2].readUtf16String();
+      let header = args[1].readUtf16String();
+      let value  = args[2].readUtf16String();
 
-      call("winhttpcom.dll", "CHttpRequest::SetRequestHeader");
+      call(module, fnName);
       separator();
       param("Header", header);
-      param("Value", value);
+      param("Value ", value);
       separator();
     }
   });
@@ -984,15 +1043,17 @@ function hookCHttpRequestSetRequestHeader()
 
 function hookCHttpRequestSend()
 {
-  hookFunction('winhttpcom.dll', 'CHttpRequest::Send',
+  let module = "winhttpcom.dll";
+  let fnName = "CHttpRequest::Send";
+  hookFunction(module, fnName,
   {
     onEnter: function(args)
     {
-      call("winhttpcom.dll", "CHttpRequest::Send");
+      call(module, fnName);
       separator();
       try
       {
-        var data = args[3].readUtf16String();
+        let data = args[3].readUtf16String();
         if (data)
         {
           param("Data", data);
@@ -1007,18 +1068,8 @@ function hookCHttpRequestSend()
   });
 }
 
-/*
-HRESULT MkParseDisplayName
-(
-  [in]  LPBC      pbc,
-  [in]  LPCOLESTR szUserName,
-  [out] ULONG     *pchEaten,
-  [out] LPMONIKER *ppmk
-);
-*/
-
-var MK_E_SYNTAX = 0x800401E4;
-var HRESULT =
+const MK_E_SYNTAX = 0x800401E4;
+const HRESULT =
 {
   0x00000000 : "S_OK",
   0x80040154 : "REGDB_E_CLASSNOTREG",
@@ -1027,35 +1078,39 @@ var HRESULT =
 
 function hookMkParseDisplayName()
 {
-  var ptrMkParseDisplayName = Module.findExportByName('ole32.dll', "MkParseDisplayName");
-  var MkParseDisplayName = new NativeFunction(ptrMkParseDisplayName, 'uint', ['pointer', 'pointer', 'pointer', 'pointer']);
+  let module = "ole32.dll";
+  let fnName = "MkParseDisplayName";
+
+  let ptrMkParseDisplayName = Module.findExportByName(module, fnName);
+  let MkParseDisplayName = new NativeFunction(ptrMkParseDisplayName, "uint", ["pointer", "pointer", "pointer", "pointer"]);
+
   Interceptor.replace(ptrMkParseDisplayName, new NativeCallback(function(pbc, szUserName, pchEaten, ppmk)
   {
-    var retval = MkParseDisplayName(pbc, szUserName, pchEaten, ppmk);
-    var moniker = ptr(szUserName).readUtf16String();
+    let retval = MkParseDisplayName(pbc, szUserName, pchEaten, ppmk);
+    let moniker = ptr(szUserName).readUtf16String();
 
-    call("ole32.dll", "MkParseDisplayName");
+    call(module, fnName);
     separator();
     param("Moniker", moniker);
 
-    // ProgIDFromCLSID() to expose bad ProgIDs from CLSID
-    var ptrCLSIDFromString = Module.findExportByName('ole32.dll', "CLSIDFromString");
-    var CLSIDFromString = new NativeFunction(ptrCLSIDFromString, 'uint', ['pointer', 'pointer']);
-    var ptrProgIDFromCLSID = Module.findExportByName('ole32.dll', "ProgIDFromCLSID");
-    var ProgIDFromCLSID = new NativeFunction(ptrProgIDFromCLSID, 'uint', ['pointer', 'pointer']);
+    /* Use ProgIDFromCLSID() to expose bad ProgIDs from CLSID. */
+    let ptrCLSIDFromString = Module.findExportByName(module, "CLSIDFromString");
+    let CLSIDFromString = new NativeFunction(ptrCLSIDFromString, "uint", ["pointer", "pointer"]);
+    let ptrProgIDFromCLSID = Module.findExportByName(module, "ProgIDFromCLSID");
+    let ProgIDFromCLSID = new NativeFunction(ptrProgIDFromCLSID, "uint", ["pointer", "pointer"]);
 
-    var clsid_re = /(new:)(\{[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\})/;
-    var clsid;
+    const clsid_re = /(new:)(\{[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\})/;
+    let clsid;
 
     if (moniker.match(clsid_re))
     {
       clsid = moniker.replace(clsid_re, "$2");
-      param("CLSID", clsid);
+      param("CLSID  ", clsid);
 
-      var lpsz = Memory.allocUtf16String(clsid);
-      var pclsid = Memory.alloc(16);
-      var lplpszProgID = Memory.alloc(256);
-      var result, szProgID;
+      let lpsz = Memory.allocUtf16String(clsid);
+      let pclsid = Memory.alloc(16);
+      let lplpszProgID = Memory.alloc(256);
+      let result, szProgID;
 
       result = CLSIDFromString(lpsz, ptr(pclsid));
       result = ProgIDFromCLSID(pclsid, lplpszProgID);
@@ -1063,11 +1118,11 @@ function hookMkParseDisplayName()
 
       if (HRESULT[result] === "S_OK")
       {
-        param("ProgID", szProgID);
+        param("ProgID ", szProgID);
       }
       else
       {
-        param("Result", HRESULT[result]);
+        param("Result ", HRESULT[result]);
         separator();
       }
 
@@ -1084,28 +1139,31 @@ function hookMkParseDisplayName()
     }
     else if (moniker.match(/win32_process/i))
     {
-        if (!ALLOW_PROC)
-        {
-          action("Block");
-          separator();
-          retval = MK_E_SYNTAX;
-          return retval;
-        }
+      if (!ALLOW_PROC)
+      {
+        action("Block");
+        separator();
+        retval = MK_E_SYNTAX;
+        return retval;
+      }
     }
     separator();
-  }, 'uint', ['pointer', 'pointer', 'pointer', 'pointer']));
+  }, "uint", ["pointer", "pointer", "pointer", "pointer"]));
 }
 
 function hookWriteLine()
 {
-  hookFunction('scrrun.dll', "CTextStream::WriteLine",
+  let module = "scrrun.dll";
+  let fnName = "CTextStream::WriteLine";
+
+  hookFunction(module, fnName,
   {
     onEnter: function(args)
     {
-        call("scrrun.dll", "CTextStream::WriteLine");
-        separator();
-        writeToFile(++text_count, "text", ptr(args[1]).readUtf16String());
-        separator();
+      call(module, fnName);
+      separator();
+      writeToFile(++text_count, "text", ptr(args[1]).readUtf16String());
+      separator();
     }
   });
 }

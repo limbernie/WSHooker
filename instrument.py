@@ -9,7 +9,7 @@ from printer import *
 class Instrumenter:
   _WSCRIPT_PATH_WOW64 = "C:\\Windows\SysWOW64\\"
   _WSCRIPT_PATH = "C:\\Windows\System32\\"
-  _WSCRIPT_EXE = 'wscript.exe'
+  _WSCRIPT_EXE = "wscript.exe"
 
   def __init__(self, hook):
     self.hook = hook
@@ -33,13 +33,13 @@ class Instrumenter:
     self.pid = pid
     session = frida.attach(self.pid)
     session.enable_child_gating()
-    session.on('detached', self.on_detached)
+    session.on("detached", self.on_detached)
     script = session.create_script(self.hook)
-    script.on('message', self.on_message)
-    script.on('destroyed', self.on_destroyed)
+    script.on("message", self.on_message)
+    script.on("destroyed", self.on_destroyed)
     script.load()
 
-    # sending config to script
+    # Sending config to script
     script.post({
       "type" : "config",
       "debug" : debug,
@@ -55,7 +55,7 @@ class Instrumenter:
       "extension"     : config.EXTENSION
     })
 
-    # keep the process suspended until resumed
+    # Keep the process suspended until resumed
     while True:
       try:
         time.sleep(0.5)
@@ -81,39 +81,39 @@ class Instrumenter:
     status("Warning: Instrumentation script is destroyed")
 
   def on_message(self, message, data):
-    if message['type'] == 'send':
-      msg_data = message['payload']
-      if msg_data['target'] == 'registry':
-        if msg_data['action'] == 'delete':
-          if msg_data['type'] == 'key':
-            if msg_data['path'] not in config.REG_KEYS:
-              config.REG_KEYS.append(msg_data['path'])
-          elif msg_data['type'] == 'value':
-            helpers.deleteValue(msg_data['path'])
-        elif msg_data['action'] == 'search':
-          if msg_data['type'] == 'value':
-            helpers.InprocServer32FromCLSID(msg_data['clsid'])
-      elif msg_data['target'] == 'file':
-        if msg_data['action'] == 'delete':
-          if msg_data['path'] not in config.FILES:
-            config.FILES.append(msg_data['path'])
-      elif msg_data['target'] == 'folder':
-        if msg_data['action'] == 'delete':
-          if msg_data['path'] not in config.FOLDERS:
-            config.FOLDERS.append(msg_data['path'])
-      elif msg_data['target'] == 'frida':
-        if msg_data['action'] == 'resume':
+    if message["type"] == "send":
+      msg_data = message["payload"]
+      if msg_data["target"] == "registry":
+        if msg_data["action"] == "delete":
+          if msg_data["type"] == "key":
+            if msg_data["path"] not in config.REG_KEYS:
+              config.REG_KEYS.append(msg_data["path"])
+          elif msg_data["type"] == "value":
+            helpers.deleteValue(msg_data["path"])
+        elif msg_data["action"] == "search":
+          if msg_data["type"] == "value":
+            helpers.InprocServer32FromCLSID(msg_data["clsid"])
+      elif msg_data["target"] == "file":
+        if msg_data["action"] == "delete":
+          if msg_data["path"] not in config.FILES:
+            config.FILES.append(msg_data["path"])
+      elif msg_data["target"] == "folder":
+        if msg_data["action"] == "delete":
+          if msg_data["path"] not in config.FOLDERS:
+            config.FOLDERS.append(msg_data["path"])
+      elif msg_data["target"] == "frida":
+        if msg_data["action"] == "resume":
           status("Hooking process: %s" % self.pid)
           frida.resume(self.pid)
           status("[*] Press Ctrl-C to kill the process...")
           print("+---------+")
           print("|  Trace  |")
           print("+---------+")
-      elif msg_data['target'] == 'system':
-        if msg_data['action'] == 'log':
-          log(msg_data['message'])
-        elif msg_data['action'] == 'decode':
-          helpers.decodePowerShell(msg_data['value'])
+      elif msg_data["target"] == "system":
+        if msg_data["action"] == "log":
+          log(msg_data["message"])
+        elif msg_data["action"] == "decode":
+          helpers.decodePowerShell(msg_data["value"])
 
   def on_child_added(self, child):
     status("%s spawned child process: %s" % (self.pid, child.pid))

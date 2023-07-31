@@ -9,117 +9,117 @@ import helpers
 from instrument import Instrumenter
 from printer import *
 
-if __name__ == '__main__':
+if __name__ == "__main__":
   helpers.clean_frida_helper()
-  parser = argparse.ArgumentParser(description='WSHooker - Windows Script Hooking with Frida')
+  parser = argparse.ArgumentParser(description="WSHooker - Windows Script Hooking with Frida")
   group = parser.add_mutually_exclusive_group()
   group.add_argument(
-    '-p',
-    '--pid',
+    "-p",
+    "--pid",
     dest="pid",
     help="process id (reserved for future release)",
     type=int
   )
   group.add_argument(
-    '-s',
-    '--script',
+    "-s",
+    "--script",
     dest="script",
     help="path to malicious script"
   )
   parser.add_argument(
-    '-a',
-    '--args',
-    dest='args',
+    "-a",
+    "--args",
+    dest="args",
     help="arguments to malicious script, e.g., -a \"arg1 arg2 arg3 ...\""
   )
   parser.add_argument(
-    '-o',
-    '--output',
-    dest='trace',
+    "-o",
+    "--output",
+    dest="trace",
     default="trace.log",
     help="write output trace to file (defaults to trace.log)"
   )
   parser.add_argument(
-    '--allow-badcom',
+    "--allow-badcom",
     dest="allow_badcom",
     action="store_true",
     help="(dangerous) allow bad COM"
   )
   parser.add_argument(
-    '--allow-file',
+    "--allow-file",
     dest="allow_file",
     action="store_true",
     help="(dangerous) allow file copy/move/write"
   )
   parser.add_argument(
-    '--allow-net',
+    "--allow-net",
     dest="allow_net",
     action="store_true",
     help="(dangerous) allow network requests"
   )
   parser.add_argument(
-    '--allow-proc',
+    "--allow-proc",
     dest="allow_proc",
     action="store_true",
     help="(dangerous) allow Win32_Process"
   )
   parser.add_argument(
-    '--allow-reg',
+    "--allow-reg",
     dest="allow_reg",
     action="store_true",
     help="(dangerous) allow registry write"
   )
   parser.add_argument(
-    '--allow-shell',
+    "--allow-shell",
     dest="allow_shell",
     action="store_true",
     help="(dangerous) allow shell commands as Administrator"
   )
   parser.add_argument(
-    '--allow-sleep',
+    "--allow-sleep",
     dest="allow_sleep",
     action="store_true",
     help="(slow-down) allow WScript.Sleep()"
   )
   parser.add_argument(
-    '--debug',
+    "--debug",
     dest="debug",
     action="store_true",
     help="(verbose) display debug message"
   )
   parser.add_argument(
-    '--dynamic',
+    "--dynamic",
     dest="dynamic",
     action="store_true",
     help="(verbose) enable dynamic tracing"
   )
   parser.add_argument(
-    '--no-banner',
+    "--no-banner",
     dest="no_banner",
     action="store_true",
     help="remove banner in output trace"
   )
   parser.add_argument(
-    '--timestamp',
+    "--timestamp",
     dest="timestamp",
     action="store_true",
     help="enable timestamp in output trace"
   )
   args = parser.parse_args()
 
-  with open('hook.js', 'r') as fd:
+  with open("hook.js", 'r') as fd:
     hook = fd.read()
 
   instrumenter = Instrumenter(hook)
 
-  # reserved for future release
+  # Reserved for future release
   if args.pid is not None:
     parser.print_help()
     exit(1)
 
   elif args.script:
     if os.path.exists(args.script):
-      valid_extensions = ['js', 'vbs', 'wsf']
+      valid_extensions = ["js", "vbs", "wsf"]
       try:
         EXTENSION = os.path.basename(args.script).rsplit('.', 1)[1]
         if EXTENSION.lower() not in valid_extensions:
@@ -154,10 +154,10 @@ if __name__ == '__main__':
         status("Using System32")
         wshost = ''.join([Instrumenter._WSCRIPT_PATH, Instrumenter._WSCRIPT_EXE])
 
-      # use '/b' to suppress alerts, errors or prompts
-      cmd = [wshost, '/b', args.script]
+      # Use "/b" to suppress alerts, errors or prompts
+      cmd = [wshost, "/b", args.script]
 
-      # arguments to malicious script, if any
+      # Arguments to malicious script, if any
       if args.args:
         for a in args.args.split(' '):
           cmd.append(a)
