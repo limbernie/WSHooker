@@ -1,4 +1,5 @@
 import frida
+import json
 import time
 
 import config
@@ -51,8 +52,10 @@ class Instrumenter:
       "allow_shell"   : allow_shell,
       "allow_sleep"   : allow_sleep,
       "dynamic"       : dynamic,
-      "work_dir"      : config.WORK_DIR,
-      "extension"     : config.EXTENSION
+      "badprogid"     : json.dumps(config.BADPROGID),
+      "extension"     : config.EXTENSION,
+      "filter"        : json.dumps(config.FILTER),
+      "work_dir"      : config.WORK_DIR
     })
 
     # Keep the process suspended until resumed

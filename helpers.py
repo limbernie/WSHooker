@@ -37,7 +37,7 @@ def parseHKEY(path):
     return hkey
 
 def search():
-  for file in glob.glob(''.join(['.\\', config.WORK_DIR, '\\', '*[degkl]_*.txt'])):
+  for file in glob.glob(''.join(['.\\', config.WORK_DIR, '\\', '*[gdeck]_*.txt'])):
     f = open(file, 'r', encoding='utf-8')
     text = f.read()
 

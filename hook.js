@@ -2,7 +2,9 @@
  * hook.js - Frida instrumentation script
  */
 
-/* Global variables */
+/*
+ * Global variables
+ */
 let ALLOW_BADCOM = false;
 let ALLOW_FILE   = false;
 let ALLOW_NET    = false;
@@ -12,83 +14,56 @@ let ALLOW_SHELL  = false;
 let ALLOW_SLEEP  = false;
 let DEBUG        = false;
 let DYNAMIC      = false;
-let EXTENSION, WORK_DIR;
+let BADPROGID, EXTENSION, FILTER, WORK_DIR;
 
-/* File write counters */
+/*
+ * File write counters
+ */
 let code_count = 0;
 let exec_count = 0;
 let sock_count = 0;
 let text_count = 0;
 
-/* Filter these functions from dynamic tracing. */
-let FILTER =
-{
-  "CWshShell::RegWrite"            : 1,
-  "CHostObj::Sleep"                : 1,
-  "CSWbemServices::ExecQuery"      : 1,
-  "CHostObj::CreateObject"         : 1,
-  "CWshShell::Run"                 : 1,
-  "CShellDispatch::ShellExecuteW"  : 1,
-  "XMLHttp::open"                  : 1,
-  "XMLHttp::setRequestHeader"      : 1,
-  "XMLHttp::send"                  : 1,
-  "CFileSystem::GetSpecialFolder"  : 1,
-  "CFileSystem::CopyFileA"         : 1,
-  "CFileSystem::MoveFileA"         : 1,
-  "CFileSystem::CreateFolder"      : 1,
-  "CHttpRequest::Open"             : 1,
-  "CHttpRequest::SetRequestHeader" : 1,
-  "CHttpRequest::Send"             : 1,
-  "CTextStream::Close"             : 1,
-  "CTextStream::Write"             : 1,
-  "CTextStream::WriteLine"         : 1
-};
-
-/* Bad ProgIDs known to evade detection based on parent-child process relationship. */
-let BADPROGID =
-{
-  "internetexplorer.application"   : 1,
-  "internetexplorer.application.1" : 1,
-  "schedule.service"               : 1,
-  "schedule.service.1"             : 1,
-  "windowsinstaller.installer"     : 1
-};
-
+/*
+ * Configuration
+ */
 recv("config", function onMessage(setting)
 {
   DEBUG = setting["debug"];
-  status(["DEBUG", '=', DEBUG].join(''));
+  info(["DEBUG", '=', DEBUG].join(''));
   ALLOW_BADCOM = setting["allow_badcom"];
-  status(["ALLOW_BADCOM", '=', ALLOW_BADCOM].join(''));
+  info(["ALLOW_BADCOM", '=', ALLOW_BADCOM].join(''));
   ALLOW_FILE = setting["allow_file"];
-  status(["ALLOW_FILE", '=', ALLOW_FILE].join(''));
+  info(["ALLOW_FILE", '=', ALLOW_FILE].join(''));
   ALLOW_NET = setting["allow_net"];
-  status(["ALLOW_NET", '=', ALLOW_NET].join(''));
+  info(["ALLOW_NET", '=', ALLOW_NET].join(''));
   ALLOW_PROC = setting["allow_proc"];
-  status(["ALLOW_PROC", '=', ALLOW_PROC].join(''));
+  info(["ALLOW_PROC", '=', ALLOW_PROC].join(''));
   ALLOW_REG = setting["allow_reg"];
-  status(["ALLOW_REG", '=', ALLOW_REG].join(''));
+  info(["ALLOW_REG", '=', ALLOW_REG].join(''));
   ALLOW_SHELL = setting["allow_shell"];
-  status(["ALLOW_SHELL", '=', ALLOW_SHELL].join(''));
+  info(["ALLOW_SHELL", '=', ALLOW_SHELL].join(''));
   ALLOW_SLEEP = setting["allow_sleep"];
-  status(["ALLOW_SLEEP", '=', ALLOW_SLEEP].join(''));
+  info(["ALLOW_SLEEP", '=', ALLOW_SLEEP].join(''));
   DYNAMIC = setting["dynamic"];
-  status(["DYNAMIC", '=', DYNAMIC].join(''));
+  info(["DYNAMIC", '=', DYNAMIC].join(''));
 
-  WORK_DIR  = setting["work_dir"];
+  BADPROGID = JSON.parse(setting["badprogid"]);
   EXTENSION = setting["extension"];
+  FILTER    = JSON.parse(setting["filter"]);
+  WORK_DIR  = setting["work_dir"];
 
   if (EXTENSION === "js")
   {
-    status(["ENGINE", '=', "JScript"].join(''));
+    info(["ENGINE", '=', "JScript"].join(''));
   }
   else if (EXTENSION === "vbs")
   {
-    status(["ENGINE", '=', "VBScript"].join(''));
+    info(["ENGINE", '=', "VBScript"].join(''));
   }
   else if (EXTENSION === "wsf")
   {
-    status(["ENGINE", '=', "Windows Script File"].join(''));
+    info(["ENGINE", '=', "Windows Script File"].join(''));
   }
 
   /* Load these modules; debug symbols are needed. */
@@ -135,7 +110,9 @@ function resume()
   });
 }
 
-/* Print functions related to trace */
+/* 
+ * Print functions related to trace.
+ */
 function log(message)
 {
   send
@@ -171,10 +148,11 @@ function separator()
   log('|');
 }
 
-/* Print functions related to debug.
- *
- * Three types of debug message: [*] for status, [+] for info, and [-] for error.
- *
+/*
+ * Print functions related to debug.
+ * [*] => info
+ * [+] => warn
+ * [-] => error
  */
 function debug(message)
 {
@@ -184,12 +162,12 @@ function debug(message)
   }
 }
 
-function status(message)
+function info(message)
 {
   debug(["[*]", ' ', message].join(''));
 }
 
-function info(message)
+function warn(message)
 {
   debug(["[+]", ' ', message].join(''));
 }
@@ -199,7 +177,9 @@ function error(message)
   debug(["[-]", ' ', message].join(''));
 }
 
-/* Helper functions */
+/*
+ * Helper functions implemented in Python.
+ */
 function decodePowerShell(encoded)
 {
   send
@@ -263,6 +243,9 @@ function printInprocServer32(clsid)
   });
 }
 
+/*
+ * Helper functions implemented in JavaScript
+ */
 function loadModuleForAddress(address)
 {
   let modules = Process.enumerateModules();
@@ -333,14 +316,14 @@ function resolveName(dllName, name)
   let moduleName = dllName.split('.')[0];
   let functionName = [dllName, '!', name].join('');
 
-  status(["Finding", ' ', functionName].join(''));
-  status(["Module.findExportByName", ' ', functionName].join(''));
+  info(["Finding", ' ', functionName].join(''));
+  info(["Module.findExportByName", ' ', functionName].join(''));
 
   let addr = Module.findExportByName(dllName, name);
 
   if (!addr || addr.isNull())
   {
-    info(["DebugSymbol.load", ' ', dllName].join(''));
+    warn(["DebugSymbol.load", ' ', dllName].join(''));
 
     try
     {
@@ -351,15 +334,15 @@ function resolveName(dllName, name)
       error(["DebugSymbol.load", ' ', e].join(''));
     }
 
-    info("DebugSymbol.load finished");
+    warn("DebugSymbol.load finished");
 
     if (functionName.indexOf('*') === -1)
     {
       try
       {
         addr = DebugSymbol.getFunctionByName([moduleName, '!', name].join(''));
-        info(["DebugSymbol.getFunctionByName", ' ', functionName].join(''));
-        info(["DebugSymbol.getFunctionByName", ' ', addr].join(''));
+        warn(["DebugSymbol.getFunctionByName", ' ', functionName].join(''));
+        warn(["DebugSymbol.getFunctionByName", ' ', addr].join(''));
       }
       catch (e)
       {
@@ -372,8 +355,8 @@ function resolveName(dllName, name)
       {
         let addresses = DebugSymbol.findFunctionsMatching(name);
         addr = addresses[addresses.length - 1];
-        info(["DebugSymbol.findFunctionsMatching", ' ', functionName].join(''));
-        info(["DebugSymbol.findFunctionsMatching", ' ', addr].join(''));
+        warn(["DebugSymbol.findFunctionsMatching", ' ', functionName].join(''));
+        warn(["DebugSymbol.findFunctionsMatching", ' ', addr].join(''));
       }
       catch (e)
       {
@@ -394,7 +377,7 @@ function hookFunction(dllName, funcName, callback)
     return;
   }
 
-  status(["Interceptor.attach", ' ', symbolName, '@', addr].join(''));
+  info(["Interceptor.attach", ' ', symbolName, '@', addr].join(''));
   Interceptor.attach(addr, callback);
 }
 
@@ -411,7 +394,9 @@ function writeToFile(count, type, data)
   whereis(filepath);
 }
 
-/* Hooks */
+/*
+ * Hooks
+ */
 function hookCOleScriptCompile()
 {
   let jsmodule = "jscript.dll";
@@ -447,10 +432,10 @@ function hookCOleScriptCompile()
   hookCLSIDFromProgID();
 }
 
-const WSAHOST_NOT_FOUND = 11001;
-
 function hookGetAddrInfoExW()
 {
+  const WSAHOST_NOT_FOUND = 11001;
+  
   let module = "ws2_32.dll";
   let fnName = "GetAddrInfoExW";
 
@@ -518,23 +503,23 @@ function hookWSASend()
   });
 }
 
-const SHOW =
-{
-  0  : "SW_HIDE",
-  1  : "SW_SHOWNORMAL",
-  2  : "SW_SHOWMINIMIZED",
-  3  : "SW_SHOWMAXIMIZED",
-  4  : "SW_SHOWNOACTIVATE",
-  5  : "SW_SHOW",
-  6  : "SW_MINIMIZE",
-  7  : "SW_SHOWMINNOACTIVE",
-  8  : "SW_SHOWNA",
-  9  : "SW_RESTORE",
-  10 : "SW_SHOWDEFAULT"
-};
-
 function hookShellExecuteExW()
 {
+  const SHOW =
+  {
+    0  : "SW_HIDE",
+    1  : "SW_SHOWNORMAL",
+    2  : "SW_SHOWMINIMIZED",
+    3  : "SW_SHOWMAXIMIZED",
+    4  : "SW_SHOWNOACTIVATE",
+    5  : "SW_SHOW",
+    6  : "SW_MINIMIZE",
+    7  : "SW_SHOWMINNOACTIVE",
+    8  : "SW_SHOWNA",
+    9  : "SW_RESTORE",
+    10 : "SW_SHOWDEFAULT"
+  };
+  
   let module = "shell32.dll";
   let fnName = "ShellExecuteExW";
 
@@ -562,7 +547,7 @@ function hookShellExecuteExW()
       call(module, fnName);
       separator();
 
-      writeToFile(++exec_count, "shell", data.join(''));
+      writeToFile(++exec_count, "exec", data.join(''));
 
       const encodedCommand_re = /.*powershell.*-e[nc]*\s+(.*)/i;
       let encodedCommand;
@@ -760,11 +745,10 @@ function hookCreateFolder()
   });
 }
 
-const CO_E_CLASSSTRING = 0x800401F3;
-const S_OK = 0;
-
 function hookCLSIDFromProgID()
 {
+  const CO_E_CLASSSTRING = 0x800401F3;
+  
   let module = "ole32.dll";
   let fnName = "CLSIDFromProgID";
 
@@ -973,15 +957,15 @@ function hookXMLHttpSend()
   });
 }
 
-const FOLDERSPEC =
-{
-  0x0 : "WindowsFolder",
-  0x1 : "SystemFolder",
-  0x2 : "TemporaryFolder"
-};
-
 function hookCFileSystemGetSpecialFolder()
 {
+  const FOLDERSPEC =
+  {
+    0x0 : "WindowsFolder",
+    0x1 : "SystemFolder",
+    0x2 : "TemporaryFolder"
+  };
+  
   let module = "scrrun.dll";
   let fnName = "CFileSystem::GetSpecialFolder";
 
@@ -1068,16 +1052,16 @@ function hookCHttpRequestSend()
   });
 }
 
-const MK_E_SYNTAX = 0x800401E4;
-const HRESULT =
-{
-  0x00000000 : "S_OK",
-  0x80040154 : "REGDB_E_CLASSNOTREG",
-  0x80040150 : "REGDB_E_READREGDB"
-};
-
 function hookMkParseDisplayName()
 {
+  const MK_E_SYNTAX = 0x800401E4;
+  const HRESULT =
+  {
+    0x00000000 : "S_OK",
+    0x80040154 : "REGDB_E_CLASSNOTREG",
+    0x80040150 : "REGDB_E_READREGDB"
+  };
+  
   let module = "ole32.dll";
   let fnName = "MkParseDisplayName";
 
