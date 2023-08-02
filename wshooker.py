@@ -105,6 +105,12 @@ if __name__ == "__main__":
     action="store_true",
     help="enable timestamp in output trace"
   )
+  parser.add_argument(
+    "--wscript",
+    dest="wscript",
+    action="store_true",
+    help="switch to wscript.exe (default is cscript.exe)"
+  )
   args = parser.parse_args()
 
   with open("hook.js", 'r') as fd:
@@ -129,6 +135,9 @@ if __name__ == "__main__":
           print("Error: No file extension")
           exit(1)
 
+      if args.wscript:
+        config.WSCRIPT_EXE = "wscript.exe"
+
       if not args.no_banner:
         helpers.print_banner()
 
@@ -147,12 +156,12 @@ if __name__ == "__main__":
 
       status(workdir)
 
-      if os.path.exists(Instrumenter._WSCRIPT_PATH_WOW64):
+      if os.path.exists(config.WSCRIPT_PATH_WOW64):
         status("x64 detected...using SysWOW64")
-        wshost = ''.join([Instrumenter._WSCRIPT_PATH_WOW64, Instrumenter._WSCRIPT_EXE])
+        wshost = ''.join([config.WSCRIPT_PATH_WOW64, config.WSCRIPT_EXE])
       else:
         status("Using System32")
-        wshost = ''.join([Instrumenter._WSCRIPT_PATH, Instrumenter._WSCRIPT_EXE])
+        wshost = ''.join([config.WSCRIPT_PATH, config.WSCRIPT_EXE])
 
       # Use "/b" to suppress alerts, errors or prompts
       cmd = [wshost, "/b", args.script]

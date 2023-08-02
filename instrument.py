@@ -8,9 +8,6 @@ import helpers
 from printer import *
 
 class Instrumenter:
-  _WSCRIPT_PATH_WOW64 = "C:\\Windows\SysWOW64\\"
-  _WSCRIPT_PATH = "C:\\Windows\System32\\"
-  _WSCRIPT_EXE = "wscript.exe"
 
   def __init__(self, hook):
     self.hook = hook

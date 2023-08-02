@@ -67,3 +67,8 @@ FILTER = \
   "CTextStream::Write"             : 1,
   "CTextStream::WriteLine"         : 1
 }
+
+# Windows Script Host
+WSCRIPT_PATH_WOW64 = "C:\\Windows\\SysWOW64\\"
+WSCRIPT_PATH = "C:\\Windows\\System32\\"
+WSCRIPT_EXE  = "cscript.exe"
