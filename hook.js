@@ -30,23 +30,23 @@ let text_count = 0;
 recv("config", function onMessage(setting)
 {
   DEBUG = setting["debug"];
-  info(["DEBUG", '=', DEBUG].join(''));
+  status(["DEBUG", '=', DEBUG].join(''));
   ALLOW_BADCOM = setting["allow_badcom"];
-  info(["ALLOW_BADCOM", '=', ALLOW_BADCOM].join(''));
+  status(["ALLOW_BADCOM", '=', ALLOW_BADCOM].join(''));
   ALLOW_FILE = setting["allow_file"];
-  info(["ALLOW_FILE", '=', ALLOW_FILE].join(''));
+  status(["ALLOW_FILE", '=', ALLOW_FILE].join(''));
   ALLOW_NET = setting["allow_net"];
-  info(["ALLOW_NET", '=', ALLOW_NET].join(''));
+  status(["ALLOW_NET", '=', ALLOW_NET].join(''));
   ALLOW_PROC = setting["allow_proc"];
-  info(["ALLOW_PROC", '=', ALLOW_PROC].join(''));
+  status(["ALLOW_PROC", '=', ALLOW_PROC].join(''));
   ALLOW_REG = setting["allow_reg"];
-  info(["ALLOW_REG", '=', ALLOW_REG].join(''));
+  status(["ALLOW_REG", '=', ALLOW_REG].join(''));
   ALLOW_SHELL = setting["allow_shell"];
-  info(["ALLOW_SHELL", '=', ALLOW_SHELL].join(''));
+  status(["ALLOW_SHELL", '=', ALLOW_SHELL].join(''));
   ALLOW_SLEEP = setting["allow_sleep"];
-  info(["ALLOW_SLEEP", '=', ALLOW_SLEEP].join(''));
+  status(["ALLOW_SLEEP", '=', ALLOW_SLEEP].join(''));
   DYNAMIC = setting["dynamic"];
-  info(["DYNAMIC", '=', DYNAMIC].join(''));
+  status(["DYNAMIC", '=', DYNAMIC].join(''));
 
   BADPROGID = JSON.parse(setting["badprogid"]);
   EXTENSION = setting["extension"];
@@ -55,15 +55,15 @@ recv("config", function onMessage(setting)
 
   if (EXTENSION === "js")
   {
-    info(["ENGINE", '=', "JScript"].join(''));
+    status(["ENGINE", '=', "JScript"].join(''));
   }
   else if (EXTENSION === "vbs")
   {
-    info(["ENGINE", '=', "VBScript"].join(''));
+    status(["ENGINE", '=', "VBScript"].join(''));
   }
   else if (EXTENSION === "wsf")
   {
-    info(["ENGINE", '=', "Windows Script File"].join(''));
+    status(["ENGINE", '=', "Windows Script File"].join(''));
   }
 
   /* Load these modules; debug symbols are needed. */
@@ -150,8 +150,8 @@ function separator()
 
 /*
  * Print functions related to debug.
- * [*] => info
- * [+] => warn
+ * [*] => status
+ * [+] => info
  * [-] => error
  */
 function debug(message)
@@ -162,12 +162,12 @@ function debug(message)
   }
 }
 
-function info(message)
+function status(message)
 {
   debug(["[*]", ' ', message].join(''));
 }
 
-function warn(message)
+function info(message)
 {
   debug(["[+]", ' ', message].join(''));
 }
@@ -316,14 +316,14 @@ function resolveName(dllName, name)
   let moduleName = dllName.split('.')[0];
   let functionName = [dllName, '!', name].join('');
 
-  info(["Finding", ' ', functionName].join(''));
-  info(["Module.findExportByName", ' ', functionName].join(''));
+  status(["Finding", ' ', functionName].join(''));
+  status(["Module.findExportByName", ' ', functionName].join(''));
 
   let addr = Module.findExportByName(dllName, name);
 
   if (!addr || addr.isNull())
   {
-    warn(["DebugSymbol.load", ' ', dllName].join(''));
+    info(["DebugSymbol.load", ' ', dllName].join(''));
 
     try
     {
@@ -334,15 +334,15 @@ function resolveName(dllName, name)
       error(["DebugSymbol.load", ' ', e].join(''));
     }
 
-    warn("DebugSymbol.load finished");
+    info("DebugSymbol.load finished");
 
     if (functionName.indexOf('*') === -1)
     {
       try
       {
         addr = DebugSymbol.getFunctionByName([moduleName, '!', name].join(''));
-        warn(["DebugSymbol.getFunctionByName", ' ', functionName].join(''));
-        warn(["DebugSymbol.getFunctionByName", ' ', addr].join(''));
+        info(["DebugSymbol.getFunctionByName", ' ', functionName].join(''));
+        info(["DebugSymbol.getFunctionByName", ' ', addr].join(''));
       }
       catch (e)
       {
@@ -355,8 +355,8 @@ function resolveName(dllName, name)
       {
         let addresses = DebugSymbol.findFunctionsMatching(name);
         addr = addresses[addresses.length - 1];
-        warn(["DebugSymbol.findFunctionsMatching", ' ', functionName].join(''));
-        warn(["DebugSymbol.findFunctionsMatching", ' ', addr].join(''));
+        info(["DebugSymbol.findFunctionsMatching", ' ', functionName].join(''));
+        info(["DebugSymbol.findFunctionsMatching", ' ', addr].join(''));
       }
       catch (e)
       {
@@ -377,7 +377,7 @@ function hookFunction(dllName, funcName, callback)
     return;
   }
 
-  info(["Interceptor.attach", ' ', symbolName, '@', addr].join(''));
+  status(["Interceptor.attach", ' ', symbolName, '@', addr].join(''));
   Interceptor.attach(addr, callback);
 }
 

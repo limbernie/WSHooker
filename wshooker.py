@@ -154,6 +154,8 @@ if __name__ == "__main__":
       config.TRACE     = args.trace
       config.WORK_DIR  = WORK_DIR
 
+      status("Script: \"%s\"" % os.path.abspath(args.script))
+      
       status(workdir)
 
       if os.path.exists(config.WSCRIPT_PATH_WOW64):
