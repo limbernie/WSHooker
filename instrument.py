@@ -52,7 +52,8 @@ class Instrumenter:
       "badprogid"     : json.dumps(config.BADPROGID),
       "extension"     : config.EXTENSION,
       "filter"        : json.dumps(config.FILTER),
-      "work_dir"      : config.WORK_DIR
+      "work_dir"      : config.WORK_DIR,
+      "wshost"        : config.WSCRIPT_EXE
     })
 
     # Keep the process suspended until resumed

@@ -18,8 +18,6 @@ def print(*objects, **kwargs):
         builtins.print(config.SPACE.join(['', *objects]), flush=True, **kwargs)
   except FileNotFoundError:
     builtins.print(*objects, **kwargs)
-  except UnicodeEncodeError:
-    pass
 
 def status(message):
   log(''.join(["[*]", ' ', message]))

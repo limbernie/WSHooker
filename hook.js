@@ -14,7 +14,7 @@ let ALLOW_SHELL  = false;
 let ALLOW_SLEEP  = false;
 let DEBUG        = false;
 let DYNAMIC      = false;
-let BADPROGID, EXTENSION, FILTER, WORK_DIR;
+let BADPROGID, EXTENSION, FILTER, WORK_DIR, WSHOST;
 
 /*
  * File write counters
@@ -52,6 +52,7 @@ recv("config", function onMessage(setting)
   EXTENSION = setting["extension"];
   FILTER    = JSON.parse(setting["filter"]);
   WORK_DIR  = setting["work_dir"];
+  WSHOST    = setting["wshost"];
 
   if (EXTENSION === "js")
   {
@@ -392,6 +393,19 @@ function writeToFile(count, type, data)
   file.close();
 
   whereis(filepath);
+}
+
+function removeNonAscii(str)
+{
+  if ((str === null) || (str ===''))
+  {
+    return false;
+  }
+  else 
+  {
+    str = str.toString();
+  }
+  return str.replace(/[^\x20-\x7E]/g, '');
 }
 
 /*
@@ -828,7 +842,7 @@ function hookDispCallFunc()
                   continue;
                 }
                 try {
-                  arg = ptr(args[i]).readUtf16String();
+                  arg = removeNonAscii(ptr(args[i]).readUtf16String());
                 }
                 catch (e)
                 {
@@ -850,7 +864,7 @@ function hookDispCallFunc()
 
 function hookCHostObjSleep()
 {
-  let module = "wscript.exe";
+  let module = WSHOST;
   let fnName = "CHostObj::Sleep";
 
   hookFunction(module, fnName,
