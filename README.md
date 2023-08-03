@@ -87,7 +87,7 @@ WSHooker supports a number of options to allow certain dangerous operations to c
 ```
 python wshooker.py --help
 usage: wshooker.py [-h] [-p PID | -s SCRIPT] [-a ARGS] [-o TRACE] [--allow-badcom] [--allow-file] [--allow-net] [--allow-proc]
-                   [--allow-reg] [--allow-shell] [--allow-sleep] [--debug] [--dynamic] [--no-banner] [--timestamp]
+                   [--allow-reg] [--allow-shell] [--allow-sleep] [--debug] [--dynamic] [--no-banner] [--timestamp] [--wscript]
 
 WSHooker - Windows Script Hooking with Frida
 
@@ -110,6 +110,7 @@ options:
   --dynamic             (verbose) enable dynamic tracing
   --no-banner           remove banner in output trace
   --timestamp           enable timestamp in output trace
+  --wscript             switch to wscript.exe (default is cscript.exe)
 ```
 
 ### Supported OS
