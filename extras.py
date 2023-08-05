@@ -19,24 +19,26 @@ BRIGHT_BLUE    = "\033[94m"
 BRIGHT_MAGENTA = "\033[95m"
 BRIGHT_CYAN    = "\033[96m"
 
-colors = [
-DARK_RED,
-DARK_GREEN,
-DARK_YELLOW,
-DARK_BLUE,
-DARK_MAGENTA,
-DARK_CYAN,
-DARK_WHITE,
-BRIGHT_BLACK,
-BRIGHT_RED,
-BRIGHT_GREEN,
-BRIGHT_YELLOW,
-BRIGHT_BLUE,
-BRIGHT_MAGENTA,
-BRIGHT_CYAN
+COLORS = \
+[
+  DARK_RED,
+  DARK_GREEN,
+  DARK_YELLOW,
+  DARK_BLUE,
+  DARK_MAGENTA,
+  DARK_CYAN,
+  DARK_WHITE,
+  BRIGHT_BLACK,
+  BRIGHT_RED,
+  BRIGHT_GREEN,
+  BRIGHT_YELLOW,
+  BRIGHT_BLUE,
+  BRIGHT_MAGENTA,
+  BRIGHT_CYAN
 ]
 
-banner1 = '''
+banner1 = \
+'''
 
  __        ______  _   _             _
  \ \      / / ___|| | | | ___   ___ | | _____ _ __
@@ -47,7 +49,8 @@ banner1 = '''
 
 '''
 
-banner2 = '''
+banner2 = \
+'''
 
  _    _ _____ _   _             _
 | |  | /  ___| | | |           | |
@@ -60,7 +63,8 @@ banner2 = '''
 
 '''
 
-banner3 = '''
+banner3 = \
+'''
 
  __    __  __                    _
 / / /\ \ \/ _\  /\  /\___   ___ | | _____ _ __
@@ -71,7 +75,8 @@ banner3 = '''
 
 '''
 
-banner4 = '''
+banner4 = \
+'''
 
  _       _______ __  __            __
 | |     / / ___// / / /___  ____  / /_____  _____
@@ -82,7 +87,8 @@ banner4 = '''
 
 '''
 
-banner5 = '''
+banner5 = \
+'''
 
  __        ______  _   _             _
  \ \      / / ___|| | | | ___   ___ | | _____ _ __
@@ -93,7 +99,8 @@ banner5 = '''
 
 '''
 
-banner6 = '''
+banner6 = \
+'''
 
 __      __ ___    _  _                     _
 \ \    / // __|  | || |    ___     ___    | |__    ___      _ _
@@ -104,7 +111,8 @@ _|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|
 
 '''
 
-banner7 = '''
+banner7 = \
+'''
 
  ____      ____   ______   ____  ____                __
 |_  _|    |_  _|.' ____ \ |_   ||   _|              [  |  _
@@ -116,7 +124,8 @@ banner7 = '''
 
 '''
 
-banner8 = '''
+banner8 = \
+'''
 
 
  _|          _|    _|_|_|  _|    _|                      _|
@@ -129,7 +138,8 @@ banner8 = '''
 
 '''
 
-banner9 = '''
+banner9 = \
+'''
 
  ________ _______ _______               __
 |  |  |  |     __|   |   |.-----.-----.|  |--.-----.----.
@@ -139,7 +149,8 @@ banner9 = '''
 
 '''
 
-banner10 = '''
+banner10 = \
+'''
 
 888       888  .d8888b.  888    888                   888
 888   o   888 d88P  Y88b 888    888                   888
@@ -153,15 +164,16 @@ banner10 = '''
 
 '''
 
-banners = [
-banner1,
-banner2,
-banner3,
-banner4,
-banner5,
-banner6,
-banner7,
-banner8,
-banner9,
-banner10
+BANNERS = \
+[ 
+  banner1,
+  banner2,
+  banner3,
+  banner4,
+  banner5,
+  banner6,
+  banner7,
+  banner8,
+  banner9,
+  banner10 
 ]

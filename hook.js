@@ -14,15 +14,15 @@ let ALLOW_SHELL  = false;
 let ALLOW_SLEEP  = false;
 let DEBUG        = false;
 let DYNAMIC      = false;
-let BADPROGID, EXTENSION, FILTER, WORK_DIR, WSHOST;
+let BAD_PROGID, EXTENSION, FILTER, WORK_DIR, WSHOST;
 
 /*
  * File write counters
  */
-let code_count = 0;
-let exec_count = 0;
-let sock_count = 0;
-let text_count = 0;
+let CODE_COUNT = 0;
+let EXEC_COUNT = 0;
+let SOCK_COUNT = 0;
+let TEXT_COUNT = 0;
 
 /*
  * Configuration
@@ -48,11 +48,13 @@ recv("config", function onMessage(setting)
   DYNAMIC = setting["dynamic"];
   status(["DYNAMIC", '=', DYNAMIC].join(''));
 
-  BADPROGID = JSON.parse(setting["badprogid"]);
-  EXTENSION = setting["extension"];
-  FILTER    = JSON.parse(setting["filter"]);
-  WORK_DIR  = setting["work_dir"];
-  WSHOST    = setting["wshost"];
+  BAD_PROGID = JSON.parse(setting["bad_progid"]);
+  EXTENSION  = setting["extension"];
+  FILTER     = JSON.parse(setting["filter"]);
+  WORK_DIR   = setting["work_dir"];
+  WSHOST     = setting["wshost"];
+  
+  
 
   if (EXTENSION === "js")
   {
@@ -134,9 +136,9 @@ function call(module, functionName)
   log(["Call", ':', ' ', module, '!', functionName, '()'].join(''));
 }
 
-function whereis(filepath)
+function where(filepath)
 {
-  param("Data", ['"', filepath, '"'].join(''));
+  param("Data", filepath);
 }
 
 function param(type, value)
@@ -233,7 +235,7 @@ function deleteRegValue(path)
   });
 }
 
-function printInprocServer32(clsid)
+function printInprocServer32FromCLSID(clsid)
 {
   send
   ({
@@ -382,17 +384,16 @@ function hookFunction(dllName, funcName, callback)
   Interceptor.attach(addr, callback);
 }
 
-function writeToFile(count, type, data)
+function writeToFile(type, count, data)
 {
-  let directory = ['.\\', WORK_DIR].join('');
   let filename  = [type, '_', count, '.', "txt"].join('');
-  let filepath  = [directory, '\\', filename].join('');
+  let filepath  = [WORK_DIR, '\\', filename].join('');
   let file      = new File(filepath, 'w');
 
   file.write(data);
   file.close();
 
-  whereis(filepath);
+  where(filepath);
 }
 
 function removeNonAscii(str)
@@ -422,7 +423,7 @@ function hookCOleScriptCompile()
     {
       call(jsmodule, fnName);
       separator();
-      writeToFile(++code_count, "code", ptr(args[1]).readUtf16String());
+      writeToFile("code", ++CODE_COUNT, ptr(args[1]).readUtf16String());
       separator();
     }
   });
@@ -435,7 +436,7 @@ function hookCOleScriptCompile()
     {
       call(vbmodule, fnName);
       separator();
-      writeToFile(++code_count, "code", ptr(args[1]).readUtf16String());
+      writeToFile("code", ++CODE_COUNT, ptr(args[1]).readUtf16String());
       separator();
     }
   });
@@ -503,7 +504,7 @@ function hookWSASend()
       let dptr = Memory.readInt(ptr(lpwbuf));
       let data = hexdump(ptr(dptr), { length: size });
 
-      writeToFile(++sock_count, "sock", data);
+      writeToFile("sock", ++SOCK_COUNT, data);
 
       if (!ALLOW_NET)
       {
@@ -561,7 +562,7 @@ function hookShellExecuteExW()
       call(module, fnName);
       separator();
 
-      writeToFile(++exec_count, "exec", data.join(''));
+      writeToFile("exec", ++EXEC_COUNT, data.join(''));
 
       const encodedCommand_re = /.*powershell.*-e[nc]*\s+(.*)/i;
       let encodedCommand;
@@ -780,9 +781,9 @@ function hookCLSIDFromProgID()
     param("ProgID", progid);
     param("CLSID ", clsid);
 
-    printInprocServer32(clsid);
+    printInprocServer32FromCLSID(clsid);
 
-    if (progid.toLowerCase() in BADPROGID)
+    if (progid.toLowerCase() in BAD_PROGID)
     {
       if (!ALLOW_BADCOM)
       {
@@ -1124,7 +1125,7 @@ function hookMkParseDisplayName()
         separator();
       }
 
-      if (szProgID.toLowerCase() in BADPROGID)
+      if (szProgID.toLowerCase() in BAD_PROGID)
       {
         if (!ALLOW_BADCOM)
         {
@@ -1160,7 +1161,7 @@ function hookWriteLine()
     {
       call(module, fnName);
       separator();
-      writeToFile(++text_count, "text", ptr(args[1]).readUtf16String());
+      writeToFile("text", ++TEXT_COUNT, ptr(args[1]).readUtf16String());
       separator();
     }
   });

@@ -10,7 +10,7 @@ from instrument import Instrumenter
 from printer import *
 
 if __name__ == "__main__":
-  helpers.clean_frida_helper()
+  helpers.clean_frida_temp_files()
   parser = argparse.ArgumentParser(description="WSHooker - Windows Script Hooking with Frida")
   group = parser.add_mutually_exclusive_group()
   group.add_argument(
@@ -136,18 +136,16 @@ if __name__ == "__main__":
           exit(1)
 
       if args.wscript:
-        config.WSCRIPT_EXE = "wscript.exe"
+        config.WSH_EXE = "wscript.exe"
 
       if not args.no_banner:
         helpers.print_banner()
-
-      ISO_8601 = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
-      WORK_DIR = ''.join([config.TRACES, '\\', ISO_8601, '_', os.path.basename(args.script).rsplit('.', 1)[0]])
-      try:
-        os.makedirs(WORK_DIR)
-        workdir = "Working directory: \".\\%s\"" % WORK_DIR
-      except FileExistsError:
-        workdir = "Working directory already exists: \".\\%s\"" % WORK_DIR
+      
+      # Prepend date and time expressed in ISO 8601 to script's file name sans extension.
+      date_time = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+      WORK_DIR = ''.join(['.\\', config.TRACES, '\\', date_time, '_', os.path.basename(args.script).rsplit('.', 1)[0]])
+      
+      os.makedirs(WORK_DIR)
 
       config.EXTENSION = EXTENSION
       config.TIMESTAMP = args.timestamp
@@ -156,14 +154,14 @@ if __name__ == "__main__":
 
       status("Script: \"%s\"" % os.path.abspath(args.script))
       
-      status(workdir)
+      status("Working Directory: \"%s\"" % WORK_DIR)
 
-      if os.path.exists(config.WSCRIPT_PATH_WOW64):
-        status("x64 detected...using SysWOW64")
-        wshost = ''.join([config.WSCRIPT_PATH_WOW64, config.WSCRIPT_EXE])
+      if os.path.exists(config.WSH_PATH_WOW64):
+        wshost = ''.join([config.WSH_PATH_WOW64, config.WSH_EXE])
       else:
-        status("Using System32")
-        wshost = ''.join([config.WSCRIPT_PATH, config.WSCRIPT_EXE])
+        wshost = ''.join([config.WSH_PATH, config.WSH_EXE])
+
+      status("Windows Script Host: \"%s\"" % wshost)
 
       # Use "/b" to suppress alerts, errors or prompts
       cmd = [wshost, "/b", args.script]

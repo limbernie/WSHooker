@@ -13,7 +13,7 @@ import extras
 
 from printer import *
 
-def InprocServer32FromCLSID(clsid):
+def print_inprocserver32_from_clsid(clsid):
   try:
     key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, ''.join(["CLSID", "\\", clsid, "\\", "InprocServer32"]))
     module = winreg.QueryValueEx(key, '')[0]
@@ -24,7 +24,7 @@ def InprocServer32FromCLSID(clsid):
     param("LocalServer32", module)
   return module.split('\\')[-1]
 
-def parseHKEY(path):
+def parse_hkey(path):
     hkey = path.split('\\')[0].lower()
     if hkey == "HKEY_CLASSES_ROOT".lower() or hkey == "HKCR".lower():
       hkey = winreg.HKEY_CLASSES_ROOT
@@ -36,22 +36,22 @@ def parseHKEY(path):
       hkey = winreg.HKEY_USERS
     return hkey
 
-def search():
-  for file in glob.glob(''.join(['.\\', config.WORK_DIR, '\\', '*[gdeckt]_*.txt'])):
+def search_for_ioc():
+  for file in glob.glob(''.join([config.WORK_DIR, '\\', '*[gdeckt]_*.txt'])):
     f = open(file, 'r', encoding='utf-8')
     text = f.read()
 
     ## Copied from Django's URLValidator class
     ul = "\u00a1-\uffff"
 
-    # IP patterns
+    # IP regex pattern
     ipv4_re = (
       r"(?:0|25[0-5]|2[0-4][0-9]|1[0-9]?[0-9]?|[1-9][0-9]?)"
       r"(?:\.(?:0|25[0-5]|2[0-4][0-9]|1[0-9]?[0-9]?|[1-9][0-9]?)){3}"
     )
     ipv6_re = r"\[[0-9a-f:.]+\]"
 
-    # Host patterns
+    # Host regex pattern
     hostname_re = (
       ''.join([r"[a-z", ul, r"0-9](?:[a-z", ul, r"0-9-]{0,61}[a-z", ul, r"0-9])?"])
     )
@@ -103,28 +103,28 @@ def search():
         url = re.sub(r'[\'"();]', '', url).encode('ascii', errors='ignore').decode()
         info("URL: %s" % url)
 
-def clean_frida_helper():
+def clean_frida_temp_files():
   for helper in glob.glob(os.path.expandvars("%TEMP%\\frida-*")):
     try:
       shutil.rmtree(helper)
     except PermissionError:
       pass
 
-def cleanup():
-  search()
+def clean_up():
+  search_for_ioc()
   status("Cleaning up...")
-  if len(config.REG_KEYS) > 0:
-    for key in config.REG_KEYS:
-      deleteKey(key)
+  if len(config.REG_KEYS_TO_DELETE) > 0:
+    for key in config.REG_KEYS_TO_DELETE:
+      delete_reg_key(key)
   if len(config.FILES) > 0:
     for file in config.FILES:
-      deleteFile(file)
+      delete_file(file)
   if len(config.FOLDERS) > 0:
     for folder in config.FOLDERS:
-      deleteFolder(folder)
-  clean_frida_helper()
+      delete_folder(folder)
+  clean_frida_temp_files()
 
-def deleteFile(path):
+def delete_file(path):
   if os.path.exists(path):
     dropped_files = ''.join([config.WORK_DIR, "\\", "dropped_files"])
     try:
@@ -138,7 +138,7 @@ def deleteFile(path):
     except FileNotFoundError:
       pass
 
-def deleteFolder(path):
+def delete_folder(path):
   if os.path.exists(path):
     try:
       os.rmdir(path)
@@ -146,7 +146,7 @@ def deleteFolder(path):
     except FileNotFoundError:
       pass
 
-def deleteKey(key):
+def delete_reg_key(key):
   hkey = parseHKEY(key)
   subkey = '\\'.join(key.split('\\')[1:])
   try:
@@ -155,7 +155,7 @@ def deleteKey(key):
     return
   info("Deleted registry key: %s" % key)
 
-def deleteValue(path):
+def delete_reg_value(path):
   hkey   = parseHKEY(path)
   subkey = '\\'.join(path.split('\\')[1:-1])
   value  = path.split('\\')[-1]
@@ -175,29 +175,29 @@ def deleteValue(path):
   time.sleep(0.1)
 
   data = winreg.QueryValueEx(key, value)[0]
-  reg_count = config.REG_COUNT + 1
-  filename = ''.join(["reg", '_', ("%d" % reg_count), '.', "txt"])
-  with open(''.join(['.\\', config.WORK_DIR, '\\', filename]), 'w') as fd:
+  reg_value_count = config.REG_VALUE_COUNT + 1
+  filename = ''.join(["reg", '_', ("%d" % reg_value_count), '.', "txt"])
+  with open(''.join([config.WORK_DIR, '\\', filename]), 'w') as fd:
     fd.write("Value: %s\nData : %s" % (path, data))
   fd.close()
-  param("Data", "\".\\%s\\%s\"" % (config.WORK_DIR, filename))
+  param("Data", "%s\\%s" % (config.WORK_DIR, filename))
   winreg.DeleteValue(key, value)
   key.Close()
   param("Status" "Deleted")
 
-def decodePowerShell(encoded):
-  decode_count = config.DECODE_COUNT + 1
-  filename = ''.join(["decoded", '_', ("%d" % decode_count), '.', "txt"])
+def decode_powershell(encoded):
+  decoded_count = config.DECODED_COUNT + 1
+  filename = ''.join(["decoded", '_', ("%d" % decoded_count), '.', "txt"])
   decoded = base64.b64decode(encoded).decode('utf-16le')
-  with open(''.join(['.\\', config.WORK_DIR, '\\', filename]), 'w') as fd:
+  with open(''.join([config.WORK_DIR, '\\', filename]), 'w') as fd:
     fd.write(decoded)
   fd.close()
-  param("Data", "\".\\%s\\%s\"" % (config.WORK_DIR, filename))
+  param("Data", "%s\\%s" % (config.WORK_DIR, filename))
 
 def print_banner():
   builtins.print("%s%s%s" % 
   (
-    random.choice(extras.colors), 
-    random.choice(extras.banners),
+    random.choice(extras.COLORS), 
+    random.choice(extras.BANNERS),
     extras.DEFAULT
   ))

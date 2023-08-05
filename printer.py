@@ -8,7 +8,7 @@ def indent(message):
 
 def print(*objects, **kwargs):
   try:
-    with open(''.join(['.\\', config.WORK_DIR, '\\', config.TRACE]), 'a') as f:
+    with open(''.join([config.WORK_DIR, '\\', config.TRACE]), 'a') as f:
       if config.TIMESTAMP:
         timestamp = "[%10.3f]" % time.perf_counter()
         builtins.print(config.SPACE.join([timestamp, *objects]), file=f, **kwargs)

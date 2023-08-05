@@ -49,11 +49,11 @@ class Instrumenter:
       "allow_shell"   : allow_shell,
       "allow_sleep"   : allow_sleep,
       "dynamic"       : dynamic,
-      "badprogid"     : json.dumps(config.BADPROGID),
+      "bad_progid"    : json.dumps(config.BAD_PROGID),
       "extension"     : config.EXTENSION,
       "filter"        : json.dumps(config.FILTER),
       "work_dir"      : config.WORK_DIR,
-      "wshost"        : config.WSCRIPT_EXE
+      "wshost"        : config.WSH_EXE
     })
 
     # Keep the process suspended until resumed
@@ -64,7 +64,7 @@ class Instrumenter:
           break
       except KeyboardInterrupt:
         status("Warning: Instrumentation script is destroyed")
-        helpers.cleanup()
+        helpers.clean_up()
         break
 
     if not self._process_terminated:
@@ -73,7 +73,7 @@ class Instrumenter:
       frida.kill(self.pid)
 
   def on_detached(self, message, data):
-    helpers.cleanup()
+    helpers.clean_up()
     info("Killed process: %s" % self.pid)
     status("Exiting...")
     self._process_terminated = True
@@ -87,13 +87,13 @@ class Instrumenter:
       if msg_data["target"] == "registry":
         if msg_data["action"] == "delete":
           if msg_data["type"] == "key":
-            if msg_data["path"] not in config.REG_KEYS:
-              config.REG_KEYS.append(msg_data["path"])
+            if msg_data["path"] not in config.REG_KEYS_TO_DELETE:
+              config.REG_KEYS_TO_DELETE.append(msg_data["path"])
           elif msg_data["type"] == "value":
-            helpers.deleteValue(msg_data["path"])
+            helpers.delete_reg_value(msg_data["path"])
         elif msg_data["action"] == "search":
           if msg_data["type"] == "value":
-            helpers.InprocServer32FromCLSID(msg_data["clsid"])
+            helpers.print_inprocserver32_from_clsid(msg_data["clsid"])
       elif msg_data["target"] == "file":
         if msg_data["action"] == "delete":
           if msg_data["path"] not in config.FILES:
@@ -104,9 +104,9 @@ class Instrumenter:
             config.FOLDERS.append(msg_data["path"])
       elif msg_data["target"] == "frida":
         if msg_data["action"] == "resume":
-          status("Hooking process: %s" % self.pid)
+          status("Windows Script Host PID: %s" % self.pid)
           frida.resume(self.pid)
-          status("[*] Press Ctrl-C to kill the process...")
+          status("Ctrl-C to kill the process...")
           print("+---------+")
           print("|  Trace  |")
           print("+---------+")
@@ -114,7 +114,7 @@ class Instrumenter:
         if msg_data["action"] == "log":
           log(msg_data["message"])
         elif msg_data["action"] == "decode":
-          helpers.decodePowerShell(msg_data["value"])
+          helpers.decode_powershell(msg_data["value"])
 
   def on_child_added(self, child):
     status("%s spawned child process: %s" % (self.pid, child.pid))
