@@ -19,7 +19,7 @@ class Instrumenter:
   def instrument(self,
     pid,
     debug=False,
-    allow_badcom=False,
+    allow_bad_progid=False,
     allow_file=False,
     allow_net=False,
     allow_proc=False,
@@ -39,21 +39,21 @@ class Instrumenter:
 
     # Sending config to script
     script.post({
-      "type" : "config",
-      "debug" : debug,
-      "allow_badcom"  : allow_badcom,
-      "allow_file"    : allow_file,
-      "allow_net"     : allow_net,
-      "allow_proc"    : allow_proc,
-      "allow_reg"     : allow_reg,
-      "allow_shell"   : allow_shell,
-      "allow_sleep"   : allow_sleep,
-      "dynamic"       : dynamic,
-      "bad_progid"    : json.dumps(config.BAD_PROGID),
-      "extension"     : config.EXTENSION,
-      "filter"        : json.dumps(config.FILTER),
-      "work_dir"      : config.WORK_DIR,
-      "wshost"        : config.WSH_EXE
+      "type"             : "config",
+      "debug"            : debug,
+      "allow_bad_progid" : allow_bad_progid,
+      "allow_file"       : allow_file,
+      "allow_net"        : allow_net,
+      "allow_proc"       : allow_proc,
+      "allow_reg"        : allow_reg,
+      "allow_shell"      : allow_shell,
+      "allow_sleep"      : allow_sleep,
+      "dynamic"          : dynamic,
+      "bad_progid"       : json.dumps(config.BAD_PROGID),
+      "extension"        : config.EXTENSION,
+      "filter"           : json.dumps(config.FILTER),
+      "work_dir"         : config.WORK_DIR,
+      "wshost"           : config.WSH_EXE
     })
 
     # Keep the process suspended until resumed
@@ -112,7 +112,12 @@ class Instrumenter:
           print("+---------+")
       elif msg_data["target"] == "system":
         if msg_data["action"] == "log":
-          log(msg_data["message"])
+          try:
+            msg_data["message"].encode("cp437") # Windows legacy code page
+          except UnicodeEncodeError:
+            pass
+          else:
+            log(msg_data["message"])
         elif msg_data["action"] == "decode":
           helpers.decode_powershell(msg_data["value"])
 

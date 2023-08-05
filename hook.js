@@ -5,15 +5,15 @@
 /*
  * Global variables
  */
-let ALLOW_BADCOM = false;
-let ALLOW_FILE   = false;
-let ALLOW_NET    = false;
-let ALLOW_PROC   = false;
-let ALLOW_REG    = false;
-let ALLOW_SHELL  = false;
-let ALLOW_SLEEP  = false;
-let DEBUG        = false;
-let DYNAMIC      = false;
+let ALLOW_BAD_PROGID = false;
+let ALLOW_FILE       = false;
+let ALLOW_NET        = false;
+let ALLOW_PROC       = false;
+let ALLOW_REG        = false;
+let ALLOW_SHELL      = false;
+let ALLOW_SLEEP      = false;
+let DEBUG            = false;
+let DYNAMIC          = false;
 let BAD_PROGID, EXTENSION, FILTER, WORK_DIR, WSHOST;
 
 /*
@@ -31,8 +31,8 @@ recv("config", function onMessage(setting)
 {
   DEBUG = setting["debug"];
   status(["DEBUG", '=', DEBUG].join(''));
-  ALLOW_BADCOM = setting["allow_badcom"];
-  status(["ALLOW_BADCOM", '=', ALLOW_BADCOM].join(''));
+  ALLOW_BAD_PROGID = setting["allow_bad_progid"];
+  status(["ALLOW_BAD_PROGID", '=', ALLOW_BAD_PROGID].join(''));
   ALLOW_FILE = setting["allow_file"];
   status(["ALLOW_FILE", '=', ALLOW_FILE].join(''));
   ALLOW_NET = setting["allow_net"];
@@ -396,19 +396,6 @@ function writeToFile(type, count, data)
   where(filepath);
 }
 
-function removeNonAscii(str)
-{
-  if ((str === null) || (str ===''))
-  {
-    return false;
-  }
-  else 
-  {
-    str = str.toString();
-  }
-  return str.replace(/[^\x20-\x7E]/g, '');
-}
-
 /*
  * Hooks
  */
@@ -496,9 +483,9 @@ function hookWSASend()
 
       call(module, fnName);
       separator();
-      param("Socket ", socket);
-      param("Buffers", buffers);
-      param("Size   ", size);
+      param("Socket", socket);
+      param("Buffer", buffers);
+      param("Size", size);
 
       let lpwbuf = args[1].toInt32() + 4;
       let dptr = Memory.readInt(ptr(lpwbuf));
@@ -672,8 +659,8 @@ function hookWriteFile()
       call(module, fnName);
       separator();
       param("Handle", handle);
-      param("Size  ", size);
-      param("Path  ", path);
+      param("Size", size);
+      param("Path", path);
       separator();
 
       if (!ALLOW_FILE)
@@ -699,7 +686,7 @@ function hookCopyFileA()
       call(module, fnName);
       separator();
       param("From", src);
-      param("To  ", dst);
+      param("To", dst);
       separator();
 
       if (!ALLOW_FILE)
@@ -725,7 +712,7 @@ function hookMoveFileA()
       call(module, fnName);
       separator();
       param("From", src);
-      param("To  ", dst);
+      param("To", dst);
       separator();
 
       if (!ALLOW_FILE)
@@ -779,13 +766,13 @@ function hookCLSIDFromProgID()
     call(module, fnName);
     separator();
     param("ProgID", progid);
-    param("CLSID ", clsid);
+    param("CLSID", clsid);
 
     printInprocServer32FromCLSID(clsid);
 
     if (progid.toLowerCase() in BAD_PROGID)
     {
-      if (!ALLOW_BADCOM)
+      if (!ALLOW_BAD_PROGID)
       {
         action("Block");
         retval = CO_E_CLASSSTRING;
@@ -838,12 +825,12 @@ function hookDispCallFunc()
               let MAX_ARGS = 5;
               for (i = 0; i < MAX_ARGS; i++)
               {
-                if (args[i] === 0)
+                if (args[i].isNull())
                 {
                   continue;
                 }
                 try {
-                  arg = removeNonAscii(ptr(args[i]).readUtf16String());
+                  arg = ptr(args[i]).readUtf16String();
                 }
                 catch (e)
                 {
@@ -851,7 +838,7 @@ function hookDispCallFunc()
                 }
                 if (arg && arg.length > 1)
                 {
-                  param("Arg", arg);
+                  param("Arg", [arg, ' ', '(', arg.length, ')'].join(''));
                 }
               }
               separator();
@@ -917,7 +904,7 @@ function hookXMLHttpOpen()
       call(module, fnName);
       separator();
       param("Verb", verb);
-      param("URL ", url);
+      param("URL", url);
       separator();
     }
   });
@@ -938,7 +925,7 @@ function hookXMLHttpsetRequestHeader()
       call(module, fnName);
       separator();
       param("Header", header);
-      param("Value ", value);
+      param("Value", value);
       separator();
     }
   });
@@ -1013,7 +1000,7 @@ function hookCHttpRequestOpen()
       call(module, fnName);
       separator();
       param("Verb", verb);
-      param("URL ", url);
+      param("URL", url);
       separator();
     }
   });
@@ -1034,7 +1021,7 @@ function hookCHttpRequestSetRequestHeader()
       call(module, fnName);
       separator();
       param("Header", header);
-      param("Value ", value);
+      param("Value", value);
       separator();
     }
   });
@@ -1104,7 +1091,7 @@ function hookMkParseDisplayName()
     if (moniker.match(clsid_re))
     {
       clsid = moniker.replace(clsid_re, "$2");
-      param("CLSID  ", clsid);
+      param("CLSID", clsid);
 
       let lpsz = Memory.allocUtf16String(clsid);
       let pclsid = Memory.alloc(16);
@@ -1117,17 +1104,17 @@ function hookMkParseDisplayName()
 
       if (HRESULT[result] === "S_OK")
       {
-        param("ProgID ", szProgID);
+        param("ProgID", szProgID);
       }
       else
       {
-        param("Result ", HRESULT[result]);
+        param("Result", HRESULT[result]);
         separator();
       }
 
       if (szProgID.toLowerCase() in BAD_PROGID)
       {
-        if (!ALLOW_BADCOM)
+        if (!ALLOW_BAD_PROGID)
         {
           action("Block");
           separator();

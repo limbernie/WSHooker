@@ -37,13 +37,13 @@ if __name__ == "__main__":
     "--output",
     dest="trace",
     default="trace.log",
-    help="write output trace to file (defaults to trace.log)"
+    help="write output trace to file (default is trace.log)"
   )
   parser.add_argument(
-    "--allow-badcom",
-    dest="allow_badcom",
+    "--allow-bad-progid",
+    dest="allow_bad_progid",
     action="store_true",
-    help="(dangerous) allow bad COM"
+    help="(dangerous) allow known bad ProgID"
   )
   parser.add_argument(
     "--allow-file",
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     "--allow-shell",
     dest="allow_shell",
     action="store_true",
-    help="(dangerous) allow shell commands as Administrator"
+    help="(dangerous) allow shell command to run as Administrator"
   )
   parser.add_argument(
     "--allow-sleep",
@@ -103,7 +103,7 @@ if __name__ == "__main__":
     "--timestamp",
     dest="timestamp",
     action="store_true",
-    help="enable timestamp in output trace"
+    help="display timestamp in output trace"
   )
   parser.add_argument(
     "--wscript",
@@ -176,7 +176,7 @@ if __name__ == "__main__":
       instrumenter.instrument(
         pid,
         args.debug,
-        args.allow_badcom,
+        args.allow_bad_progid,
         args.allow_file,
         args.allow_net,
         args.allow_proc,

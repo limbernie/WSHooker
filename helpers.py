@@ -95,12 +95,12 @@ def search_for_ioc():
     if (len(keywords) > 0 or len(ips) > 0 or len(urls) > 0):
       status("Searching for IOCs in \"%s\"..." % file)
       for keyword in keywords:
-        keyword = re.sub(r'[\'"();]', '', keyword).encode('ascii', errors='ignore').decode()
+        keyword = re.sub(r'[\'"();]', '', keyword).encode("ascii", errors="ignore").decode()
         info("Keyword: %s" % keyword)
       for ip in ips:
         info("IP: %s" % ip)
       for url in urls:
-        url = re.sub(r'[\'"();]', '', url).encode('ascii', errors='ignore').decode()
+        url = re.sub(r'[\'"();]', '', url).encode("ascii", errors="ignore").decode()
         info("URL: %s" % url)
 
 def clean_frida_temp_files():
@@ -147,7 +147,7 @@ def delete_folder(path):
       pass
 
 def delete_reg_key(key):
-  hkey = parseHKEY(key)
+  hkey = parse_hkey(key)
   subkey = '\\'.join(key.split('\\')[1:])
   try:
     winreg.DeleteKey(hkey, subkey)
@@ -156,7 +156,7 @@ def delete_reg_key(key):
   info("Deleted registry key: %s" % key)
 
 def delete_reg_value(path):
-  hkey   = parseHKEY(path)
+  hkey   = parse_hkey(path)
   subkey = '\\'.join(path.split('\\')[1:-1])
   value  = path.split('\\')[-1]
 
@@ -183,7 +183,7 @@ def delete_reg_value(path):
   param("Data", "%s\\%s" % (config.WORK_DIR, filename))
   winreg.DeleteValue(key, value)
   key.Close()
-  param("Status" "Deleted")
+  param("Action", "Delete")
 
 def decode_powershell(encoded):
   decoded_count = config.DECODED_COUNT + 1

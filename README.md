@@ -82,11 +82,11 @@ WSHooker may appear unresponsive in the first run as it downloads the required d
 
 ### Options
 
-WSHooker supports a number of options to allow certain dangerous operations to continue during analysis in order to reveal other behaviors of the malicious script that were blocked otherwise. 
+WSHooker supports a number of options to allow certain dangerous operations to continue during analysis in order to reveal behaviors of the malicious script that were otherwise blocked. 
 
 ```
 python wshooker.py --help
-usage: wshooker.py [-h] [-p PID | -s SCRIPT] [-a ARGS] [-o TRACE] [--allow-badcom] [--allow-file] [--allow-net] [--allow-proc]
+usage: wshooker.py [-h] [-p PID | -s SCRIPT] [-a ARGS] [-o TRACE] [--allow-bad-progid] [--allow-file] [--allow-net] [--allow-proc]
                    [--allow-reg] [--allow-shell] [--allow-sleep] [--debug] [--dynamic] [--no-banner] [--timestamp] [--wscript]
 
 WSHooker - Windows Script Hooking with Frida
@@ -98,18 +98,18 @@ options:
                         path to malicious script
   -a ARGS, --args ARGS  arguments to malicious script, e.g., -a "arg1 arg2 arg3 ..."
   -o TRACE, --output TRACE
-                        write output trace to file (defaults to trace.log)
-  --allow-badcom        (dangerous) allow bad COM
+                        write output trace to file (default is trace.log)
+  --allow-bad-progid    (dangerous) allow known bad ProgID
   --allow-file          (dangerous) allow file copy/move/write
   --allow-net           (dangerous) allow network requests
   --allow-proc          (dangerous) allow Win32_Process
   --allow-reg           (dangerous) allow registry write
-  --allow-shell         (dangerous) allow shell commands as Administrator
+  --allow-shell         (dangerous) allow shell command to run as Administrator
   --allow-sleep         (slow-down) allow WScript.Sleep()
   --debug               (verbose) display debug message
   --dynamic             (verbose) enable dynamic tracing
   --no-banner           remove banner in output trace
-  --timestamp           enable timestamp in output trace
+  --timestamp           display timestamp in output trace
   --wscript             switch to wscript.exe (default is cscript.exe)
 ```
 
