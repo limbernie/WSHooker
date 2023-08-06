@@ -3,9 +3,11 @@
 Various functions related to printing.
 """
 import builtins
+import random
 import re
 import time
 
+import extras
 import config
 
 def indent(message):
@@ -41,3 +43,10 @@ def log(message):
     print(message)
   else:
     indent(message)
+    
+def print_banner():
+  builtins.print("%s%s%s" % (
+    random.choice(extras.colors), 
+    random.choice(extras.banners),
+    extras.reset
+  ))

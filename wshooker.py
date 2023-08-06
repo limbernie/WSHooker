@@ -145,7 +145,7 @@ if __name__ == "__main__":
         config.wsh_exe = "wscript.exe"
 
       if not args.no_banner:
-        helpers.print_banner()
+        print_banner()
       
       # Prepend date and time expressed in ISO 8601 to script's file name sans extension.
       date_time = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())

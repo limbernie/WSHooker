@@ -3,46 +3,44 @@
 Banners and Colors
 """
 # ANSI escape sequences
-DEFAULT        = "\033[0m"
-BLACK          = "\033[30m"
-BOLD           = "\033[1m"
-UNDERLINE      = "\033[4m"
-WHITE          = "\033[97m"
-DARK_RED       = "\033[31m"
-DARK_GREEN     = "\033[32m"
-DARK_YELLOW    = "\033[33m"
-DARK_BLUE      = "\033[34m"
-DARK_MAGENTA   = "\033[35m"
-DARK_CYAN      = "\033[36m"
-DARK_WHITE     = "\033[37m"
-BRIGHT_BLACK   = "\033[90m"
-BRIGHT_RED     = "\033[91m"
-BRIGHT_GREEN   = "\033[92m"
-BRIGHT_YELLOW  = "\033[93m"
-BRIGHT_BLUE    = "\033[94m"
-BRIGHT_MAGENTA = "\033[95m"
-BRIGHT_CYAN    = "\033[96m"
+reset          = "\033[0m"
+black          = "\033[30m"
+bold           = "\033[1m"
+underline      = "\033[4m"
+white          = "\033[97m"
+dark_red       = "\033[31m"
+dark_green     = "\033[32m"
+dark_yellow    = "\033[33m"
+dark_blue      = "\033[34m"
+dark_magenta   = "\033[35m"
+dark_cyan      = "\033[36m"
+dark_white     = "\033[37m"
+bright_black   = "\033[90m"
+bright_red     = "\033[91m"
+bright_green   = "\033[92m"
+bright_yellow  = "\033[93m"
+bright_blue    = "\033[94m"
+bright_magenta = "\033[95m"
+bright_cyan    = "\033[96m"
 
-COLORS = \
-[
-  DARK_RED,
-  DARK_GREEN,
-  DARK_YELLOW,
-  DARK_BLUE,
-  DARK_MAGENTA,
-  DARK_CYAN,
-  DARK_WHITE,
-  BRIGHT_BLACK,
-  BRIGHT_RED,
-  BRIGHT_GREEN,
-  BRIGHT_YELLOW,
-  BRIGHT_BLUE,
-  BRIGHT_MAGENTA,
-  BRIGHT_CYAN
+colors = [
+  dark_red,
+  dark_green,
+  dark_yellow,
+  dark_blue,
+  dark_magenta,
+  dark_cyan,
+  dark_white,
+  bright_black,
+  bright_red,
+  bright_green,
+  bright_yellow,
+  bright_blue,
+  bright_magenta,
+  bright_cyan
 ]
 
-banner1 = \
-'''
+banner1 = '''
 
  __        ______  _   _             _
  \ \      / / ___|| | | | ___   ___ | | _____ _ __
@@ -53,8 +51,7 @@ banner1 = \
 
 '''
 
-banner2 = \
-'''
+banner2 = '''
 
  _    _ _____ _   _             _
 | |  | /  ___| | | |           | |
@@ -64,11 +61,9 @@ banner2 = \
  \/  \/\____/\_| |_/\___/ \___/|_|\_\___|_|
 
 
-
 '''
 
-banner3 = \
-'''
+banner3 = '''
 
  __    __  __                    _
 / / /\ \ \/ _\  /\  /\___   ___ | | _____ _ __
@@ -79,8 +74,7 @@ banner3 = \
 
 '''
 
-banner4 = \
-'''
+banner4 = '''
 
  _       _______ __  __            __
 | |     / / ___// / / /___  ____  / /_____  _____
@@ -91,8 +85,7 @@ banner4 = \
 
 '''
 
-banner5 = \
-'''
+banner5 = '''
 
  __        ______  _   _             _
  \ \      / / ___|| | | | ___   ___ | | _____ _ __
@@ -103,8 +96,7 @@ banner5 = \
 
 '''
 
-banner6 = \
-'''
+banner6 = '''
 
 __      __ ___    _  _                     _
 \ \    / // __|  | || |    ___     ___    | |__    ___      _ _
@@ -113,10 +105,10 @@ __      __ ___    _  _                     _
 _|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|
 "`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'"`-0-0-'
 
+
 '''
 
-banner7 = \
-'''
+banner7 = '''
 
  ____      ____   ______   ____  ____                __
 |_  _|    |_  _|.' ____ \ |_   ||   _|              [  |  _
@@ -128,8 +120,7 @@ banner7 = \
 
 '''
 
-banner8 = \
-'''
+banner8 = '''
 
 
  _|          _|    _|_|_|  _|    _|                      _|
@@ -139,11 +130,9 @@ banner8 = \
      _|  _|      _|_|_|    _|    _|    _|_|      _|_|    _|    _|    _|_|_|  _|
 
 
-
 '''
 
-banner9 = \
-'''
+banner9 = '''
 
  ________ _______ _______               __
 |  |  |  |     __|   |   |.-----.-----.|  |--.-----.----.
@@ -153,8 +142,7 @@ banner9 = \
 
 '''
 
-banner10 = \
-'''
+banner10 = '''
 
 888       888  .d8888b.  888    888                   888
 888   o   888 d88P  Y88b 888    888                   888
@@ -168,8 +156,7 @@ banner10 = \
 
 '''
 
-BANNERS = \
-[ 
+banners = [ 
   banner1,
   banner2,
   banner3,

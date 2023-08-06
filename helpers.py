@@ -3,17 +3,14 @@
 Helper Functions
 """
 import base64
-import builtins
 import glob
 import os
-import random
 import re
 import shutil
 import time
 import winreg
 
 import config
-import extras
 
 from printer import *
 
@@ -204,11 +201,3 @@ def decode_powershell(encoded):
     fd.write(decoded)
   fd.close()
   param("Data", "%s\\%s" % (config.work_dir, filename))
-
-def print_banner():
-  builtins.print("%s%s%s" % 
-  (
-    random.choice(extras.COLORS), 
-    random.choice(extras.BANNERS),
-    extras.DEFAULT
-  ))
