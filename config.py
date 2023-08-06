@@ -28,6 +28,9 @@ TRACE = ''
 # Timestamp
 TIMESTAMP = False
 
+# Fixed width for aesthetics
+FIXED_WIDTH = 8
+
 # Space character
 SPACE = ' '
 

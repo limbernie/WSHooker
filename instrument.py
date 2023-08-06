@@ -52,6 +52,7 @@ class Instrumenter:
       "bad_progid"       : json.dumps(config.BAD_PROGID),
       "extension"        : config.EXTENSION,
       "filter"           : json.dumps(config.FILTER),
+      "fixed_width"      : config.FIXED_WIDTH,
       "work_dir"         : config.WORK_DIR,
       "wshost"           : config.WSH_EXE
     })

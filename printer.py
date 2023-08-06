@@ -1,7 +1,8 @@
 import builtins
-import config
 import re
 import time
+
+import config
 
 def indent(message):
   print(''.join([config.INDENT, message]))
@@ -29,7 +30,7 @@ def error(message):
   log(''.join(["[-]", ' ', message]))
   
 def param(name, value):
-  log(''.join(["|--", ' ', name, " => ", value]))
+  log(''.join(["|--", ' ', '(', name.center(config.FIXED_WIDTH), ')', " => ", value]))
   
 def log(message):
   if re.match(r"^(\[\*\]|Call)", message):

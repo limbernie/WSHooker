@@ -14,7 +14,7 @@ let ALLOW_SHELL      = false;
 let ALLOW_SLEEP      = false;
 let DEBUG            = false;
 let DYNAMIC          = false;
-let BAD_PROGID, EXTENSION, FILTER, WORK_DIR, WSHOST;
+let BAD_PROGID, EXTENSION, FILTER, FIXED_WIDTH, WORK_DIR, WSHOST;
 
 /*
  * File write counters
@@ -48,11 +48,12 @@ recv("config", function onMessage(setting)
   DYNAMIC = setting["dynamic"];
   status(["DYNAMIC", '=', DYNAMIC].join(''));
 
-  BAD_PROGID = JSON.parse(setting["bad_progid"]);
-  EXTENSION  = setting["extension"];
-  FILTER     = JSON.parse(setting["filter"]);
-  WORK_DIR   = setting["work_dir"];
-  WSHOST     = setting["wshost"];
+  BAD_PROGID  = JSON.parse(setting["bad_progid"]);
+  EXTENSION   = setting["extension"];
+  FILTER      = JSON.parse(setting["filter"]);
+  FIXED_WIDTH = setting["fixed_width"];
+  WORK_DIR    = setting["work_dir"];
+  WSHOST      = setting["wshost"];
   
   
 
@@ -141,9 +142,15 @@ function where(filepath)
   param("Data", filepath);
 }
 
-function param(type, value)
+String.prototype.center = function(width, c = ' ') 
 {
-  log(["|--", ' ', type, " => ", value].join(''));
+  let pad = width - Math.ceil((width - this.length) / 2);
+  return this.padStart(pad, c).padEnd(width, c);
+};
+
+function param(name, value)
+{
+  log(["|--", ' ', '(', name.center(FIXED_WIDTH), ')', " => ", value].join(''));
 }
 
 function separator()
@@ -838,7 +845,7 @@ function hookDispCallFunc()
                 }
                 if (arg && arg.length > 1)
                 {
-                  param("Arg", [arg, ' ', '(', arg.length, ')'].join(''));
+                  param("Arg", [arg, ' ', '[', arg.length, ']'].join(''));
                 }
               }
               separator();
@@ -862,7 +869,7 @@ function hookCHostObjSleep()
       call(module, fnName);
       separator();
       param("Delay", args[1].toInt32() + "ms" +
-        ((!ALLOW_SLEEP) ? " (Skipping to 0ms)" : ""));
+        ((!ALLOW_SLEEP) ? [' ', '[', "Skipping to 0ms", ']'].join('') : ''));
       if (!ALLOW_SLEEP)
       {
         args[1] = ptr(0);
