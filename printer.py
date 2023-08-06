@@ -1,3 +1,7 @@
+"""printer.py
+
+Various functions related to printing.
+"""
 import builtins
 import re
 import time
@@ -5,18 +9,18 @@ import time
 import config
 
 def indent(message):
-  print(''.join([config.INDENT, message]))
+  print(''.join([config.indent, message]))
 
 def print(*objects, **kwargs):
   try:
-    with open(''.join([config.WORK_DIR, '\\', config.TRACE]), 'a') as f:
-      if config.TIMESTAMP:
+    with open(''.join([config.work_dir, '\\', config.trace]), 'a') as f:
+      if config.timestamp:
         timestamp = "[%10.3f]" % time.perf_counter()
-        builtins.print(config.SPACE.join([timestamp, *objects]), file=f, **kwargs)
-        builtins.print(config.SPACE.join([timestamp, *objects]), flush=True, **kwargs)
+        builtins.print(config.space.join([timestamp, *objects]), file=f, **kwargs)
+        builtins.print(config.space.join([timestamp, *objects]), flush=True, **kwargs)
       else:
-        builtins.print(config.SPACE.join(['', *objects]), file=f, **kwargs)
-        builtins.print(config.SPACE.join(['', *objects]), flush=True, **kwargs)
+        builtins.print(config.space.join(['', *objects]), file=f, **kwargs)
+        builtins.print(config.space.join(['', *objects]), flush=True, **kwargs)
   except FileNotFoundError:
     builtins.print(*objects, **kwargs)
 
@@ -30,7 +34,7 @@ def error(message):
   log(''.join(["[-]", ' ', message]))
   
 def param(name, value):
-  log(''.join(["|--", ' ', '(', name.center(config.FIXED_WIDTH), ')', " => ", value]))
+  log(''.join(["|--", ' ', '(', name.center(config.fixed_width), ')', " => ", value]))
   
 def log(message):
   if re.match(r"^(\[\*\]|Call)", message):

@@ -1,3 +1,7 @@
+"""instrument.py
+
+Frida Instrumentation
+"""
 import frida
 import json
 import time
@@ -49,12 +53,12 @@ class Instrumenter:
       "allow_shell"      : allow_shell,
       "allow_sleep"      : allow_sleep,
       "dynamic"          : dynamic,
-      "bad_progid"       : json.dumps(config.BAD_PROGID),
-      "extension"        : config.EXTENSION,
-      "filter"           : json.dumps(config.FILTER),
-      "fixed_width"      : config.FIXED_WIDTH,
-      "work_dir"         : config.WORK_DIR,
-      "wshost"           : config.WSH_EXE
+      "bad_progids"      : json.dumps(config.bad_progids),
+      "extension"        : config.extension,
+      "filter"           : json.dumps(config.filter_from_tracing),
+      "fixed_width"      : config.fixed_width,
+      "work_dir"         : config.work_dir,
+      "wshost"           : config.wsh_exe
     })
 
     # Keep the process suspended until resumed
@@ -88,8 +92,8 @@ class Instrumenter:
       if msg_data["target"] == "registry":
         if msg_data["action"] == "delete":
           if msg_data["type"] == "key":
-            if msg_data["path"] not in config.REG_KEYS_TO_DELETE:
-              config.REG_KEYS_TO_DELETE.append(msg_data["path"])
+            if msg_data["path"] not in config.reg_keys_to_delete:
+              config.reg_keys_to_delete.append(msg_data["path"])
           elif msg_data["type"] == "value":
             helpers.delete_reg_value(msg_data["path"])
         elif msg_data["action"] == "search":
@@ -97,12 +101,12 @@ class Instrumenter:
             helpers.print_inprocserver32_from_clsid(msg_data["clsid"])
       elif msg_data["target"] == "file":
         if msg_data["action"] == "delete":
-          if msg_data["path"] not in config.FILES:
-            config.FILES.append(msg_data["path"])
+          if msg_data["path"] not in config.files_to_delete:
+            config.files_to_delete.append(msg_data["path"])
       elif msg_data["target"] == "folder":
         if msg_data["action"] == "delete":
-          if msg_data["path"] not in config.FOLDERS:
-            config.FOLDERS.append(msg_data["path"])
+          if msg_data["path"] not in config.folders_to_delete:
+            config.folders_to_delete.append(msg_data["path"])
       elif msg_data["target"] == "frida":
         if msg_data["action"] == "resume":
           status("Windows Script Host PID: %s" % self.pid)

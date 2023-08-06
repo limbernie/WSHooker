@@ -1,3 +1,7 @@
+""" helpers.py
+
+Helper Functions
+"""
 import base64
 import builtins
 import glob
@@ -36,12 +40,19 @@ def parse_hkey(path):
       hkey = winreg.HKEY_USERS
     return hkey
 
+# Search for IOCS in these files:
+#    exe[c]_*.txt
+# decode[d]_*.txt
+#    cod[e]_*.txt
+#     re[g]_*.txt
+#    soc[k]_*.txt
+#    tex[t]_*.txt
 def search_for_ioc():
-  for file in glob.glob(''.join([config.WORK_DIR, '\\', '*[gdeckt]_*.txt'])):
+  for file in glob.glob(''.join([config.work_dir, '\\', '*[cdegkt]_*.txt'])):
     f = open(file, 'r', encoding='utf-8')
     text = f.read()
 
-    ## Copied from Django's URLValidator class
+    # Copied from Django's URLValidator class
     ul = "\u00a1-\uffff"
 
     # IP regex pattern
@@ -113,20 +124,20 @@ def clean_frida_temp_files():
 def clean_up():
   search_for_ioc()
   status("Cleaning up...")
-  if len(config.REG_KEYS_TO_DELETE) > 0:
-    for key in config.REG_KEYS_TO_DELETE:
+  if len(config.reg_keys_to_delete) > 0:
+    for key in config.reg_keys_to_delete:
       delete_reg_key(key)
-  if len(config.FILES) > 0:
-    for file in config.FILES:
+  if len(config.files_to_delete) > 0:
+    for file in config.files_to_delete:
       delete_file(file)
-  if len(config.FOLDERS) > 0:
-    for folder in config.FOLDERS:
+  if len(config.folders_to_delete) > 0:
+    for folder in config.folders_to_delete:
       delete_folder(folder)
   clean_frida_temp_files()
 
 def delete_file(path):
   if os.path.exists(path):
-    dropped_files = ''.join([config.WORK_DIR, "\\", "dropped_files"])
+    dropped_files = ''.join([config.work_dir, "\\", "dropped_files"])
     try:
       if not os.path.exists(dropped_files):
         os.mkdir(dropped_files)
@@ -171,28 +182,28 @@ def delete_reg_value(path):
     param("Access", "Denied")
     return
 
-  # pause for value to be written
+  # Pause for value to be written
   time.sleep(0.1)
 
   data = winreg.QueryValueEx(key, value)[0]
-  reg_value_count = config.REG_VALUE_COUNT + 1
-  filename = ''.join(["reg", '_', ("%d" % reg_value_count), '.', "txt"])
-  with open(''.join([config.WORK_DIR, '\\', filename]), 'w') as fd:
+  reg_value_delete_count = config.reg_value_delete_count + 1
+  filename = ''.join(["reg", '_', ("%d" % reg_value_delete_count), '.', "txt"])
+  with open(''.join([config.work_dir, '\\', filename]), 'w') as fd:
     fd.write("Value: %s\nData : %s" % (path, data))
   fd.close()
-  param("Data", "%s\\%s" % (config.WORK_DIR, filename))
+  param("Data", "%s\\%s" % (config.work_dir, filename))
   winreg.DeleteValue(key, value)
   key.Close()
   param("Action", "Delete")
 
 def decode_powershell(encoded):
-  decoded_count = config.DECODED_COUNT + 1
+  decoded_count = config.decoded_count + 1
   filename = ''.join(["decoded", '_', ("%d" % decoded_count), '.', "txt"])
   decoded = base64.b64decode(encoded).decode('utf-16le')
-  with open(''.join([config.WORK_DIR, '\\', filename]), 'w') as fd:
+  with open(''.join([config.work_dir, '\\', filename]), 'w') as fd:
     fd.write(decoded)
   fd.close()
-  param("Data", "%s\\%s" % (config.WORK_DIR, filename))
+  param("Data", "%s\\%s" % (config.work_dir, filename))
 
 def print_banner():
   builtins.print("%s%s%s" % 

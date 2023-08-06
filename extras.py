@@ -1,3 +1,7 @@
+"""extra.py
+
+Banners and Colors
+"""
 # ANSI escape sequences
 DEFAULT        = "\033[0m"
 BLACK          = "\033[30m"

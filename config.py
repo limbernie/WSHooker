@@ -1,54 +1,59 @@
-# Registry keys to be deleted
-REG_KEYS_TO_DELETE = []
+"""config.py
 
-# Number of Registry values deleted
-REG_VALUE_COUNT = 0
+WSHooker Configuration
+"""
+# Windows Registry keys to be deleted
+reg_keys_to_delete = []
 
-# Number of -EncodedCommand decoded
-DECODED_COUNT = 0
+# Number of Windows Registry values deleted
+reg_value_delete_count = 0
+
+# Number of PowerShell's `-EncodedCommand` decoded
+decoded_count = 0
 
 # Files to be deleted
-FILES = []
+files_to_delete = []
 
 # Folders to be deleted
-FOLDERS = []
+folders_to_delete = []
 
 # Working directory
-WORK_DIR = ''
+work_dir = ''
 
 # Script extension
-EXTENSION = ''
+extension = ''
 
 # Name of folder containing traces
-TRACES = "traces"
+traces = "traces"
 
-# Trace log
-TRACE = ''
+# File name of trace log
+trace = ''
 
 # Timestamp
-TIMESTAMP = False
+timestamp = False
 
 # Fixed width for aesthetics
-FIXED_WIDTH = 8
+fixed_width = 8
 
-# Space character
-SPACE = ' '
+# Separator character
+space = ' '
 
 # Indent size
-INDENT = SPACE * 2
+indent = space * 2
 
-# Bad ProgIDs known to evade detection based on parent-child process relationship.
-BAD_PROGID = \
+# Bad ProgIDs that evade detection based on parent-child process relationship.
+# Add new ProgID in lower case.
+bad_progids = \
 {
-  "InternetExplorer.Application".lower()   : 1,
-  "InternetExplorer.Application.1".lower() : 1,
-  "Schedule.Service".lower()               : 1,
-  "Schedule.Service.1".lower()             : 1,
-  "WindowsInstaller.Installer".lower()     : 1
+  "internetexplorer.application"   : 1,
+  "internetexplorer.application.1" : 1,
+  "schedule.service"               : 1,
+  "schedule.service.1"             : 1,
+  "windowsinstaller.installer"     : 1
 }
 
 # Filter these functions from dynamic tracing.
-FILTER = \
+filter_from_tracing = \
 {
   "CWshShell::RegWrite"            : 1,
   "CHostObj::Sleep"                : 1,
@@ -72,6 +77,6 @@ FILTER = \
 }
 
 # Windows Script Host (WSH)
-WSH_PATH_WOW64 = "C:\\Windows\\SysWOW64\\"
-WSH_PATH = "C:\\Windows\\System32\\"
-WSH_EXE  = "cscript.exe"
+wsh_path_wow64 = "C:\\Windows\\SysWOW64\\"
+wsh_path = "C:\\Windows\\System32\\"
+wsh_exe  = "cscript.exe"

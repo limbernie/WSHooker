@@ -14,7 +14,7 @@ let ALLOW_SHELL      = false;
 let ALLOW_SLEEP      = false;
 let DEBUG            = false;
 let DYNAMIC          = false;
-let BAD_PROGID, EXTENSION, FILTER, FIXED_WIDTH, WORK_DIR, WSHOST;
+let BAD_PROGIDS, EXTENSION, FILTER, FIXED_WIDTH, WORK_DIR, WSHOST;
 
 /*
  * File write counters
@@ -48,7 +48,7 @@ recv("config", function onMessage(setting)
   DYNAMIC = setting["dynamic"];
   status(["DYNAMIC", '=', DYNAMIC].join(''));
 
-  BAD_PROGID  = JSON.parse(setting["bad_progid"]);
+  BAD_PROGIDS = JSON.parse(setting["bad_progids"]);
   EXTENSION   = setting["extension"];
   FILTER      = JSON.parse(setting["filter"]);
   FIXED_WIDTH = setting["fixed_width"];
@@ -777,7 +777,7 @@ function hookCLSIDFromProgID()
 
     printInprocServer32FromCLSID(clsid);
 
-    if (progid.toLowerCase() in BAD_PROGID)
+    if (progid.toLowerCase() in BAD_PROGIDS)
     {
       if (!ALLOW_BAD_PROGID)
       {
@@ -1119,7 +1119,7 @@ function hookMkParseDisplayName()
         separator();
       }
 
-      if (szProgID.toLowerCase() in BAD_PROGID)
+      if (szProgID.toLowerCase() in BAD_PROGIDS)
       {
         if (!ALLOW_BAD_PROGID)
         {

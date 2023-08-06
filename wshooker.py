@@ -1,7 +1,12 @@
+"""wshooker.py
+
+Windows Script Hooking with Frida
+"""
 import argparse
-import frida
 import os
 import time
+
+import frida
 
 import config
 import helpers
@@ -127,8 +132,9 @@ if __name__ == "__main__":
     if os.path.exists(args.script):
       valid_extensions = ["js", "vbs", "wsf"]
       try:
-        EXTENSION = os.path.basename(args.script).rsplit('.', 1)[1]
-        if EXTENSION.lower() not in valid_extensions:
+        file_name = os.path.basename(args.script).rsplit('.', 1)[0]
+        extension = os.path.basename(args.script).rsplit('.', 1)[1]
+        if extension.lower() not in valid_extensions:
           print("Error: Invalid file extension")
           exit(1)
       except IndexError:
@@ -136,30 +142,30 @@ if __name__ == "__main__":
           exit(1)
 
       if args.wscript:
-        config.WSH_EXE = "wscript.exe"
+        config.wsh_exe = "wscript.exe"
 
       if not args.no_banner:
         helpers.print_banner()
       
       # Prepend date and time expressed in ISO 8601 to script's file name sans extension.
       date_time = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
-      WORK_DIR = ''.join(['.\\', config.TRACES, '\\', date_time, '_', os.path.basename(args.script).rsplit('.', 1)[0]])
+      work_dir  = ''.join(['.\\', config.traces, '\\', date_time, '_', file_name])
       
-      os.makedirs(WORK_DIR)
+      os.makedirs(work_dir)
 
-      config.EXTENSION = EXTENSION
-      config.TIMESTAMP = args.timestamp
-      config.TRACE     = args.trace
-      config.WORK_DIR  = WORK_DIR
+      config.extension = extension
+      config.timestamp = args.timestamp
+      config.trace     = args.trace
+      config.work_dir  = work_dir
 
       status("Script: \"%s\"" % os.path.abspath(args.script))
       
-      status("Working Directory: \"%s\"" % WORK_DIR)
+      status("Working Directory: \"%s\"" % work_dir)
 
-      if os.path.exists(config.WSH_PATH_WOW64):
-        wshost = ''.join([config.WSH_PATH_WOW64, config.WSH_EXE])
+      if os.path.exists(config.wsh_path_wow64):
+        wshost = ''.join([config.wsh_path_wow64, config.wsh_exe])
       else:
-        wshost = ''.join([config.WSH_PATH, config.WSH_EXE])
+        wshost = ''.join([config.wsh_path, config.wsh_exe])
 
       status("Windows Script Host: \"%s\"" % wshost)
 
@@ -168,8 +174,7 @@ if __name__ == "__main__":
 
       # Arguments to malicious script, if any
       if args.args:
-        for a in args.args.split(' '):
-          cmd.append(a)
+        [cmd.append(a) for a in args.args.split(' ')]
 
       pid = frida.spawn(cmd)
 
