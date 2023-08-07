@@ -38,6 +38,12 @@ if __name__ == "__main__":
     help="arguments to malicious script, e.g., -a \"arg1 arg2 arg3 ...\""
   )
   parser.add_argument(
+    "-d",
+    "--directory",
+    dest="dir",
+    help="directory or folder to hold output trace"
+  )
+  parser.add_argument(
     "-o",
     "--output",
     dest="trace",
@@ -147,9 +153,13 @@ if __name__ == "__main__":
       if not args.no_banner:
         print_banner()
       
-      # Prepend date and time expressed in ISO 8601 to script's file name sans extension.
+      # Prepend date and time expressed as ISO 8601 to script's file name sans extension.
       date_time = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
-      work_dir  = ''.join(['.\\', config.traces, '\\', date_time, '_', file_name])
+      
+      if args.dir:
+        work_dir = ''.join([os.path.abspath(args.dir), '\\', date_time, '_', file_name])
+      else:
+        work_dir = ''.join([os.path.abspath('.\\'), '\\', config.traces, '\\', date_time, '_', file_name])
       
       os.makedirs(work_dir)
 

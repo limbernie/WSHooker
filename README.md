@@ -86,8 +86,9 @@ WSHooker supports a number of options to allow certain dangerous operations to c
 
 ```
 python wshooker.py --help
-usage: wshooker.py [-h] [-p PID | -s SCRIPT] [-a ARGS] [-o TRACE] [--allow-bad-progid] [--allow-file] [--allow-net] [--allow-proc]
-                   [--allow-reg] [--allow-shell] [--allow-sleep] [--debug] [--dynamic] [--no-banner] [--timestamp] [--wscript]
+usage: wshooker.py [-h] [-p PID | -s SCRIPT] [-a ARGS] [-d DIR] [-o TRACE] [--allow-bad-progid] [--allow-file] [--allow-net]
+                   [--allow-proc] [--allow-reg] [--allow-shell] [--allow-sleep] [--debug] [--dynamic] [--no-banner] [--timestamp]
+                   [--wscript]
 
 WSHooker - Windows Script Hooking with Frida
 
@@ -97,6 +98,8 @@ options:
   -s SCRIPT, --script SCRIPT
                         path to malicious script
   -a ARGS, --args ARGS  arguments to malicious script, e.g., -a "arg1 arg2 arg3 ..."
+  -d DIR, --directory DIR
+                        directory or folder to hold output trace
   -o TRACE, --output TRACE
                         write output trace to file (default is trace.log)
   --allow-bad-progid    (dangerous) allow known bad ProgID
