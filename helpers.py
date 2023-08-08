@@ -15,6 +15,8 @@ import config
 from printer import *
 
 def print_inprocserver32_from_clsid(clsid):
+  if clsid == config.unregistered_class:
+    return
   try:
     key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, ''.join(["CLSID", "\\", clsid, "\\", "InprocServer32"]))
     module = winreg.QueryValueEx(key, '')[0]

@@ -136,11 +136,10 @@ if __name__ == "__main__":
 
   elif args.script:
     if os.path.exists(args.script):
-      valid_extensions = ["js", "vbs", "wsf"]
       try:
         file_name = os.path.basename(args.script).rsplit('.', 1)[0]
         extension = os.path.basename(args.script).rsplit('.', 1)[1]
-        if extension.lower() not in valid_extensions:
+        if extension.lower() not in config.valid_extensions:
           print("Error: Invalid file extension")
           exit(1)
       except IndexError:

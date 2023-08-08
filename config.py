@@ -20,6 +20,9 @@ folders_to_delete = []
 # Working directory
 work_dir = ''
 
+# Valid extensions
+valid_extensions = [ "js", "jse", "vbs", "vbe", "wsh" ]
+
 # Script extension
 extension = ''
 
@@ -43,8 +46,7 @@ indent = space * 2
 
 # Bad ProgIDs that evade detection based on parent-child process relationship.
 # Add new ProgID in lower case.
-bad_progids = \
-{
+bad_progids = {
   "internetexplorer.application"   : 1,
   "internetexplorer.application.1" : 1,
   "schedule.service"               : 1,
@@ -52,9 +54,11 @@ bad_progids = \
   "windowsinstaller.installer"     : 1
 }
 
+# Unregistered class
+unregistered_class = "{00000000-0000-0000-0000-000000000000}"
+
 # Filter these functions from dynamic tracing.
-filter_from_tracing = \
-{
+filter_from_tracing = {
   "CWshShell::RegWrite"            : 1,
   "CHostObj::Sleep"                : 1,
   "CSWbemServices::ExecQuery"      : 1,

@@ -57,11 +57,11 @@ recv("config", function onMessage(setting)
   
   
 
-  if (EXTENSION === "js")
+  if (EXTENSION.match(/js/))
   {
     status(["ENGINE", '=', "JScript"].join(''));
   }
-  else if (EXTENSION === "vbs")
+  else if (EXTENSION.match(/vb/))
   {
     status(["ENGINE", '=', "VBScript"].join(''));
   }
