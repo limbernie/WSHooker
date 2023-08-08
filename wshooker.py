@@ -159,7 +159,7 @@ if __name__ == "__main__":
       if args.dir:
         work_dir = ''.join([os.path.abspath(args.dir), '\\', date_time, '_', file_name])
       else:
-        work_dir = ''.join([os.path.abspath('.\\'), '\\', config.traces, '\\', date_time, '_', file_name])
+        work_dir = ''.join([os.path.abspath('.'), '\\', config.traces, '\\', date_time, '_', file_name])
       
       os.makedirs(work_dir)
 

@@ -137,15 +137,15 @@ function call(module, functionName)
   log(["Call", ':', ' ', module, '!', functionName, '()'].join(''));
 }
 
-function where(filepath)
-{
-  param("Data", filepath);
-}
-
 String.prototype.center = function(width, c = ' ') 
 {
   let pad = width - Math.ceil((width - this.length) / 2);
   return this.padStart(pad, c).padEnd(width, c);
+};
+
+String.prototype.capitalize = function() 
+{
+  return this.charAt(0).toUpperCase() + this.toLowerCase().slice(1);
 };
 
 function param(name, value)
@@ -400,7 +400,7 @@ function writeToFile(type, count, data)
   file.write(data);
   file.close();
 
-  where(filepath);
+  param(type.capitalize(), filepath);
 }
 
 /*

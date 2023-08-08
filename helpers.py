@@ -39,13 +39,13 @@ def parse_hkey(path):
 
 # Search for IOCS in these files:
 #    exe[c]_*.txt
-# decode[d]_*.txt
 #    cod[e]_*.txt
+#      p[s]_*.txt
 #     re[g]_*.txt
 #    soc[k]_*.txt
 #    tex[t]_*.txt
 def search_for_ioc():
-  for file in glob.glob(''.join([config.work_dir, '\\', '*[cdegkt]_*.txt'])):
+  for file in glob.glob(''.join([config.work_dir, '\\', '*[geckst]_*.txt'])):
     f = open(file, 'r', encoding='utf-8')
     text = f.read()
 
@@ -188,16 +188,16 @@ def delete_reg_value(path):
   with open(''.join([config.work_dir, '\\', filename]), 'w') as fd:
     fd.write("Value: %s\nData : %s" % (path, data))
   fd.close()
-  param("Data", "%s\\%s" % (config.work_dir, filename))
+  param("WinReg", "%s\\%s" % (config.work_dir, filename))
   winreg.DeleteValue(key, value)
   key.Close()
   param("Action", "Delete")
 
 def decode_powershell(encoded):
   decoded_count = config.decoded_count + 1
-  filename = ''.join(["decoded", '_', ("%d" % decoded_count), '.', "txt"])
+  filename = ''.join(["ps", '_', ("%d" % decoded_count), '.', "txt"])
   decoded = base64.b64decode(encoded).decode('utf-16le')
   with open(''.join([config.work_dir, '\\', filename]), 'w') as fd:
     fd.write(decoded)
   fd.close()
-  param("Data", "%s\\%s" % (config.work_dir, filename))
+  param("PS", "%s\\%s" % (config.work_dir, filename))
