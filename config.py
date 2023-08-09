@@ -3,84 +3,84 @@
 WSHooker Configuration
 """
 # Windows Registry keys to be deleted
-reg_keys_to_delete = []
+REG_KEYS_TO_DELETE = []
 
 # Number of Windows Registry values deleted
-reg_value_delete_count = 0
+REG_VALUE_DELETE_COUNT = 0
 
 # Number of PowerShell's `-EncodedCommand` decoded
-decoded_count = 0
+DECODED_COUNT = 0
 
 # Files to be deleted
-files_to_delete = []
+FILES_TO_DELETE = []
 
 # Folders to be deleted
-folders_to_delete = []
+FOLDERS_TO_DELETE = []
 
 # Working directory
-work_dir = ''
+WORK_DIR = ""
 
 # Valid extensions
-valid_extensions = [ "js", "jse", "vbs", "vbe", "wsh" ]
+VALID_EXTENSIONS = [".js", ".jse", ".vbs", ".vbe", ".wsh"]
 
 # Script extension
-extension = ''
+EXTENSION = ""
 
 # Name of folder containing traces
-traces = "traces"
+TRACES = "traces"
 
 # File name of trace log
-trace = ''
+TRACE = ""
 
 # Timestamp
-timestamp = False
+TIMESTAMP = False
 
 # Fixed width for aesthetics
-fixed_width = 8
+FIXED_WIDTH = 10
 
 # Separator character
-space = ' '
+SPACE = " "
 
 # Indent size
-indent = space * 2
+INDENT = SPACE * 2
 
 # Bad ProgIDs that evade detection based on parent-child process relationship.
 # Add new ProgID in lower case.
-bad_progids = {
-  "internetexplorer.application"   : 1,
-  "internetexplorer.application.1" : 1,
-  "schedule.service"               : 1,
-  "schedule.service.1"             : 1,
-  "windowsinstaller.installer"     : 1
+BAD_PROGIDS = {
+    "internetexplorer.application": 1,
+    "internetexplorer.application.1": 1,
+    "schedule.service": 1,
+    "schedule.service.1": 1,
+    "windowsinstaller.installer": 1,
 }
 
 # Unregistered class
-unregistered_class = "{00000000-0000-0000-0000-000000000000}"
+UNREGISTERED_CLASS = "{00000000-0000-0000-0000-000000000000}"
 
-# Filter these functions from dynamic tracing.
-filter_from_tracing = {
-  "CWshShell::RegWrite"            : 1,
-  "CHostObj::Sleep"                : 1,
-  "CSWbemServices::ExecQuery"      : 1,
-  "CHostObj::CreateObject"         : 1,
-  "CWshShell::Run"                 : 1,
-  "CShellDispatch::ShellExecuteW"  : 1,
-  "XMLHttp::open"                  : 1,
-  "XMLHttp::setRequestHeader"      : 1,
-  "XMLHttp::send"                  : 1,
-  "CFileSystem::GetSpecialFolder"  : 1,
-  "CFileSystem::CopyFileA"         : 1,
-  "CFileSystem::MoveFileA"         : 1,
-  "CFileSystem::CreateFolder"      : 1,
-  "CHttpRequest::Open"             : 1,
-  "CHttpRequest::SetRequestHeader" : 1,
-  "CHttpRequest::Send"             : 1,
-  "CTextStream::Close"             : 1,
-  "CTextStream::Write"             : 1,
-  "CTextStream::WriteLine"         : 1
+# Add and/or filter these functions from dynamic tracing.
+FILTER_FROM_TRACING = {
+    "CWshShell::RegWrite": 1,
+    "CHostObj::Sleep": 1,
+    "CSWbemServices::ExecQuery": 1,
+    "CHostObj::CreateObject": 1,
+    "CWshShell::Run": 1,
+    "CShellDispatch::ShellExecuteW": 1,
+    "XMLHttp::open": 1,
+    "XMLHttp::setRequestHeader": 1,
+    "XMLHttp::send": 1,
+    "CFileSystem::GetSpecialFolder": 1,
+    "CFileSystem::CopyFileA": 1,
+    "CFileSystem::MoveFileA": 1,
+    "CFileSystem::CreateFolder": 1,
+    "CHttpRequest::Open": 1,
+    "CHttpRequest::SetRequestHeader": 1,
+    "CHttpRequest::Send": 1,
+    "CTextStream::Close": 1,
+    "CTextStream::Write": 1,
+    "CTextStream::WriteLine": 1,
 }
 
 # Windows Script Host (WSH)
-wsh_path_wow64 = "C:\\Windows\\SysWOW64\\"
-wsh_path = "C:\\Windows\\System32\\"
-wsh_exe  = "cscript.exe"
+WSH_PATH_WOW64 = "C:\\Windows\\SysWOW64\\"
+WSH_PATH = "C:\\Windows\\System32\\"
+WSH_EXE = "cscript.exe"
