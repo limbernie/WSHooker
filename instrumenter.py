@@ -14,7 +14,6 @@ from helpers import (
     delete_reg_value,
     print_inprocserver32_from_clsid,
 )
-
 from printer import info, log, printf, status
 
 

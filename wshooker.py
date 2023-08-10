@@ -12,7 +12,6 @@ import frida
 
 import config
 from helpers import clean_frida_temp_files
-
 from instrumenter import Instrumenter
 from printer import print_banner, status
 
