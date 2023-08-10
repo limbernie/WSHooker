@@ -117,7 +117,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    if not args:
+    if len(sys.argv) == 1:
         parser.print_usage()
         sys.exit(1)
     # Reserved for future release.
