@@ -153,6 +153,7 @@ if __name__ == "__main__":
 
             makedirs(WORK_DIR)
 
+            # Global configurations
             config.EXTENSION = extension
             config.TIMESTAMP = args.timestamp
             config.TRACE = args.trace
@@ -184,7 +185,8 @@ if __name__ == "__main__":
 
             instrumenter = Instrumenter(hook, pid)
 
-            options = {
+            # Hook options
+            hook_options = {
                 "debug": args.debug,
                 "dynamic": args.dynamic,
                 "allow_bad_progid": args.allow_bad_progid,
@@ -196,7 +198,7 @@ if __name__ == "__main__":
                 "allow_sleep": args.allow_sleep,
             }
 
-            instrumenter.instrument(options=options)
+            instrumenter.instrument(options=hook_options)
         else:
             print("Error: File not found")
             sys.exit(1)
