@@ -126,6 +126,7 @@ class Instrumenter:
             self.resume()
         elif parameter is not None:
             try:
+                # Windows legacy console code page
                 parameter.encode("cp437")
             except UnicodeEncodeError:
                 parameter = None

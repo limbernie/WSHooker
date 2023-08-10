@@ -134,14 +134,11 @@ if __name__ == "__main__":
                 print("Error: Invalid file extension")
                 sys.exit(1)
 
-            if args.wscript:
-                config.WSH_EXE = "wscript.exe"
-
             if not args.no_banner:
                 print_banner()
 
             # Prepend date and time expressed as ISO 8601 to script's file name
-            # sans extension.
+            # sans extension so that there's no chance of name collision.
             date_time = strftime("%Y%m%dT%H%M%SZ", gmtime())
 
             if args.dir:
@@ -158,6 +155,7 @@ if __name__ == "__main__":
             config.TIMESTAMP = args.timestamp
             config.TRACE = args.trace
             config.WORK_DIR = WORK_DIR
+            config.WSH_EXE = "wscript.exe" if args.wscript else "cscript.exe"
 
             status(f'Script: "{abspath(args.script)}"')
 
@@ -175,7 +173,7 @@ if __name__ == "__main__":
 
             # Arguments to malicious script, if any
             if args.args:
-                for a in args.split(" "):
+                for a in args.args.split(" "):
                     cmd.append(a)
 
             pid = frida.spawn(cmd)

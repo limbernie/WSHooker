@@ -143,6 +143,8 @@ def delete_reg_key(key):
 
 def delete_reg_value(path):
     """Delete registry value."""
+    if path is None:
+        return
     hkey = parse_hkey(path)
     subkey = "\\".join(path.split("\\")[1:-1])
     value = path.split("\\")[-1]
@@ -174,6 +176,8 @@ def delete_reg_value(path):
 
 def decode_powershell(encoded):
     """Decode Base64-encoded PowerShell in -EncodedCommand."""
+    if encoded is None:
+        return
     config.DECODED_COUNT += 1
     decoded_count = config.DECODED_COUNT
     filename = "".join(["ps", "_", (f"{decoded_count}"), ".", "txt"])
