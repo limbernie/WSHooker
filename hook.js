@@ -345,7 +345,7 @@ function writeToFile(type, count, data) {
   file.write(data);
   file.close();
 
-  param(type.capitalize(), filepath);
+  param(type.capitalize(), filename);
 }
 
 /*

@@ -5,7 +5,7 @@ Helper Functions
 from base64 import b64decode
 from glob import glob
 from os import makedirs, remove, rmdir
-from os.path import exists, expandvars
+from os.path import basename, exists, expandvars
 import re
 from shutil import copy2, rmtree
 from time import sleep
@@ -60,7 +60,7 @@ def search_for_ioc():
         ipaddrs = [x.group() for x in IP_RE.finditer(content)]
 
         if len(keywords) > 0 or len(ipaddrs) > 0 or len(urls) > 0:
-            status(f'Searching for IOCs in "{_file}"...')
+            status(f'Searching for IOCs in "{basename(_file)}"...')
             for keyword in keywords:
                 keyword = (
                     re.sub(r'[\'"();]', "", keyword).encode("utf-8", "ignore").decode()
@@ -159,13 +159,14 @@ def delete_reg_value(path):
     sleep(0.1)
 
     data = winreg.QueryValueEx(key, value)[0]
-    reg_value_delete_count = config.REG_VALUE_DELETE_COUNT + 1
+    config.REG_VALUE_DELETE_COUNT += 1
+    reg_value_delete_count = config.REG_VALUE_DELETE_COUNT
     filename = "".join(["reg", "_", f"{reg_value_delete_count}", ".", "txt"])
     with open(
         "".join([config.WORK_DIR, "\\", filename]), "w", encoding="utf-8"
     ) as file:
         file.write(f"Value: {path}\nData : {data}")
-    param("WinReg", f"{config.WORK_DIR}\\{filename}")
+    param("WinReg", f"{filename}")
     winreg.DeleteValue(key, value)
     key.Close()
     param("Action", "Delete")
@@ -173,11 +174,12 @@ def delete_reg_value(path):
 
 def decode_powershell(encoded):
     """Decode Base64-encoded PowerShell in -EncodedCommand."""
-    decoded_count = config.DECODED_COUNT + 1
+    config.DECODED_COUNT += 1
+    decoded_count = config.DECODED_COUNT
     filename = "".join(["ps", "_", (f"{decoded_count}"), ".", "txt"])
     decoded = b64decode(encoded).decode("utf-16le")
     with open(
         "".join([config.WORK_DIR, "\\", filename]), "w", encoding="utf-8"
     ) as file:
         file.write(decoded)
-    param("PS", f"{config.WORK_DIR}\\{filename}")
+    param("PS", f"{filename}")
