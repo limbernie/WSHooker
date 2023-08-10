@@ -117,11 +117,8 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    if len(sys.argv) == 1:
-        parser.print_usage()
-        sys.exit(1)
     # Reserved for future release.
-    elif args.pid is not None:
+    if args.pid is not None:
         parser.print_help()
         sys.exit(1)
     elif args.script:
@@ -200,3 +197,6 @@ if __name__ == "__main__":
         else:
             print("Error: File not found")
             sys.exit(1)
+    else:
+        parser.print_usage()
+        sys.exit(1)
