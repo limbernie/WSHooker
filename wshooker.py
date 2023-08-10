@@ -124,6 +124,7 @@ if __name__ == "__main__":
     elif args.script:
         if exists(args.script):
             file_name, extension = splitext(basename(args.script))
+            file_name = file_name.replace(" ", "_")
             if not extension:
                 print("Error: No file extension")
                 sys.exit(1)
