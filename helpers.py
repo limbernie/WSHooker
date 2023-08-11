@@ -51,7 +51,12 @@ def parse_hkey(path):
 
 def search_for_ioc():
     """Search for IOCs in .txt files."""
-    for _file in glob("".join([config.WORK_DIR, "\\", "*[geckst]_*.txt"])):
+    _files = [
+        _file
+        for _file in glob("".join([config.WORK_DIR, "\\", "*[geckst]_*.txt"]))
+        if "code_1.txt" not in _file
+    ]
+    for _file in _files:
         with open(_file, "r", encoding="utf-8") as file:
             content = file.read()
 
