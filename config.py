@@ -21,7 +21,7 @@ FOLDERS_TO_DELETE = []
 WORK_DIR = ""
 
 # Valid extensions
-VALID_EXTENSIONS = [".js", ".jse", ".vbs", ".vbe", ".wsh"]
+VALID_EXTENSIONS = [".js", ".jse", ".vbs", ".vbe", ".wsf"]
 
 # Script extension
 EXTENSION = ""

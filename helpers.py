@@ -2,6 +2,7 @@
 
 Helper Functions
 """
+from argparse import ArgumentParser
 from base64 import b64decode
 from glob import glob
 from os import makedirs, remove, rmdir
@@ -192,3 +193,107 @@ def decode_powershell(encoded):
     ) as file:
         file.write(decoded)
     param("PS", f"{filename}")
+
+
+def parse_arguments():
+    """Parse WSHooker's arguments."""
+    parser = ArgumentParser(description="WSHooker - Windows Script Hooking with Frida")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "-p",
+        "--pid",
+        dest="pid",
+        help="process id (reserved for future release)",
+        type=int,
+    )
+    group.add_argument("-s", "--script", dest="script", help="path to malicious script")
+    parser.add_argument(
+        "-a",
+        "--args",
+        dest="args",
+        help='arguments to malicious script, e.g., -a "arg1 arg2 arg3 ..."',
+    )
+    parser.add_argument(
+        "-d", "--directory", dest="dir", help="directory or folder to hold output trace"
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        dest="trace",
+        default="trace.log",
+        help="write output trace to file (default is trace.log)",
+    )
+    parser.add_argument(
+        "--allow-bad-progid",
+        dest="allow_bad_progid",
+        action="store_true",
+        help="(dangerous) allow known bad ProgID",
+    )
+    parser.add_argument(
+        "--allow-file",
+        dest="allow_file",
+        action="store_true",
+        help="(dangerous) allow file copy/move/write",
+    )
+    parser.add_argument(
+        "--allow-net",
+        dest="allow_net",
+        action="store_true",
+        help="(dangerous) allow network requests",
+    )
+    parser.add_argument(
+        "--allow-proc",
+        dest="allow_proc",
+        action="store_true",
+        help="(dangerous) allow Win32_Process",
+    )
+    parser.add_argument(
+        "--allow-reg",
+        dest="allow_reg",
+        action="store_true",
+        help="(dangerous) allow registry write",
+    )
+    parser.add_argument(
+        "--allow-shell",
+        dest="allow_shell",
+        action="store_true",
+        help="(dangerous) allow shell command to run as Administrator",
+    )
+    parser.add_argument(
+        "--allow-sleep",
+        dest="allow_sleep",
+        action="store_true",
+        help="(slow-down) allow WScript.Sleep()",
+    )
+    parser.add_argument(
+        "--debug",
+        dest="debug",
+        action="store_true",
+        help="(verbose) display debug message",
+    )
+    parser.add_argument(
+        "--dynamic",
+        dest="dynamic",
+        action="store_true",
+        help="(verbose) enable dynamic tracing",
+    )
+    parser.add_argument(
+        "--no-banner",
+        dest="no_banner",
+        action="store_true",
+        help="remove banner in output trace",
+    )
+    parser.add_argument(
+        "--timestamp",
+        dest="timestamp",
+        action="store_true",
+        help="display timestamp in output trace",
+    )
+    parser.add_argument(
+        "--wscript",
+        dest="wscript",
+        action="store_true",
+        help="switch to wscript.exe (default is cscript.exe)",
+    )
+    args = parser.parse_args()
+    return parser, args
