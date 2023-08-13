@@ -97,7 +97,7 @@ class Instrumenter:
     def on_destroyed(self):
         """Called when instrumentation script is destroyed."""
         if not self.interrupted:
-            status("Trace is finished without error")
+            status("Trace is finished with no error")
 
     def on_message(self, message, data):
         """Called when message from instrumention script is posted."""

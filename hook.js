@@ -122,7 +122,7 @@ function action(action) {
 }
 
 function call(module, functionName) {
-  log("Call: " + module + "!", functionName + "()");
+  log("Call: " + module + "!" + functionName + "()");
 }
 
 String.prototype.center = function (width, c = ' ') {
