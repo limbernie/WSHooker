@@ -146,9 +146,9 @@ function separator() {
 
 /*
  * Print functions for debug message.
- * [*] => status
- * [+] => info
- * [-] => error
+ * (**) => status
+ * (II) => info
+ * (EE) => error
  */
 function debug(message) {
   if (DEBUG) {
@@ -157,15 +157,15 @@ function debug(message) {
 }
 
 function status(message) {
-  debug(["[*]", ' ', message].join(''));
+  debug(["(**)", ' ', message].join(''));
 }
 
 function info(message) {
-  debug(["[+]", ' ', message].join(''));
+  debug(["(II)", ' ', message].join(''));
 }
 
 function error(message) {
-  debug(["[-]", ' ', message].join(''));
+  debug(["(EE)", ' ', message].join(''));
 }
 
 /*

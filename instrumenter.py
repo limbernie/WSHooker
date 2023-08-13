@@ -9,12 +9,11 @@ import frida
 
 import config
 from helpers import (
-    clean_up,
     decode_powershell,
     delete_reg_value,
     print_inprocserver32_from_clsid,
 )
-from printer import info, log, printf, status
+from printer import info, log, print_trace_label, status
 
 
 class Instrumenter:
@@ -23,10 +22,11 @@ class Instrumenter:
     def __init__(self, hook, pid):
         self.hook = hook
         self.pid = pid
-        self._device = frida.get_local_device()
-        self._device.on("child-added", self.on_child_added)
-        self._device.on("child-removed", self.on_child_removed)
-        self._process_terminated = False
+        self.device = frida.get_local_device()
+        self.device.on("child-added", self.on_child_added)
+        self.device.on("child-removed", self.on_child_removed)
+        self.interrupted = False
+        self.process_terminated = False
         self.defaults = {
             "debug": False,
             "dynamic": False,
@@ -43,7 +43,7 @@ class Instrumenter:
         """Begin instrumentation"""
         if options is None:
             options = self.defaults
-        session = frida.attach(self.pid)
+        session = self.device.attach(self.pid)
         session.enable_child_gating()
         session.on("detached", self.on_detached)
         script = session.create_script(self.hook)
@@ -51,7 +51,7 @@ class Instrumenter:
         script.on("destroyed", self.on_destroyed)
         script.load()
 
-        # Sending config to instrumentation script
+        # Sending settings to instrumentation script.
         script.post(
             {
                 "type": "config",
@@ -73,34 +73,31 @@ class Instrumenter:
             }
         )
 
-        # Keep the process suspended until resumed
+        # Keep the process suspended until resumed.
         while True:
             try:
                 sleep(0.5)
-                if self._process_terminated:
+                if self.process_terminated:
                     break
             except KeyboardInterrupt:
-                status("Warning: Instrumentation script is destroyed")
-                clean_up()
+                status("Trace interrupted")
+                self.interrupted = True
                 break
 
-        if not self._process_terminated:
-            info(f"Killed process: {self.pid}")
-            status("Exiting...")
+        if not self.process_terminated:
             frida.kill(self.pid)
+            raise KeyboardInterrupt
 
     def on_detached(self, message, data):
         """Called when process is detached."""
         if message == "process-terminated" and data is None:
             pass
-        clean_up()
-        info(f"Killed process: {self.pid}")
-        status("Exiting...")
-        self._process_terminated = True
+        self.process_terminated = True
 
     def on_destroyed(self):
         """Called when instrumentation script is destroyed."""
-        status("Warning: Instrumentation script is destroyed")
+        if not self.interrupted:
+            status("Trace completed")
 
     def on_message(self, message, data):
         """Called when message from instrumention script is posted."""
@@ -108,7 +105,7 @@ class Instrumenter:
             pass
         if message["type"] == "send":
             payload = message["payload"]
-            self.do_action(payload.get("action"), payload.get("parameter"))
+            self.on_action(payload.get("action"), payload.get("parameter"))
 
     def on_child_added(self, child):
         """Called when child process is added."""
@@ -120,7 +117,7 @@ class Instrumenter:
         info(f"Killed child process: {child.pid}")
         log("|")
 
-    def do_action(self, action, parameter):
+    def on_action(self, action, parameter):
         """Invoke helper functions to complete action, except for resume."""
         if action == "resume":
             self.resume()
@@ -143,9 +140,5 @@ class Instrumenter:
 
     def resume(self):
         """Resume Frida instrumentation."""
-        status(f"Windows Script Host PID: {self.pid}")
         frida.resume(self.pid)
-        status("Ctrl-C to kill the process...")
-        printf("+---------+")
-        printf("|  Trace  |")
-        printf("+---------+")
+        print_trace_label()

@@ -11,9 +11,9 @@ from time import gmtime, strftime
 import frida
 
 import config
-from helpers import clean_frida_temp_files, parse_arguments
+from helpers import delete_frida_temp_files, parse_arguments, post_actions
 from instrumenter import Instrumenter
-from printer import print_banner, status
+from printer import print_banner, printf
 
 
 class WSHooker:
@@ -46,21 +46,9 @@ class WSHooker:
                 # Date and time expressed in ISO 8601 to prevent name collision.
                 datetime = strftime("%Y%m%dT%H%M%SZ", gmtime())
                 if self.args.dir:
-                    workdir = "".join(
-                        [abspath(self.args.dir), "\\", datetime, "_", filename]
-                    )
+                    workdir = f"{abspath(self.args.dir)}\\{datetime}_{filename}"
                 else:
-                    workdir = "".join(
-                        [
-                            abspath("."),
-                            "\\",
-                            config.TRACES,
-                            "\\",
-                            datetime,
-                            "_",
-                            filename,
-                        ]
-                    )
+                    workdir = f"{abspath('.')}\\{config.TRACES}\\{datetime}_{filename}"
                 makedirs(workdir)
 
                 # Global configurations
@@ -85,18 +73,15 @@ class WSHooker:
             print("Error: WSHooker is not configured.")
             sys.exit(1)
 
-        clean_frida_temp_files()
+        delete_frida_temp_files()
 
         if not self.args.no_banner:
             print_banner()
 
         if exists(config.WSH_PATH_WOW64):
-            wshost = "".join([config.WSH_PATH_WOW64, config.WSH_EXE])
+            wshost = f"{config.WSH_PATH_WOW64}{config.WSH_EXE}"
         else:
-            wshost = "".join([config.WSH_PATH, config.WSH_EXE])
-        status(f'Script: "{self.script}"')
-        status(f'Working Directory: "{config.WORK_DIR}"')
-        status(f'Windows Script Host: "{wshost}"')
+            wshost = f"{config.WSH_PATH}{config.WSH_EXE}"
 
         # Use "/b" to suppress alerts, errors or prompts
         cmd = [wshost, "/b", abspath(self.script)]
@@ -106,12 +91,8 @@ class WSHooker:
             for arg in self.args.args.split(" "):
                 cmd.append(arg)
 
-        pid = frida.spawn(cmd)
-
         with open("hook.js", "r", encoding="utf-8") as hook_js:
             hook = hook_js.read()
-
-        instrumenter = Instrumenter(hook, pid)
 
         # Hook options
         hook_options = {
@@ -126,10 +107,26 @@ class WSHooker:
             "allow_sleep": self.args.allow_sleep,
         }
 
+        pid = frida.spawn(cmd)
+
+        printf(f'Script: "{self.script}"')
+        printf(f'Working Directory: "{config.WORK_DIR}"')
+        printf(f'Windows Script Host: "{wshost}"')
+        printf(f"Windows Script Host process: {pid}")
+        printf("Ctrl-C to kill the process")
+        printf("Markers: (**) status, (II) informational, (EE) error")
+
+        instrumenter = Instrumenter(hook, pid)
         instrumenter.instrument(options=hook_options)
+
+        if instrumenter.process_terminated:
+            post_actions(1)
 
 
 if __name__ == "__main__":
-    wshooker = WSHooker()
-    wshooker.configure()
-    wshooker.run()
+    try:
+        wshooker = WSHooker()
+        wshooker.configure()
+        wshooker.run()
+    except KeyboardInterrupt:
+        post_actions(3)
