@@ -80,7 +80,7 @@ class Instrumenter:
                 if self.process_terminated:
                     break
             except KeyboardInterrupt:
-                status("Trace interrupted")
+                status("Trace is stopped by Ctrl-C")
                 self.interrupted = True
                 break
 
@@ -97,7 +97,7 @@ class Instrumenter:
     def on_destroyed(self):
         """Called when instrumentation script is destroyed."""
         if not self.interrupted:
-            status("Trace completed")
+            status("Trace is finished without error")
 
     def on_message(self, message, data):
         """Called when message from instrumention script is posted."""

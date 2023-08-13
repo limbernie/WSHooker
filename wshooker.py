@@ -112,10 +112,10 @@ class WSHooker:
         pid = frida.spawn(cmd)
 
         printf(f'Script: "{self.script}"')
-        printf(f'Working Directory: "{config.WORK_DIR}"')
+        printf(f'Working directory: "{config.WORK_DIR}"')
         printf(f'Windows Script Host: "{wshost}"')
         printf(f"Windows Script Host process: {pid}")
-        printf("Ctrl-C to kill the process")
+        printf("Ctrl-C to stop the trace")
         printf("Markers: (**) status, (II) informational, (EE) error")
 
         instrumenter = Instrumenter(hook, pid)
