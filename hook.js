@@ -47,9 +47,9 @@ recv("config", function onMessage(setting) {
   ALLOW_SLEEP = setting["allow_sleep"];
   status(["ALLOW_SLEEP", '=', ALLOW_SLEEP].join(''));
 
-  BAD_PROGIDS = JSON.parse(setting["bad_progids"]);
+  BAD_PROGIDS = new Set(JSON.parse(setting["bad_progids"]));
   EXTENSION = setting["extension"];
-  FILTER = JSON.parse(setting["filter"]);
+  FILTER = new Set(JSON.parse(setting["filter"]));
   FIXED_WIDTH = setting["fixed_width"];
   WORK_DIR = setting["work_dir"];
   WSHOST = setting["wshost"];
@@ -677,7 +677,7 @@ function hookCLSIDFromProgID() {
 
     printInprocServer32FromCLSID(clsid);
 
-    if (progid.toLowerCase() in BAD_PROGIDS) {
+    if (BAD_PROGIDS.has(progid.toLowerCase())) {
       if (!ALLOW_BAD_PROGID) {
         action("Block");
         retval = CO_E_CLASSSTRING;
@@ -689,8 +689,8 @@ function hookCLSIDFromProgID() {
 }
 
 function hookDispCallFunc() {
-  if (!("DispCallFunc" in FILTER)) {
-    FILTER["DispCallFunc"] = 1;
+  if (!(FILTER.has("DispCallFunc"))) {
+    FILTER.add("DispCallFunc");
 
     let module = "oleaut32.dll";
     let fnName = "DispCallFunc";
@@ -713,8 +713,8 @@ function hookDispCallFunc() {
           separator();
 
           /* Hook new functions here if they aren't already hooked. */
-          if (!(functionName.name in FILTER)) {
-            FILTER[functionName.name] = 1;
+          if (!(FILTER.has(functionName.name))) {
+            FILTER.add(functionName.name);
             Interceptor.attach(functionAddress,
               {
                 onEnter: function (args) {
@@ -978,7 +978,7 @@ function hookMkParseDisplayName() {
         separator();
       }
 
-      if (szProgID.toLowerCase() in BAD_PROGIDS) {
+      if (BAD_PROGIDS.has(szProgID.toLowerCase())) {
         if (!ALLOW_BAD_PROGID) {
           action("Block");
           separator();

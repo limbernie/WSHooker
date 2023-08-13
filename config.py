@@ -45,42 +45,45 @@ SPACE = " "
 INDENT = SPACE * 2
 
 # Bad ProgIDs that evade detection based on parent-child process relationship.
-# Add new ProgID in lower case.
-BAD_PROGIDS = {
-    "internetexplorer.application": 1,
-    "internetexplorer.application.1": 1,
-    "schedule.service": 1,
-    "schedule.service.1": 1,
-    "windowsinstaller.installer": 1,
-}
+# Add new ProgIDs to this list.
+BAD_PROGIDS_LIST = [
+    "Internetexplorer.Application",
+    "Internetexplorer.Application.1",
+    "Schedule.Service",
+    "Schedule.Service.1",
+    "Windowsinstaller.Installer",
+]
+
+# Transform the ProgIDs to lower case.
+BAD_PROGIDS = [progid.lower() for progid in BAD_PROGIDS_LIST]
 
 # Unregistered class
 UNREGISTERED_CLASS = "{00000000-0000-0000-0000-000000000000}"
 
 # Add and/or filter these functions from dynamic tracing.
-FILTER_FROM_TRACING = {
-    "CWshShell::RegWrite": 1,
-    "CHostObj::Sleep": 1,
-    "CSWbemServices::ExecQuery": 1,
-    "CHostObj::CreateObject": 1,
-    "CWshShell::Run": 1,
-    "CShellDispatch::ShellExecuteW": 1,
-    "XMLHttp::open": 1,
-    "XMLHttp::setRequestHeader": 1,
-    "XMLHttp::send": 1,
-    "CFileSystem::GetSpecialFolder": 1,
-    "CFileSystem::CopyFileA": 1,
-    "CFileSystem::MoveFileA": 1,
-    "CFileSystem::CreateFolder": 1,
-    "CHttpRequest::Open": 1,
-    "CHttpRequest::SetRequestHeader": 1,
-    "CHttpRequest::Send": 1,
-    "CTextStream::Close": 1,
-    "CTextStream::Write": 1,
-    "CTextStream::WriteLine": 1,
-}
+FILTER = [
+    "CWshShell::RegWrite",
+    "CHostObj::Sleep",
+    "CSWbemServices::ExecQuery",
+    "CHostObj::CreateObject",
+    "CWshShell::Run",
+    "CShellDispatch::ShellExecuteW",
+    "XMLHttp::open",
+    "XMLHttp::setRequestHeader",
+    "XMLHttp::send",
+    "CFileSystem::GetSpecialFolder",
+    "CFileSystem::CopyFileA",
+    "CFileSystem::MoveFileA",
+    "CFileSystem::CreateFolder",
+    "CHttpRequest::Open",
+    "CHttpRequest::SetRequestHeader",
+    "CHttpRequest::Send",
+    "CTextStream::Close",
+    "CTextStream::Write",
+    "CTextStream::WriteLine",
+]
 
-# Windows Script Host (WSH)
-WSH_PATH_WOW64 = "C:\\Windows\\SysWOW64\\"
-WSH_PATH = "C:\\Windows\\System32\\"
-WSH_EXE = "cscript.exe"
+# Windows Script Host
+SYSWOW64 = "C:\\Windows\\SysWOW64"
+SYSTEM32 = "C:\\Windows\\System32"
+WSHOST = ""

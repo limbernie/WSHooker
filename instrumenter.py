@@ -66,10 +66,10 @@ class Instrumenter:
                 "allow_sleep": options["allow_sleep"],
                 "bad_progids": dumps(config.BAD_PROGIDS),
                 "extension": config.EXTENSION,
-                "filter": dumps(config.FILTER_FROM_TRACING),
+                "filter": dumps(config.FILTER),
                 "fixed_width": config.FIXED_WIDTH,
                 "work_dir": config.WORK_DIR,
-                "wshost": config.WSH_EXE,
+                "wshost": config.WSHOST,
             }
         )
 

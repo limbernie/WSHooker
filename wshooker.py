@@ -56,7 +56,9 @@ class WSHooker:
                 config.TIMESTAMP = self.args.timestamp
                 config.TRACE = self.args.trace
                 config.WORK_DIR = workdir
-                config.WSH_EXE = "wscript.exe" if self.args.wscript else "cscript.exe"
+                config.WSHOST = (
+                    "cscript.exe" if not self.args.wscript else "wscript.exe"
+                )
 
                 self.configured = True
             else:
@@ -78,10 +80,10 @@ class WSHooker:
         if not self.args.no_banner:
             print_banner()
 
-        if exists(config.WSH_PATH_WOW64):
-            wshost = f"{config.WSH_PATH_WOW64}{config.WSH_EXE}"
+        if exists(config.SYSWOW64):
+            wshost = f"{config.SYSWOW64}\\{config.WSHOST}"
         else:
-            wshost = f"{config.WSH_PATH}{config.WSH_EXE}"
+            wshost = f"{config.SYSTEM32}\\{config.WSHOST}"
 
         # Use "/b" to suppress alerts, errors or prompts
         cmd = [wshost, "/b", abspath(self.script)]
