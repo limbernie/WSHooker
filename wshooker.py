@@ -120,7 +120,7 @@ class WSHooker:
         instrumenter.instrument(options=hook_options)
 
         if instrumenter.process_terminated:
-            post_actions(1)
+            post_actions(3)
 
 
 if __name__ == "__main__":

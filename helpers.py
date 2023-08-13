@@ -27,7 +27,7 @@ def clean_frida():
 
 def clean_up():
     """Clean up actions"""
-    status("Cleaning up")
+    status("Cleaning up...")
 
     files_to_delete = list(set(config.FILES_TO_DELETE))
     folders_to_delete = list(set(config.FOLDERS_TO_DELETE))
