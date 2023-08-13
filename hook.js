@@ -29,23 +29,23 @@ let TEXT_COUNT = 0;
  */
 recv("config", function onMessage(setting) {
   DEBUG = setting["debug"];
-  status(["DEBUG", '=', DEBUG].join(''));
+  status("DEBUG" + "=" + DEBUG);
   DYNAMIC = setting["dynamic"];
-  status(["DYNAMIC", '=', DYNAMIC].join(''));
+  status("DYNAMIC" + "=" + DYNAMIC);
   ALLOW_BAD_PROGID = setting["allow_bad_progid"];
-  status(["ALLOW_BAD_PROGID", '=', ALLOW_BAD_PROGID].join(''));
+  status("ALLOW_BAD_PROGID" + "=" + ALLOW_BAD_PROGID);
   ALLOW_FILE = setting["allow_file"];
-  status(["ALLOW_FILE", '=', ALLOW_FILE].join(''));
+  status("ALLOW_FILE" + "=" + ALLOW_FILE);
   ALLOW_NET = setting["allow_net"];
-  status(["ALLOW_NET", '=', ALLOW_NET].join(''));
+  status("ALLOW_NET" + "=" + ALLOW_NET);
   ALLOW_PROC = setting["allow_proc"];
-  status(["ALLOW_PROC", '=', ALLOW_PROC].join(''));
+  status("ALLOW_PROC" + "=" + ALLOW_PROC);
   ALLOW_REG = setting["allow_reg"];
-  status(["ALLOW_REG", '=', ALLOW_REG].join(''));
+  status("ALLOW_REG" + "=" + ALLOW_REG);
   ALLOW_SHELL = setting["allow_shell"];
-  status(["ALLOW_SHELL", '=', ALLOW_SHELL].join(''));
+  status("ALLOW_SHELL" + "=" + ALLOW_SHELL);
   ALLOW_SLEEP = setting["allow_sleep"];
-  status(["ALLOW_SLEEP", '=', ALLOW_SLEEP].join(''));
+  status("ALLOW_SLEEP" + "=" + ALLOW_SLEEP);
 
   BAD_PROGIDS = new Set(JSON.parse(setting["bad_progids"]));
   EXTENSION = setting["extension"];
@@ -54,16 +54,14 @@ recv("config", function onMessage(setting) {
   WORK_DIR = setting["work_dir"];
   WSHOST = setting["wshost"];
 
-
-
   if (EXTENSION.match(/js/)) {
-    status(["ENGINE", '=', "JScript"].join(''));
+    status("ENGINE=JScript");
   }
   else if (EXTENSION.match(/vb/)) {
-    status(["ENGINE", '=', "VBScript"].join(''));
+    status("ENGINE=VBScript");
   }
   else if (EXTENSION.match(/wsf/)) {
-    status(["ENGINE", '=', "Windows Script File"].join(''));
+    status("ENGINE=Windows Script File");
   }
 
   /* Load these modules; debug symbols are needed. */
@@ -124,7 +122,7 @@ function action(action) {
 }
 
 function call(module, functionName) {
-  log(["Call", ':', ' ', module, '!', functionName, '()'].join(''));
+  log("Call: " + module + "!", functionName + "()");
 }
 
 String.prototype.center = function (width, c = ' ') {
@@ -133,11 +131,11 @@ String.prototype.center = function (width, c = ' ') {
 };
 
 String.prototype.capitalize = function () {
-  return [this.charAt(0).toUpperCase(), this.toLowerCase().slice(1)].join('');
+  return this.charAt(0).toUpperCase() + this.toLowerCase().slice(1);
 };
 
 function param(name, value) {
-  log(["|--", ' ', '(', name.center(FIXED_WIDTH), ')', " => ", value].join(''));
+  log("|-- (" + name.center(FIXED_WIDTH) + ") => " + value);
 }
 
 function separator() {
@@ -157,15 +155,15 @@ function debug(message) {
 }
 
 function status(message) {
-  debug(["(**)", ' ', message].join(''));
+  debug("(**) " + message);
 }
 
 function info(message) {
-  debug(["(II)", ' ', message].join(''));
+  debug("(II) " + message);
 }
 
 function error(message) {
-  debug(["(EE)", ' ', message].join(''));
+  debug("(EE) " + message);
 }
 
 /*
@@ -247,31 +245,31 @@ function bytesToCLSID(address) {
   let data = new Uint8Array(ptr(address).readByteArray(0x10));
   let clsid =
     [
-      '{',
+      "{",
       chrToHexStr(data[3]),
       chrToHexStr(data[2]),
       chrToHexStr(data[1]),
       chrToHexStr(data[0]),
-      '-',
+      "-",
       chrToHexStr(data[5]),
       chrToHexStr(data[4]),
-      '-',
+      "-",
       chrToHexStr(data[7]),
       chrToHexStr(data[6]),
-      '-',
+      "-",
       chrToHexStr(data[8]),
       chrToHexStr(data[9]),
-      '-',
+      "-",
       chrToHexStr(data[10]),
       chrToHexStr(data[11]),
       chrToHexStr(data[12]),
       chrToHexStr(data[13]),
       chrToHexStr(data[14]),
       chrToHexStr(data[15]),
-      '}'
+      "}"
     ];
 
-  return clsid.join('');
+  return clsid.join("");
 }
 
 function chrToHexStr(chr) {
@@ -281,44 +279,44 @@ function chrToHexStr(chr) {
 
 function resolveName(dllName, name) {
   let moduleName = dllName.split('.')[0];
-  let functionName = [dllName, '!', name].join('');
+  let functionName = dllName + "!" + name;
 
-  status(["Finding", ' ', functionName].join(''));
-  status(["Module.findExportByName", ' ', functionName].join(''));
+  status("Finding " + functionName);
+  status("Module.findExportByName " + functionName);
 
   let addr = Module.findExportByName(dllName, name);
 
   if (!addr || addr.isNull()) {
-    info(["DebugSymbol.load", ' ', dllName].join(''));
+    info("DebugSymbol.load " + dllName);
 
     try {
       DebugSymbol.load(dllName);
     }
     catch (e) {
-      error(["DebugSymbol.load", ' ', e].join(''));
+      error("DebugSymbol.load " + e);
     }
 
     info("DebugSymbol.load finished");
 
     if (functionName.indexOf('*') === -1) {
       try {
-        addr = DebugSymbol.getFunctionByName([moduleName, '!', name].join(''));
-        info(["DebugSymbol.getFunctionByName", ' ', functionName].join(''));
-        info(["DebugSymbol.getFunctionByName", ' ', addr].join(''));
+        addr = DebugSymbol.getFunctionByName(moduleName + "!" + name);
+        info("DebugSymbol.getFunctionByName " + functionName);
+        info("DebugSymbol.getFunctionByName " + addr);
       }
       catch (e) {
-        error(["DebugSymbol.getFunctionByName", ' ', e].join(''));
+        error("DebugSymbol.getFunctionByName " + e);
       }
     }
     else {
       try {
         let addresses = DebugSymbol.findFunctionsMatching(name);
         addr = addresses[addresses.length - 1];
-        info(["DebugSymbol.findFunctionsMatching", ' ', functionName].join(''));
-        info(["DebugSymbol.findFunctionsMatching", ' ', addr].join(''));
+        info("DebugSymbol.findFunctionsMatching " + functionName);
+        info("DebugSymbol.findFunctionsMatching " + addr);
       }
       catch (e) {
-        error(["DebugSymbol.findFunctionsMatching", ' ', e].join(''));
+        error("DebugSymbol.findFunctionsMatching " + e);
       }
     }
   }
@@ -326,20 +324,20 @@ function resolveName(dllName, name) {
 }
 
 function hookFunction(dllName, funcName, callback) {
-  let symbolName = [dllName, '!', funcName].join('');
+  let symbolName = dllName + "!" + funcName;
   let addr = resolveName(dllName, funcName);
 
   if (!addr || addr.isNull()) {
     return;
   }
 
-  status(["Interceptor.attach", ' ', symbolName, '@', addr].join(''));
+  status("Interceptor.attach " + symbolName + "@" + addr);
   Interceptor.attach(addr, callback);
 }
 
 function writeToFile(type, count, data) {
-  let filename = [type, '_', count, '.', "txt"].join('');
-  let filepath = [WORK_DIR, '\\', filename].join('');
+  let filename = type + "_" + count + ".txt";
+  let filepath = WORK_DIR + "\\" + filename;
   let file = new File(filepath, 'w');
 
   file.write(data);
@@ -486,7 +484,7 @@ function hookShellExecuteExW() {
         call(module, fnName);
         separator();
 
-        writeToFile("exec", ++EXEC_COUNT, data.join(''));
+        writeToFile("exec", ++EXEC_COUNT, data.join(""));
 
         const encodedCommand_re = /.*powershell.*-e[nc]*\s+(.*)/i;
         let encodedCommand;
@@ -734,7 +732,7 @@ function hookDispCallFunc() {
                       continue;
                     }
                     if (arg && arg.length > 1) {
-                      param("Arg", [arg, ' ', '[', arg.length, ']'].join(''));
+                      param("Arg", arg + " [" + arg.length + "]");
                     }
                   }
                   separator();
@@ -755,8 +753,8 @@ function hookCHostObjSleep() {
       onEnter: function (args) {
         call(module, fnName);
         separator();
-        param("Delay", [args[1].toInt32(), "ms"].join('') +
-          ((!ALLOW_SLEEP) ? [' ', '[', "Skipping to 0ms", ']'].join('') : ''));
+        param("Delay", args[1].toInt32() + "ms" +
+          ((!ALLOW_SLEEP) ? " [Skipping to 0ms]" : ""));
         if (!ALLOW_SLEEP) {
           args[1] = ptr(0);
         }
