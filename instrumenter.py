@@ -3,7 +3,7 @@
 Frida Instrumentation
 """
 from json import dumps
-from time import sleep
+from time import gmtime, strftime, sleep
 
 import frida
 
@@ -141,4 +141,4 @@ class Instrumenter:
     def resume(self):
         """Resume Frida instrumentation."""
         frida.resume(self.pid)
-        print_trace_label()
+        print_trace_label(f'Trace started on {strftime("%Y-%m-%dT%H:%M:%SZ", gmtime())}')
