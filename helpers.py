@@ -19,12 +19,6 @@ from patterns import DOMAIN_RE, IP_RE, URL_RE
 from printer import info, param, status
 
 
-def clean_frida():
-    """Clean up Frida residuals."""
-    delete_frida_injectors()
-    delete_frida_temp_files()
-
-
 def clean_up():
     """Clean up actions"""
     status("Cleaning up...")
@@ -41,23 +35,6 @@ def clean_up():
 
     for key in reg_keys_to_delete:
         delete_reg_key(key)
-
-
-def delete_frida_injectors():
-    """Delete Frida's injectors."""
-    device = frida.get_local_device()
-    for process in device.enumerate_processes():
-        if "frida-" in process.name:
-            frida.kill(process.pid)
-
-
-def delete_frida_temp_files():
-    """Delete Frida's temporary files."""
-    for helper in glob(expandvars("%TEMP%\\frida-*")):
-        try:
-            rmtree(helper)
-        except PermissionError:
-            pass
 
 
 def delete_file(path):
@@ -141,11 +118,11 @@ def decode_powershell(encoded):
     param("PS", f"{filename}")
 
 
-def find_ioc():
-    """Search for IOCs in .txt files."""
+def find_ioc(wildcard="*[geckst]_*.txt"):
+    """Search for IOC(s) in *.txt files."""
     _files = [
         _file
-        for _file in glob(f"{config.WORK_DIR}\\*[geckst]_*.txt")
+        for _file in glob(f"{config.WORK_DIR}\\{wildcard}")
         if "code_1.txt" not in _file
     ]
     for _file in _files:
@@ -157,7 +134,7 @@ def find_ioc():
         ipaddrs = [x.group() for x in IP_RE.finditer(content)]
 
         if len(keywords) > 0 or len(ipaddrs) > 0 or len(urls) > 0:
-            status(f'Found IOCs in "{basename(_file)}"')
+            status(f'Found IOC(s) in "{basename(_file)}"')
             for keyword in keywords:
                 keyword = (
                     re.sub(r'[\'"();]', "", keyword).encode("utf-8", "ignore").decode()
@@ -288,15 +265,15 @@ def parse_hkey(path):
     return hkey
 
 
-def post_actions(delay=0):
-    """Post-instrumentation actions to perform with delay for Frida."""
+def post_actions(delay_in_sec=0):
+    """Post-instrumentation actions to perform with a delay for Frida removal."""
     find_ioc()
 
     clean_up()
 
-    sleep(delay)
+    sleep(delay_in_sec)
 
-    clean_frida()
+    remove_frida()
 
     status("Bye!")
 
@@ -314,3 +291,26 @@ def print_inprocserver32_from_clsid(clsid):
         key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, f"{clsid_path}LocalServer32")
         module = winreg.QueryValueEx(key, "")[0]
         param("LocalServer32", module)
+
+
+def remove_frida():
+    """Clean up Frida residuals."""
+    remove_frida_injectors()
+    remove_frida_temp_files()
+
+
+def remove_frida_injectors():
+    """Delete Frida's injectors."""
+    device = frida.get_local_device()
+    for process in device.enumerate_processes():
+        if "frida-" in process.name:
+            frida.kill(process.pid)
+
+
+def remove_frida_temp_files():
+    """Delete Frida's temporary files."""
+    for helper in glob(expandvars("%TEMP%\\frida-*")):
+        try:
+            rmtree(helper)
+        except PermissionError:
+            pass

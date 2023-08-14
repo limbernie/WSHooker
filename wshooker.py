@@ -11,7 +11,7 @@ from time import gmtime, strftime
 import frida
 
 import config
-from helpers import delete_frida_temp_files, parse_arguments, post_actions
+from helpers import remove_frida_temp_files, parse_arguments, post_actions
 from instrumenter import Instrumenter
 from printer import print_banner, printf
 
@@ -75,7 +75,7 @@ class WSHooker:
             print("Error: WSHooker is not configured.")
             sys.exit(1)
 
-        delete_frida_temp_files()
+        remove_frida_temp_files()
 
         if not self.args.no_banner:
             print_banner()
@@ -122,7 +122,7 @@ class WSHooker:
         instrumenter.instrument(options=hook_options)
 
         if instrumenter.process_terminated:
-            post_actions(3)
+            post_actions(delay_in_sec=3)
 
 
 if __name__ == "__main__":
@@ -131,4 +131,4 @@ if __name__ == "__main__":
         wshooker.configure()
         wshooker.run()
     except KeyboardInterrupt:
-        post_actions(3)
+        post_actions(delay_in_sec=3)

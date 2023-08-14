@@ -125,6 +125,9 @@ function call(module, functionName) {
   log("Call: " + module + "!" + functionName + "()");
 }
 
+/* 
+ * String manipulation methods.
+*/
 String.prototype.center = function (width, c = ' ') {
   let pad = width - Math.ceil((width - this.length) / 2);
   return this.padStart(pad, c).padEnd(width, c);
@@ -132,6 +135,14 @@ String.prototype.center = function (width, c = ' ') {
 
 String.prototype.capitalize = function () {
   return this.charAt(0).toUpperCase() + this.toLowerCase().slice(1);
+};
+
+String.prototype.removeprefix = function (prefix) {
+  if (this.startsWith(prefix)) {
+    return this.slice(prefix.length);
+  } else {
+    return this;
+  }
 };
 
 function param(name, value) {
@@ -571,7 +582,8 @@ function hookWriteFile() {
         let lpszFilePath = Memory.alloc(256);
         GetFinalPathNameByHandleW(handle, ptr(lpszFilePath), 256, 0x8);
 
-        let path = lpszFilePath.readUtf16String();
+        const prefix = "\\\\?\\";
+        let path = lpszFilePath.readUtf16String().removeprefix(prefix);
 
         call(module, fnName);
         separator();
