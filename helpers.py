@@ -20,7 +20,7 @@ from printer import info, param, status
 
 
 def clean_up():
-    """Clean up actions"""
+    """Clean up actions."""
     status("Cleaning up...")
 
     files_to_delete = list(set(config.FILES_TO_DELETE))
@@ -294,7 +294,7 @@ def print_inprocserver32_from_clsid(clsid):
 
 
 def remove_frida():
-    """Clean up Frida residuals."""
+    """Remove Frida residuals."""
     remove_frida_injectors()
     remove_frida_temp_files()
 

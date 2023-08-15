@@ -39,8 +39,8 @@ class Instrumenter:
             "allow_sleep": False,
         }
 
-    def instrument(self, options=None):
-        """Begin instrumentation"""
+    def begin(self, options=None):
+        """Begin instrumentation."""
         if options is None:
             options = self.defaults
         session = self.device.attach(self.pid)
@@ -80,7 +80,7 @@ class Instrumenter:
                 if self.process_terminated:
                     break
             except KeyboardInterrupt:
-                status("Trace stopped by SIGINT (Ctrl-C)")
+                status("Trace stopped because of Ctrl-C")
                 self.interrupted = True
                 break
 

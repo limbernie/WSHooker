@@ -119,7 +119,7 @@ class WSHooker:
         printf("Markers: (**) status, (II) informational, (EE) error")
 
         instrumenter = Instrumenter(hook, pid)
-        instrumenter.instrument(options=hook_options)
+        instrumenter.begin(options=hook_options)
 
         if instrumenter.process_terminated:
             post_actions(delay_in_sec=3)

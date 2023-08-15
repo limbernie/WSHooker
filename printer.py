@@ -12,12 +12,12 @@ import config
 
 
 def indent(message):
-    """Indent message"""
+    """Indent message."""
     printf(f"{config.INDENT}{message}")
 
 
 def printf(*objects, **kwargs):
-    """Override builtins.print()"""
+    """Override builtins.print()."""
     try:
         with open(f"{config.WORK_DIR}\\{config.TRACE}", "a", encoding="utf-8") as file:
             if config.TIMESTAMP:
@@ -36,27 +36,27 @@ def printf(*objects, **kwargs):
 
 
 def status(message):
-    """Debug: status"""
+    """Marker: (**) status"""
     log(f"(**) {message}")
 
 
 def info(message):
-    """Debug: info"""
+    """Marker: (II) informational"""
     log(f"(II) {message}")
 
 
 def error(message):
-    """Debug: error"""
+    """Marker: (EE) error"""
     log(f"(EE) {message}")
 
 
 def param(name, value):
-    """Print parameter"""
+    """Print parameter."""
     log(f"|-- ({name.center(config.FIXED_WIDTH)}) => {value}")
 
 
 def log(message):
-    """Print message"""
+    """Print message."""
     if message is None:
         return
     if re.match(r"^(\(\*\*\)|Call)", message):
@@ -66,7 +66,7 @@ def log(message):
 
 
 def print_banner():
-    """Print banner"""
+    """Print banner."""
     color = random.choice(COLORS)
     banner = random.choice(BANNERS)
     reset = RESET
