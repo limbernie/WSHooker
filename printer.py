@@ -60,8 +60,10 @@ def param(name, value):
 
 def log(message):
     """Print message."""
+
     if message is None:
         return
+
     if re.match(r"^(\(\*\*\)|Call)", message):
         printf(message)
     else:
@@ -100,27 +102,29 @@ def print_trace_label(label="Trace"):
 
 def bold(text):
     """Bolds text."""
+
     if has_ansi_colors():
-        return f"{BOLD}{text}{RESET}"
-    else:
-        return text
+        text = f"{BOLD}{text}{RESET}"
+
+    return text
 
 
 def highlight(text):
     """Random color to highlight text."""
     color = random.choice(COLORS)
     if has_ansi_colors():
-        return f"{color}{text}{RESET}"
-    else:
-        return text
+        text = f"{color}{text}{RESET}"
+
+    return text
 
 
 def underline(text):
     """Underlines text."""
+
     if has_ansi_colors():
-        return f"{UNDERLINE}{text}{RESET}"
-    else:
-        return text
+        text = f"{UNDERLINE}{text}{RESET}"
+
+    return text
 
 
 def strip(text):
