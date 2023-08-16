@@ -16,7 +16,7 @@ import frida
 
 import config
 from patterns import DOMAIN_RE, IP_RE, URL_RE
-from printer import info, param, status
+from printer import bold, info, param, status, underline
 
 
 def clean_up():
@@ -134,7 +134,11 @@ def find_ioc(wildcard="*[geckst]_*.txt"):
         ipaddrs = [x.group() for x in IP_RE.finditer(content)]
 
         if len(keywords) > 0 or len(ipaddrs) > 0 or len(urls) > 0:
-            status(f'Found IOC(s) in "{basename(_file)}"')
+            ioc_total = len(keywords) + len(ipaddrs) + len(urls)
+            suffix = "s" if ioc_total > 1 else ""
+            status(
+                f'Found {bold(underline(ioc_total))} IOC{suffix} in "{basename(_file)}"'
+            )
             for keyword in keywords:
                 keyword = (
                     re.sub(r'[\'"();]', "", keyword).encode("utf-8", "ignore").decode()
@@ -144,7 +148,7 @@ def find_ioc(wildcard="*[geckst]_*.txt"):
                 info(f"IP: {ipaddr}")
             for url in urls:
                 url = re.sub(r'[\'"();]', "", url).encode("utf-8", "ignore").decode()
-                info(f"URL: {url}")
+                info(f"URL: {underline(url)}")
 
 
 def parse_arguments():
