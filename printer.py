@@ -18,7 +18,7 @@ def indent(message):
 
 
 def printf(*objects, **kwargs):
-    """Override builtins.print()."""
+    """Overload builtins.print() with `tee'-like feature and timestamp."""
     try:
         with open(f"{config.WORK_DIR}\\{config.TRACE}", "a", encoding="utf-8") as file:
             if config.TIMESTAMP:
@@ -54,12 +54,12 @@ def error(message):
 
 
 def param(name, value):
-    """Print parameter."""
+    """Print parameter and its value."""
     log(f"|-- ({name.center(config.FIXED_WIDTH)}) => {value}")
 
 
 def log(message):
-    """Print message."""
+    """Print message to console."""
 
     if message is None:
         return
@@ -71,7 +71,7 @@ def log(message):
 
 
 def has_ansi_colors():
-    """Check for ANSI support of colors."""
+    """Check for ANSI colors support."""
     supported = False
     try:
         key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Console")
@@ -90,7 +90,7 @@ def print_banner():
 
 
 def print_trace_label(label="Trace"):
-    """Print label to indicate the start of a trace."""
+    """Print label with a border to indicate the start of a trace."""
 
     def border(label):
         printf(f"+-{'-' * len(label)}-+")
@@ -110,8 +110,10 @@ def bold(text):
 
 
 def highlight(text):
-    """Random color to highlight text."""
+    """Highlights text with a random color."""
+
     color = random.choice(COLORS)
+
     if has_ansi_colors():
         text = f"{color}{text}{RESET}"
 

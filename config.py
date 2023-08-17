@@ -60,7 +60,8 @@ BAD_PROGIDS = [progid.lower() for progid in BAD_PROGIDS_LIST]
 # Unregistered class
 UNREGISTERED_CLASS = "{00000000-0000-0000-0000-000000000000}"
 
-# Add and/or filter these functions from dynamic tracing.
+# Filter these functions from dynamic tracing.
+# Add new functions to filter to this list.
 FILTER = [
     "CWshShell::RegWrite",
     "CHostObj::Sleep",

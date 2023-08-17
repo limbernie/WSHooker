@@ -270,7 +270,7 @@ def parse_hkey(path):
 
 
 def post_actions(delay_in_sec=0):
-    """Post-instrumentation actions to perform with a delay for Frida removal."""
+    """Post-instrumentation actions to perform with a delay in seconds for Frida's removal."""
     find_ioc()
 
     clean_up()
@@ -283,7 +283,7 @@ def post_actions(delay_in_sec=0):
 
 
 def print_inprocserver32_from_clsid(clsid):
-    """Get InprocServer32/LocalServer32 from CLSID and then print."""
+    """Get InprocServer32/LocalServer32 from CLSID and then print to console."""
     if clsid == config.UNREGISTERED_CLASS:
         return
     clsid_path = f"CLSID\\{clsid}\\"
@@ -298,13 +298,13 @@ def print_inprocserver32_from_clsid(clsid):
 
 
 def remove_frida():
-    """Remove Frida residuals."""
+    """Remove Frida's residuals."""
     remove_frida_injectors()
     remove_frida_temp_files()
 
 
 def remove_frida_injectors():
-    """Delete Frida's injectors."""
+    """Remove Frida's injectors."""
     device = frida.get_local_device()
     for process in device.enumerate_processes():
         if "frida-" in process.name:
@@ -312,7 +312,7 @@ def remove_frida_injectors():
 
 
 def remove_frida_temp_files():
-    """Delete Frida's temporary files."""
+    """Remove Frida's temporary files."""
     for helper in glob(expandvars("%TEMP%\\frida-*")):
         try:
             rmtree(helper)
