@@ -87,8 +87,8 @@ WSHooker supports a number of options to allow certain dangerous operations to c
 ```
 python wshooker.py --help
 usage: wshooker.py [-h] [-p PID | -s SCRIPT] [-a ARGS] [-d DIR] [-o TRACE] [--allow-bad-progid] [--allow-file] [--allow-net]
-                   [--allow-proc] [--allow-reg] [--allow-shell] [--allow-sleep] [--debug] [--dynamic] [--no-banner] [--timestamp]
-                   [--wscript]
+                   [--allow-proc] [--allow-reg] [--allow-shell] [--allow-sleep] [--debug] [--dynamic] [--fun] [--no-banner]
+                   [--timestamp] [--wscript]
 
 WSHooker - Windows Script Hooking with Frida
 
@@ -99,7 +99,7 @@ options:
                         path to malicious script
   -a ARGS, --args ARGS  arguments to malicious script, e.g., -a "arg1 arg2 arg3 ..."
   -d DIR, --directory DIR
-                        directory or folder to hold output trace
+                        directory or folder for output traces
   -o TRACE, --output TRACE
                         write output trace to file (default is trace.log)
   --allow-bad-progid    (dangerous) allow known bad ProgID
@@ -111,9 +111,10 @@ options:
   --allow-sleep         (slow-down) allow WScript.Sleep()
   --debug               (verbose) display debug message
   --dynamic             (verbose) enable dynamic tracing
+  --fun                 add some fun to life
   --no-banner           remove banner in output trace
-  --timestamp           display timestamp in output trace
-  --wscript             switch to wscript.exe (default is cscript.exe)
+  --timestamp           show timestamp in output trace
+  --wscript             use wscript.exe (default is cscript.exe)
 ```
 
 ### Supported OS

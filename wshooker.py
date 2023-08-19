@@ -53,6 +53,7 @@ class WSHooker:
 
                 # Global configurations
                 config.EXTENSION = extension
+                config.FUN = self.args.fun
                 config.TIMESTAMP = self.args.timestamp
                 config.TRACE = self.args.trace
                 config.WORK_DIR = workdir

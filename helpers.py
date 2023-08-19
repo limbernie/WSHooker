@@ -170,7 +170,7 @@ def parse_arguments():
         help='arguments to malicious script, e.g., -a "arg1 arg2 arg3 ..."',
     )
     parser.add_argument(
-        "-d", "--directory", dest="dir", help="directory or folder to hold output trace"
+        "-d", "--directory", dest="dir", help="directory or folder for output traces"
     )
     parser.add_argument(
         "-o",
@@ -234,6 +234,12 @@ def parse_arguments():
         help="(verbose) enable dynamic tracing",
     )
     parser.add_argument(
+        "--fun",
+        dest="fun",
+        action="store_true",
+        help="add some fun to life"
+    )
+    parser.add_argument(
         "--no-banner",
         dest="no_banner",
         action="store_true",
@@ -243,13 +249,13 @@ def parse_arguments():
         "--timestamp",
         dest="timestamp",
         action="store_true",
-        help="display timestamp in output trace",
+        help="show timestamp in output trace",
     )
     parser.add_argument(
         "--wscript",
         dest="wscript",
         action="store_true",
-        help="switch to wscript.exe (default is cscript.exe)",
+        help="use wscript.exe (default is cscript.exe)",
     )
     args = parser.parse_args()
     return parser, args

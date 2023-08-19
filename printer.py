@@ -64,6 +64,11 @@ def log(message):
     if message is None:
         return
 
+    if config.FUN:
+        if "|" in message:
+            message = message.replace("|", highlight("|"))
+            message = message.replace("--", highlight("--"))
+
     if re.match(r"^(\(\*\*\)|Call)", message):
         printf(message)
     else:
@@ -93,11 +98,18 @@ def print_trace_label(label="Trace"):
     """Print label with a border to indicate the start of a trace."""
 
     def border(label):
-        printf(f"+-{'-' * len(label)}-+")
+        return f"+-{'-' * len(label)}-+"
 
-    border(label)
+    border = border(label)
+
+    printf(border)
+
+    if config.FUN:
+        label = "".join([highlight(char) for char in [*label]])
+
     printf(f"| {label} |")
-    border(label)
+
+    printf(border)
 
 
 def bold(text):

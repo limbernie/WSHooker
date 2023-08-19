@@ -88,3 +88,6 @@ FILTER = [
 SYSWOW64 = "C:\\Windows\\SysWOW64"
 SYSTEM32 = "C:\\Windows\\System32"
 WSHOST = ""
+
+# Add some fun to life.
+FUN = False
