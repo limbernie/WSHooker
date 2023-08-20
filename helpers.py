@@ -7,6 +7,7 @@ from base64 import b64decode
 from glob import glob
 from os import makedirs, remove, rmdir
 from os.path import basename, exists, expandvars
+from random import choice
 import re
 from shutil import copy2, rmtree
 from time import sleep
@@ -15,8 +16,9 @@ import winreg
 import frida
 
 import config
+from extras import PERLISISMS
 from patterns import DOMAIN_RE, IP_RE, URL_RE
-from printer import bold, info, param, status, underline
+from printer import bold, fun, info, param, status, underline
 
 
 def clean_up():
@@ -234,10 +236,7 @@ def parse_arguments():
         help="(verbose) enable dynamic tracing",
     )
     parser.add_argument(
-        "--fun",
-        dest="fun",
-        action="store_true",
-        help="add some fun to life"
+        "--fun", dest="fun", action="store_true", help="add some fun to life"
     )
     parser.add_argument(
         "--no-banner",
@@ -285,7 +284,10 @@ def post_actions(delay_in_sec=0):
 
     remove_frida()
 
-    status("Bye!")
+    if config.FUN:
+        status(f"{fun(choice(PERLISISMS))}")
+    else:
+        status("Bye!")
 
 
 def print_inprocserver32_from_clsid(clsid):

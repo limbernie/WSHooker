@@ -66,8 +66,8 @@ def log(message):
 
     if config.FUN:
         if "|" in message:
-            message = message.replace("|", highlight("|"))
-            message = message.replace("--", highlight("--"))
+            message = message.replace("|", fun("|"))
+            message = message.replace("--", fun("--"))
 
     if re.match(r"^(\(\*\*\)|Call)", message):
         printf(message)
@@ -89,9 +89,14 @@ def has_ansi_colors():
 
 
 def print_banner():
-    """Print banner."""
+    """Print WSHooker banner."""
+
     banner = random.choice(BANNERS)
-    builtins.print(f"{bold(highlight(banner))}")
+
+    if config.FUN:
+        builtins.print(f"{fun(banner)}")
+    else:
+        builtins.print(f"{highlight(bold(banner))}")
 
 
 def print_trace_label(label="Trace"):
@@ -105,7 +110,7 @@ def print_trace_label(label="Trace"):
     printf(border)
 
     if config.FUN:
-        label = "".join([highlight(char) for char in [*label]])
+        label = fun(label)
 
     printf(f"| {label} |")
 
@@ -117,6 +122,14 @@ def bold(text):
 
     if has_ansi_colors():
         text = f"{BOLD}{text}{RESET}"
+
+    return text
+
+
+def fun(text):
+    """Rainbow text."""
+
+    text = "".join([highlight(bold(x)) for x in [*text]])
 
     return text
 
