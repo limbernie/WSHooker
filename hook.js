@@ -513,7 +513,7 @@ function hookShellExecuteExW() {
             catch (e) {
               error(e);
             }
-            action("Allow (as Administrator)");
+            action("Allow");
           }
           else {
             action("Block");
@@ -530,7 +530,7 @@ function hookShellExecuteExW() {
             action("Block");
           }
           else {
-            action("Allow (as Administrator)");
+            action("Allow");
           }
         }
         separator();
@@ -767,8 +767,8 @@ function hookCHostObjSleep() {
         separator();
         param("Delay", args[1].toInt32() + "ms");
         if (!ALLOW_SLEEP) {
-          args[1] = ptr(0);
           action("Skip");
+          args[1] = ptr(0);
         }
         separator();
       }

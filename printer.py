@@ -62,11 +62,11 @@ def log(message):
     """Print message based on its content to console."""
 
     def split_call(message):
-        """Split call into module and symbol."""
+        """Split call into image and symbol."""
         match = re.match(r"Call: (.*)!(.*)\(\)", message)
         if match is not None:
-            module, symbol = match.groups()
-        return (module.strip(), symbol.strip())
+            image, symbol = match.groups()
+        return (image.strip(), symbol.strip())
 
     def split_param(message):
         "Split parameter into name and value."
