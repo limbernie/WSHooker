@@ -9,8 +9,8 @@ let ALLOW_BAD_PROGID = false;
 let ALLOW_FILE = false;
 let ALLOW_NET = false;
 let ALLOW_PROC = false;
-let ALLOW_REG = false;
-let ALLOW_SHELL = false;
+let ALLOW_REG_WRITE = false;
+let ALLOW_SHELL_EXEC = false;
 let ALLOW_SLEEP = false;
 let DEBUG = false;
 let DYNAMIC = false;
@@ -40,10 +40,10 @@ recv("config", function onMessage(setting) {
   status("ALLOW_NET" + "=" + ALLOW_NET);
   ALLOW_PROC = setting["allow_proc"];
   status("ALLOW_PROC" + "=" + ALLOW_PROC);
-  ALLOW_REG = setting["allow_reg"];
-  status("ALLOW_REG" + "=" + ALLOW_REG);
-  ALLOW_SHELL = setting["allow_shell"];
-  status("ALLOW_SHELL" + "=" + ALLOW_SHELL);
+  ALLOW_REG_WRITE = setting["allow_reg_write"];
+  status("ALLOW_REG_WRITE" + "=" + ALLOW_REG_WRITE);
+  ALLOW_SHELL_EXEC = setting["allow_shell_exec"];
+  status("ALLOW_SHELL_EXEC" + "=" + ALLOW_SHELL_EXEC);
   ALLOW_SLEEP = setting["allow_sleep"];
   status("ALLOW_SLEEP" + "=" + ALLOW_SLEEP);
 
@@ -288,20 +288,20 @@ function chrToHexStr(chr) {
   return hstr.length < 2 ? "0" + hstr : hstr;
 }
 
-function resolveName(dllName, name) {
-  let moduleName = dllName.split('.')[0];
-  let functionName = dllName + "!" + name;
+function resolveName(image, symbol) {
+  let moduleName = image.split('.')[0];
+  let functionName = image + "!" + symbol;
 
   status("Finding " + functionName);
   status("Module.findExportByName " + functionName);
 
-  let addr = Module.findExportByName(dllName, name);
+  let addr = Module.findExportByName(image, symbol);
 
   if (!addr || addr.isNull()) {
-    info("DebugSymbol.load " + dllName);
+    info("DebugSymbol.load " + image);
 
     try {
-      DebugSymbol.load(dllName);
+      DebugSymbol.load(image);
     }
     catch (e) {
       error("DebugSymbol.load " + e);
@@ -311,7 +311,7 @@ function resolveName(dllName, name) {
 
     if (functionName.indexOf('*') === -1) {
       try {
-        addr = DebugSymbol.getFunctionByName(moduleName + "!" + name);
+        addr = DebugSymbol.getFunctionByName(moduleName + "!" + symbol);
         info("DebugSymbol.getFunctionByName " + functionName);
         info("DebugSymbol.getFunctionByName " + addr);
       }
@@ -321,7 +321,7 @@ function resolveName(dllName, name) {
     }
     else {
       try {
-        let addresses = DebugSymbol.findFunctionsMatching(name);
+        let addresses = DebugSymbol.findFunctionsMatching(symbol);
         addr = addresses[addresses.length - 1];
         info("DebugSymbol.findFunctionsMatching " + functionName);
         info("DebugSymbol.findFunctionsMatching " + addr);
@@ -334,9 +334,9 @@ function resolveName(dllName, name) {
   return addr;
 }
 
-function hookFunction(dllName, funcName, callback) {
-  let symbolName = dllName + "!" + funcName;
-  let addr = resolveName(dllName, funcName);
+function hookFunction(image, symbol, callback) {
+  let symbolName = image + "!" + symbol;
+  let addr = resolveName(image, symbol);
 
   if (!addr || addr.isNull()) {
     return;
@@ -506,7 +506,7 @@ function hookShellExecuteExW() {
 
         /* "runas" doesn't spawn child process; dangerous! */
         if (lpverb.match(/open/i)) {
-          if (ALLOW_SHELL) {
+          if (ALLOW_SHELL_EXEC) {
             try {
               ptr_verb.writeUtf16String("runas");
             }
@@ -520,7 +520,7 @@ function hookShellExecuteExW() {
           }
         }
         else if (lpverb.match(/runas/i)) {
-          if (!ALLOW_SHELL) {
+          if (!ALLOW_SHELL_EXEC) {
             try {
               ptr_verb.writeUtf16String("open");
             }
@@ -552,13 +552,13 @@ function hookCWshShellRegWrite() {
 
         if (path.slice(-1) == '\\') {
           param("Key", path);
-          if (!ALLOW_REG) {
+          if (!ALLOW_REG_WRITE) {
             deleteRegKey(path);
           }
         }
         else {
           param("Value", path);
-          if (!ALLOW_REG) {
+          if (!ALLOW_REG_WRITE) {
             deleteRegValue(path);
           }
         }
@@ -744,7 +744,7 @@ function hookDispCallFunc() {
                       continue;
                     }
                     if (arg && arg.length > 1) {
-                      param("Arg", arg + " [" + arg.length + "]");
+                      param("Arg", arg);
                     }
                   }
                   separator();
@@ -765,10 +765,10 @@ function hookCHostObjSleep() {
       onEnter: function (args) {
         call(module, fnName);
         separator();
-        param("Delay", args[1].toInt32() + "ms" +
-          ((!ALLOW_SLEEP) ? " [Skipping to 0ms]" : ""));
+        param("Delay", args[1].toInt32() + "ms");
         if (!ALLOW_SLEEP) {
           args[1] = ptr(0);
+          action("Skip");
         }
         separator();
       }

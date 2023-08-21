@@ -91,3 +91,11 @@ WSHOST = ""
 
 # Add some fun to life.
 FUN = False
+
+# JSON output
+JSON = False
+JSON_OUTPUT = {
+    "start": "",
+    "trace": [],
+    "ioc": [],
+}

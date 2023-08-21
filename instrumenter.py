@@ -34,8 +34,8 @@ class Instrumenter:
             "allow_file": False,
             "allow_net": False,
             "allow_proc": False,
-            "allow_reg": False,
-            "allow_shell": False,
+            "allow_reg_write": False,
+            "allow_shell_exec": False,
             "allow_sleep": False,
         }
 
@@ -61,8 +61,8 @@ class Instrumenter:
                 "allow_file": options["allow_file"],
                 "allow_net": options["allow_net"],
                 "allow_proc": options["allow_proc"],
-                "allow_reg": options["allow_reg"],
-                "allow_shell": options["allow_shell"],
+                "allow_reg_write": options["allow_reg_write"],
+                "allow_shell_exec": options["allow_shell_exec"],
                 "allow_sleep": options["allow_sleep"],
                 "bad_progids": dumps(config.BAD_PROGIDS),
                 "extension": config.EXTENSION,
@@ -141,4 +141,6 @@ class Instrumenter:
     def resume(self):
         """Resume Frida instrumentation."""
         frida.resume(self.pid)
-        print_trace_label(f'Trace started on {strftime("%Y-%m-%dT%H:%M:%SZ", gmtime())}')
+        start = strftime("%Y-%m-%dT%H:%M:%SZ", gmtime())
+        config.JSON_OUTPUT["start"] = start
+        print_trace_label(f'Trace started on {start}')

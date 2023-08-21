@@ -59,10 +59,39 @@ def param(name, value):
 
 
 def log(message):
-    """Print message to console."""
+    """Print message based on its content to console."""
+
+    def split_call(message):
+        """Split call into module and symbol."""
+        match = re.match(r"Call: (.*)!(.*)\(\)", message)
+        if match is not None:
+            module, symbol = match.groups()
+        return (module.strip(), symbol.strip())
+
+    def split_param(message):
+        "Split parameter into name and value."
+        match = re.match(r"\s*\|-- \(\s*(.*)\s*\) => (.*)", message)
+        if match is not None:
+            name, value = match.groups()
+        return (name.strip(), value.strip())
 
     if message is None:
         return
+
+    if "Call:" in message:
+        image, symbol = split_call(message)
+        call = {"image": image, "symbol": symbol, "params": {}}
+        config.JSON_OUTPUT["trace"].append(call)
+    elif "|--" in message:
+        name, value = split_param(message)
+        match = re.match(r"^\d+$", value)
+        if match is not None:
+            value = int(value)
+        if "Action" in name or "Access" in name:
+            config.JSON_OUTPUT["trace"][-1][name.lower()] = value.lower()
+        else:
+            params = config.JSON_OUTPUT["trace"][-1]["params"]
+            params[name.lower()] = value
 
     if config.FUN:
         if "|" in message:
@@ -137,9 +166,8 @@ def fun(text):
 def highlight(text):
     """Highlights text with a random color."""
 
-    color = random.choice(COLORS)
-
     if has_ansi_colors():
+        color = random.choice(COLORS)
         text = f"{color}{text}{RESET}"
 
     return text

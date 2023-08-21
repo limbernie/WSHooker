@@ -54,8 +54,9 @@ class WSHooker:
                 # Global configurations
                 config.EXTENSION = extension
                 config.FUN = self.args.fun
+                config.JSON = self.args.json
                 config.TIMESTAMP = self.args.timestamp
-                config.TRACE = self.args.trace
+                config.TRACE = basename(self.args.trace)
                 config.WORK_DIR = workdir
                 config.WSHOST = (
                     "cscript.exe" if not self.args.wscript else "wscript.exe"
@@ -105,8 +106,8 @@ class WSHooker:
             "allow_file": self.args.allow_file,
             "allow_net": self.args.allow_net,
             "allow_proc": self.args.allow_proc,
-            "allow_reg": self.args.allow_reg,
-            "allow_shell": self.args.allow_shell,
+            "allow_reg_write": self.args.allow_reg_write,
+            "allow_shell_exec": self.args.allow_shell_exec,
             "allow_sleep": self.args.allow_sleep,
         }
 

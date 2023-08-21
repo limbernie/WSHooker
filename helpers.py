@@ -5,8 +5,9 @@ Helper Functions
 from argparse import ArgumentParser
 from base64 import b64decode
 from glob import glob
+from json import dumps
 from os import makedirs, remove, rmdir
-from os.path import basename, exists, expandvars
+from os.path import basename, exists, expandvars, splitext
 from random import choice
 import re
 from shutil import copy2, rmtree
@@ -122,6 +123,10 @@ def decode_powershell(encoded):
 
 def find_ioc(wildcard="*[geckst]_*.txt"):
     """Search for IOC(s) in *.txt files."""
+
+    def strip(string):
+        return re.sub(r'[\'"();]', "", string).encode("utf-8", "ignore").decode()
+
     _files = [
         _file
         for _file in glob(f"{config.WORK_DIR}\\{wildcard}")
@@ -131,26 +136,38 @@ def find_ioc(wildcard="*[geckst]_*.txt"):
         with open(_file, "r", encoding="utf-8") as file:
             content = file.read()
 
-        urls = [x.group() for x in URL_RE.finditer(content)]
-        keywords = [x.group() for x in DOMAIN_RE.finditer(content)]
         ipaddrs = [x.group() for x in IP_RE.finditer(content)]
+        keywords = [x.group() for x in DOMAIN_RE.finditer(content)]
+        urls = [x.group() for x in URL_RE.finditer(content)]
 
-        if len(keywords) > 0 or len(ipaddrs) > 0 or len(urls) > 0:
-            ioc_total = len(keywords) + len(ipaddrs) + len(urls)
+        keywords = [strip(keyword) for keyword in keywords]
+        urls = [strip(url) for url in urls]
+
+        if len(ipaddrs) > 0 or len(keywords) > 0 or len(urls) > 0:
+            ioc_total = len(ipaddrs) + len(keywords) + len(urls)
             suffix = "s" if ioc_total > 1 else ""
             status(
                 f'Found {bold(underline(ioc_total))} IOC{suffix} in "{basename(_file)}"'
             )
-            for keyword in keywords:
-                keyword = (
-                    re.sub(r'[\'"();]', "", keyword).encode("utf-8", "ignore").decode()
-                )
-                info(f"Keyword: {keyword}")
+
             for ipaddr in ipaddrs:
                 info(f"IP: {ipaddr}")
+
+            for keyword in keywords:
+                info(f"Keyword: {keyword}")
+
             for url in urls:
-                url = re.sub(r'[\'"();]', "", url).encode("utf-8", "ignore").decode()
                 info(f"URL: {underline(url)}")
+
+            # JSON
+            ioc = {
+                "found_in": basename(_file),
+                "total": ioc_total,
+                "keyword": keywords,
+                "ip": ipaddrs,
+                "url": urls,
+            }
+            config.JSON_OUTPUT["ioc"].append(ioc)
 
 
 def parse_arguments():
@@ -179,7 +196,7 @@ def parse_arguments():
         "--output",
         dest="trace",
         default="trace.log",
-        help="write output trace to file (default is trace.log)",
+        help='write output trace to file (default is "trace.log")',
     )
     parser.add_argument(
         "--allow-bad-progid",
@@ -206,16 +223,16 @@ def parse_arguments():
         help="(dangerous) allow Win32_Process",
     )
     parser.add_argument(
-        "--allow-reg",
-        dest="allow_reg",
+        "--allow-reg-write",
+        dest="allow_reg_write",
         action="store_true",
-        help="(dangerous) allow registry write",
+        help="(dangerous) allow Registry write",
     )
     parser.add_argument(
-        "--allow-shell",
-        dest="allow_shell",
+        "--allow-shell-exec",
+        dest="allow_shell_exec",
         action="store_true",
-        help="(dangerous) allow shell command to run as Administrator",
+        help="(dangerous) allow shell execution as current user",
     )
     parser.add_argument(
         "--allow-sleep",
@@ -239,6 +256,12 @@ def parse_arguments():
         "--fun", dest="fun", action="store_true", help="add some fun to life"
     )
     parser.add_argument(
+        "--json",
+        dest="json",
+        action="store_true",
+        help='enable JSON output trace (default is "trace.json")',
+    )
+    parser.add_argument(
         "--no-banner",
         dest="no_banner",
         action="store_true",
@@ -254,7 +277,7 @@ def parse_arguments():
         "--wscript",
         dest="wscript",
         action="store_true",
-        help="use wscript.exe (default is cscript.exe)",
+        help='use "wscript.exe" (default is "cscript.exe")',
     )
     args = parser.parse_args()
     return parser, args
@@ -283,6 +306,11 @@ def post_actions(delay_in_sec=0):
     sleep(delay_in_sec)
 
     remove_frida()
+
+    if config.JSON:
+        filename = splitext(config.TRACE)[0]
+        with open(f"{config.WORK_DIR}\\{filename}.json", "w", encoding="utf-8") as file:
+            file.write(dumps(config.JSON_OUTPUT, indent=2))
 
     if config.FUN:
         status(f"{fun(choice(PERLISISMS))}")
