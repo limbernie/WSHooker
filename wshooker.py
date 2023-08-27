@@ -2,7 +2,6 @@
 
 WSHooker — Windows Script Hooking with Frida
 """
-
 from os import makedirs
 from os.path import abspath, basename, exists, splitext
 import sys
