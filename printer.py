@@ -3,13 +3,22 @@
 Various functions related to printing.
 """
 import builtins
-import random
+from random import choice
 import re
 from time import perf_counter
 import winreg
 
 import config
-from extras import BANNERS, BOLD, COLORS, RESET, UNDERLINE
+from extras import (
+    BANNERS,
+    BOLD,
+    BACKGROUND,
+    BLACK_OR_WHITE,
+    FOREGROUND,
+    PERLISISMS,
+    RESET,
+    UNDERLINE,
+)
 
 
 def indent(message):
@@ -120,12 +129,12 @@ def has_ansi_colors():
 def print_banner():
     """Print WSHooker banner."""
 
-    banner = random.choice(BANNERS)
+    banner = choice(BANNERS)
 
     if config.FUN:
         builtins.print(f"{fun(banner)}")
     else:
-        builtins.print(f"{highlight(bold(banner))}")
+        builtins.print(f"{highlight(banner)}")
 
 
 def print_trace_label(label="Trace"):
@@ -139,7 +148,7 @@ def print_trace_label(label="Trace"):
     printf(border)
 
     if config.FUN:
-        label = fun(label)
+        label = ransomize(label)
 
     printf(f"| {label} |")
 
@@ -158,17 +167,32 @@ def bold(text):
 def fun(text):
     """Rainbow text."""
 
-    text = "".join([highlight(bold(x)) for x in [*text]])
+    if has_ansi_colors():
+        text = "".join([f"{choice(FOREGROUND)}{x}{RESET}" for x in [*text]])
 
     return text
 
 
+def ransomize(text):
+    """Ransomize text like those found in ransom notes."""
+    if has_ansi_colors():
+        text = "".join(
+            [f"{choice(BACKGROUND)}{choice(BLACK_OR_WHITE)}{x}{RESET}" for x in [*text]]
+        )
+
+    return text
+
+
+def epigram():
+    """Return a random Perlisism."""
+    return choice(PERLISISMS)
+
+
 def highlight(text):
-    """Highlights text with a random color."""
+    """Highlights text with a random foreground color."""
 
     if has_ansi_colors():
-        color = random.choice(COLORS)
-        text = f"{color}{text}{RESET}"
+        text = f"{choice(FOREGROUND)}{text}{RESET}"
 
     return text
 

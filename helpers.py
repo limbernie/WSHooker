@@ -8,7 +8,6 @@ from glob import glob
 from json import dumps
 from os import makedirs, remove, rmdir
 from os.path import basename, exists, expandvars, splitext
-from random import choice
 import re
 from shutil import copy2, rmtree
 from time import sleep
@@ -17,9 +16,8 @@ import winreg
 import frida
 
 import config
-from extras import PERLISISMS
 from patterns import DOMAIN_RE, IP_RE, URL_RE
-from printer import bold, fun, info, param, status, underline
+from printer import bold, epigram, info, param, ransomize, status, underline
 
 
 def clean_up():
@@ -313,7 +311,7 @@ def post_actions(delay_in_sec=0):
             file.write(dumps(config.JSON_OUTPUT, indent=2))
 
     if config.FUN:
-        status(f"{fun(choice(PERLISISMS))}")
+        status(ransomize(epigram()))
     else:
         status("Bye!")
 
