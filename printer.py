@@ -175,12 +175,16 @@ def fun(text):
 
 def ransomize(text):
     """Ransomize text like those found in ransom notes."""
-    if has_ansi_colors():
-        text = "".join(
-            [f"{choice(BACKGROUND)}{choice(BLACK_OR_WHITE)}{x}{RESET}" for x in [*text]]
-        )
 
-    return text
+    def _ransomize(text):
+        if has_ansi_colors():
+            text = "".join(
+                [f"{choice(BACKGROUND)}{BLACK_OR_WHITE[1]}{x}{RESET}" for x in [*text]]
+            )
+
+        return text
+
+    return " ".join([_ransomize(word) for word in text.split(" ")])
 
 
 def epigram():
