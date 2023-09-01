@@ -50,6 +50,7 @@ WSHooker has several features over AMSI when it comes to analyzing and unpacking
 5. Prevents Windows Registry key/value write
 
 6. Terminates dangerous and evasive COM objects:
+
    - `InternetExplorer.Application`
    - `Schedule.Service`
    - `WindowsInstaller.Installer`
@@ -60,13 +61,13 @@ WSHooker has several features over AMSI when it comes to analyzing and unpacking
 
 9. Trace functions dynamically as they are called
 
-10. Tracks COM objects creation, WMI queries, and stops `Win32_Process` creation 
+10. Tracks COM objects creation, WMI queries, and stops `Win32_Process` creation
 
 ## Usage
 
 To use WSHooker, you need Python 3 and Frida:
 
-```
+```msdos
 pip install frida-tools
 ```
 
@@ -74,7 +75,7 @@ pip install frida-tools
 
 To set `c:\symbols` as the local symbol cache as WSHooker downloads debug symbols from the Microsoft symbol server, use the following:
 
-```
+```msdos
 setx _NT_SYMBOL_PATH SRV*c:\symbols*https://msdl.microsoft.com/downloads/symbols
 ```
 
@@ -82,9 +83,9 @@ WSHooker may appear unresponsive in the first run as it downloads the required d
 
 ### Options
 
-WSHooker supports a number of options to allow certain dangerous operations to continue during analysis in order to reveal behaviors of the malicious script that were otherwise blocked. 
+WSHooker supports a number of options to allow certain dangerous operations to continue during analysis in order to reveal behaviors of the malicious script that were otherwise blocked.
 
-```
+```msdos
 python wshooker.py --help
 usage: wshooker.py [-h] [-p PID | -s SCRIPT] [-a ARGS] [-d DIR] [-o TRACE] [--allow-bad-progid] [--allow-file] [--allow-net]
                    [--allow-proc] [--allow-reg-write] [--allow-shell-exec] [--allow-sleep] [--debug] [--dynamic] [--fun] [--json]
