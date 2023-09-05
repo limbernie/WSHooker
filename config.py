@@ -99,3 +99,6 @@ JSON_OUTPUT = {
     "trace": [],
     "ioc": [],
 }
+
+# ANSI COLORS
+ANSI_COLORS = False

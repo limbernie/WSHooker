@@ -12,7 +12,7 @@ import frida
 import config
 from helpers import remove_frida_temp_files, parse_arguments, post_actions
 from instrumenter import Instrumenter
-from printer import print_banner, printf
+from printer import has_ansi_colors, print_banner, printf
 
 
 class WSHooker:
@@ -53,6 +53,7 @@ class WSHooker:
                 # Global configurations
                 config.EXTENSION = extension
                 config.FUN = self.args.fun
+                config.ANSI_COLORS = has_ansi_colors()
                 config.JSON = self.args.json
                 config.TIMESTAMP = self.args.timestamp
                 config.TRACE = basename(self.args.trace)

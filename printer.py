@@ -158,7 +158,7 @@ def print_trace_label(label="Trace"):
 def bold(text):
     """Bolds text."""
 
-    if has_ansi_colors():
+    if config.ANSI_COLORS:
         text = f"{BOLD}{text}{RESET}"
 
     return text
@@ -167,7 +167,7 @@ def bold(text):
 def fun(text):
     """Rainbow text."""
 
-    if has_ansi_colors():
+    if config.ANSI_COLORS:
         text = "".join([f"{choice(FOREGROUND)}{x}{RESET}" for x in [*text]])
 
     return text
@@ -177,7 +177,7 @@ def ransomize(text):
     """Ransomize text like those found in ransom notes."""
 
     def _ransomize(text):
-        if has_ansi_colors():
+        if config.ANSI_COLORS:
             text = "".join(
                 [f"{choice(BACKGROUND)}{BLACK_OR_WHITE[1]}{x}{RESET}" for x in [*text]]
             )
@@ -195,7 +195,7 @@ def epigram():
 def highlight(text):
     """Highlights text with a random foreground color."""
 
-    if has_ansi_colors():
+    if config.ANSI_COLORS:
         text = f"{choice(FOREGROUND)}{text}{RESET}"
 
     return text
@@ -204,7 +204,7 @@ def highlight(text):
 def underline(text):
     """Underlines text."""
 
-    if has_ansi_colors():
+    if config.ANSI_COLORS:
         text = f"{UNDERLINE}{text}{RESET}"
 
     return text
