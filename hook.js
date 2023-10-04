@@ -94,6 +94,7 @@ recv("config", function onMessage(setting) {
   hookMkParseDisplayName();
   hookWriteLine();
   hookCreateFolder();
+  hookCShellDispatchNameSpace();
 
   /* We're done here; tell frida to resume. */
   resume();
@@ -231,6 +232,29 @@ function printInprocServer32FromCLSID(clsid) {
 /*
  * Helper functions implemented in JavaScript
  */
+function checkCopyHereOptions(options) {
+  const flags = {
+    4: "Do not display a progress dialog box.",
+    8: "Give the file being operated on a new name in a move, copy, or rename operation if a file with the target name already exists.",
+    16: 'Respond with "Yes to All" for any dialog box that is displayed.',
+    64: "Preserve undo information, if possible.",
+    128: "Perform the operation on files only if a wildcard file name (*.*) is specified.",
+    256: "Display a progress dialog box but do not show the file names.",
+    512: "Do not confirm the creation of a new directory if the operation requires one to be created.",
+    1024: "Do not display a user interface if an error occurs.",
+    2048: "Do not copy the security attributes of the file.",
+    4096: "Only operate in the local directory. Do not operate recursively into subdirectories.",
+    8192: "Do not copy connected files as a group. Only copy the specified files.",
+  };
+
+  for (const [key, value] of Object.entries(flags)) {
+    if ((options & parseInt(key)) == parseInt(key)) {
+      param(key, value);
+    }
+
+  }
+}
+
 function loadModuleForAddress(address) {
   let modules = Process.enumerateModules();
 
@@ -1021,5 +1045,92 @@ function hookWriteLine() {
         writeToFile("text", ++TEXT_COUNT, ptr(args[1]).readUtf16String());
         separator();
       }
+    });
+}
+
+function hookCShellDispatchNameSpace() {
+  const ShellSpecialFolderConstants =
+  {
+    0: "%USERPROFILE%\\Desktop",
+    0x2: "%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs",
+    0x3: "ssfCONTROLS",
+    0x4: "ssfPRINTERS",
+    0x5: "%USERPROFILE%\\Documents",
+    0x6: "%USERPROFILE%\\Favorites",
+    0x7: "%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp",
+    0x8: "%APPDATA%\\Microsoft\\Windows\\Recent",
+    0x9: "%APPDATA%\\Microsoft\\Windows\\SendTo",
+    0xa: "ssfBITBUCKET",
+    0xb: "%APPDATA%\\Microsoft\\Windows\\Start Menu",
+    0x10: "%USERPROFILE%\\Desktop",
+    0x11: "ssfDRIVES",
+    0x12: "ssfNETWORK",
+    0x13: "%APPDATA%\\Microsoft\\Windows\\Network Shortcuts",
+    0x14: "%windir%\\Fonts",
+    0x15: "%APPDATA%\\Microsoft\\Windows\\Templates",
+    0x16: "%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu",
+    0x17: "%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs",
+    0x18: "%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp",
+    0x19: "%PUBLIC%\\Desktop",
+    0x1a: "%APPDATA%",
+    0x1b: "%APPDATA%\\Microsoft\\Windows\\Printer Shortcuts",
+    0x1c: "%LOCALAPPDATA%",
+    0x1d: "%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp",
+    0x1e: "%ALLUSERSPROFILE%\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp",
+    0x1f: "%USERPROFILE%\\Favorites",
+    0x20: "%LOCALAPPDATA%\\Microsoft\\Windows\\INetCache",
+    0x21: "%LOCALAPPDATA%\\Microsoft\\Windows\\INetCookies",
+    0x22: "%LOCALAPPDATA%\\Microsoft\\Windows\\History",
+    0x23: "%ALLUSERSPROFILE%",
+    0x24: "%windir%",
+    0x25: "%windir%\\system32",
+    0x26: "%ProgramFiles%",
+    0x27: "%USERPROFILE%\\Pictures",
+    0x28: "%USERPROFILE%",
+    0x29: "%windir%\\syswow64",
+    0x30: "%SystemDrive%\\Program Files (x86)"
+  };
+
+  let module = "shell32.dll";
+  let fnName = "CShellDispatch::NameSpace";
+  let folder;
+
+  hookFunction(module, fnName,
+    {
+      onEnter: function (args) {
+        folder = ShellSpecialFolderConstants[args[3].toInt32() & 0xff];
+        call(module, fnName);
+        separator();
+        param("Folder", folder);
+        hookCFolderCopyHere(folder);
+        separator();
+      }
+    });
+}
+
+function hookCFolderCopyHere(folder) {
+
+  let module = "shell32.dll";
+  let fnName = "CFolder::CopyHere";
+  let vItem, vOptions;
+
+  hookFunction(module, fnName,
+    {
+      onEnter: function (args) {
+        vItem = args[3].readUtf16String();
+        vOptions = args[7].toInt32() & 0xffff;
+        call(module, fnName);
+        separator();
+        param("From", vItem);
+
+        if (!folder.includes("ssf") && !ALLOW_FILE) {
+          vItem = vItem.split("\\").slice(-1);
+          const dst = folder + "\\" + vItem;
+          param("To", dst);
+          deleteFile(dst);
+        }
+        checkCopyHereOptions(vOptions);
+        separator();
+      },
     });
 }

@@ -40,6 +40,7 @@ def clean_up():
 
 def delete_file(path):
     """Delete file."""
+    path = expandvars(path)
     if exists(path):
         dropped_files = f"{config.WORK_DIR}\\dropped_files"
         try:

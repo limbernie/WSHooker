@@ -82,6 +82,8 @@ FILTER = [
     "CTextStream::Close",
     "CTextStream::Write",
     "CTextStream::WriteLine",
+    "CShellDispatch::NameSpace",
+    "CFolder::CopyHere",
 ]
 
 # Windows Script Host
