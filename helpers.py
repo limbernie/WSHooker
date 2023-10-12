@@ -258,7 +258,7 @@ def parse_arguments():
         "--json",
         dest="json",
         action="store_true",
-        help='enable JSON output trace (default is "trace.json")',
+        help='output trace in JSON (default is "trace.json")',
     )
     parser.add_argument(
         "--no-banner",

@@ -26,6 +26,7 @@ class Instrumenter:
         self.device.on("child-added", self.on_child_added)
         self.device.on("child-removed", self.on_child_removed)
         self.interrupted = False
+        self.process_resumed = False
         self.process_terminated = False
         self.defaults = {
             "debug": False,
@@ -52,6 +53,7 @@ class Instrumenter:
         script.load()
 
         # Sending settings to instrumentation script.
+        self.defaults = options
         script.post(
             {
                 "type": "config",
@@ -110,12 +112,32 @@ class Instrumenter:
     def on_child_added(self, child):
         """Called when child process is added."""
         status(f"{self.pid} spawned child process: {child.pid}")
-        frida.kill(child.pid)
+        if self.defaults["allow_shell_exec"]:
+            resume = input("\nResume process? [Y]es/[N]o: ")
+            print()
+
+            try:
+                if resume[0].lower() == "y":
+                    self.process_resumed = True
+                elif resume[0].lower() == "n":
+                    self.process_resumed = False
+            except IndexError:
+                self.process_resumed = False
+
+            if self.process_resumed:
+                info(f"Resumed child process: {child.pid}")
+                log("|")
+                self.device.resume(child.pid)
+            else:
+                frida.kill(child.pid)
+        else:
+            frida.kill(child.pid)
 
     def on_child_removed(self, child):
         """Called when child process is removed."""
-        info(f"Killed child process: {child.pid}")
-        log("|")
+        if not self.process_resumed:
+            info(f"Removed child process: {child.pid}")
+            log("|")
 
     def on_action(self, action, parameter):
         """Invoke helper functions to complete action, except for resume."""
@@ -143,4 +165,4 @@ class Instrumenter:
         frida.resume(self.pid)
         start = strftime("%Y-%m-%dT%H:%M:%SZ", gmtime())
         config.JSON_OUTPUT["start"] = start
-        print_trace_label(f'Trace started on {start}')
+        print_trace_label(f"Trace started on {start}")

@@ -23,7 +23,7 @@ from extras import (
 
 def indent(message):
     """Indent message."""
-    printf(f"{config.INDENT}{message}")
+    return f"{config.INDENT}{message}"
 
 
 def printf(*objects, **kwargs):
@@ -110,7 +110,7 @@ def log(message):
     if re.match(r"^(\(\*\*\)|Call)", message):
         printf(message)
     else:
-        indent(message)
+        printf(indent(message))
 
 
 def has_ansi_colors():

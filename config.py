@@ -26,10 +26,10 @@ VALID_EXTENSIONS = [".js", ".jse", ".vbs", ".vbe", ".wsf"]
 # Script extension
 EXTENSION = ""
 
-# Name of folder containing traces
+# Name of folder containing traces. Default is "traces"
 TRACES = "traces"
 
-# File name of trace log
+# File name of trace log. Default is "trace.log"
 TRACE = ""
 
 # Timestamp

@@ -527,36 +527,6 @@ function hookShellExecuteExW() {
           encodedCommand = lpparams.replace(encodedCommand_re, "$1");
           decodePowerShell(encodedCommand);
         }
-
-        /* "runas" doesn't spawn child process; dangerous! */
-        if (lpverb.match(/open/i)) {
-          if (ALLOW_SHELL_EXEC) {
-            try {
-              ptr_verb.writeUtf16String("runas");
-            }
-            catch (e) {
-              error(e);
-            }
-            action("Allow");
-          }
-          else {
-            action("Block");
-          }
-        }
-        else if (lpverb.match(/runas/i)) {
-          if (!ALLOW_SHELL_EXEC) {
-            try {
-              ptr_verb.writeUtf16String("open");
-            }
-            catch (e) {
-              error(e);
-            }
-            action("Block");
-          }
-          else {
-            action("Allow");
-          }
-        }
         separator();
       }
     });
