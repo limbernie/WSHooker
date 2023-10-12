@@ -527,6 +527,16 @@ function hookShellExecuteExW() {
           encodedCommand = lpparams.replace(encodedCommand_re, "$1");
           decodePowerShell(encodedCommand);
         }
+
+        /* (dangerous) enable_child_gating has no effect on "runas" */
+        if (lpverb.match(/runas/i)) {
+          try {
+            ptr_verb.writeUtf16String("open");
+          }
+          catch (e) {
+            error(e);
+          }
+        }
         separator();
       }
     });

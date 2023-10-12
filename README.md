@@ -113,7 +113,7 @@ options:
   --debug               (verbose) display debug message
   --dynamic             (verbose) enable dynamic tracing
   --fun                 add some fun to life
-  --json                enable JSON output trace (default is "trace.json")
+  --json                output trace in JSON (default is "trace.json")
   --no-banner           remove banner in output trace
   --timestamp           show timestamp in output trace
   --wscript             use "wscript.exe" (default is "cscript.exe")
